@@ -1,0 +1,29 @@
+{
+  "name": "@fragrance-battle/ai",
+  "version": "1.0.0",
+  "private": true,
+  "description": "AI categorization utilities for the fragrance battle AI application",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rimraf dist"
+  },
+  "dependencies": {
+    "openai": "^4.28.4",
+    "@fragrance-battle/types": "*"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.24",
+    "typescript": "^5.4.2",
+    "rimraf": "^5.0.5"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  }
+}

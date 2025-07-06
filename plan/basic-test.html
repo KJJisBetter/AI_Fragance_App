@@ -1,0 +1,1820 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Fragrance Testing Guide</title>
+
+    <style>
+
+        body {
+
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+            line-height: 1.6;
+
+            color: #333;
+
+            background-color: #f9f9f9;
+
+            margin: 0;
+
+            padding: 0 0 80px 0;
+
+        }
+
+
+
+        .container {
+
+            max-width: 100%;
+
+            padding: 15px;
+
+        }
+
+
+
+        h1 {
+
+            color: #3a6ea5;
+
+            text-align: center;
+
+            font-size: 1.8rem;
+
+            margin: 20px 0;
+
+        }
+
+
+
+        h2 {
+
+            color: #004e89;
+
+            font-size: 1.4rem;
+
+            border-bottom: 2px solid #3a6ea5;
+
+            padding-bottom: 8px;
+
+            margin-top: 25px;
+
+        }
+
+
+
+        .category {
+
+            background-color: #fff;
+
+            border-radius: 8px;
+
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+
+            padding: 15px;
+
+            margin-bottom: 20px;
+
+        }
+
+
+
+        .category-info {
+
+            margin-bottom: 15px;
+
+        }
+
+
+
+        .purpose strong, .examples strong {
+
+            color: #004e89;
+
+        }
+
+
+
+        .how-to-choose {
+
+            font-style: italic;
+
+            color: #004e89;
+
+            margin-top: 5px;
+
+        }
+
+
+
+        .fragrance {
+
+            border-left: 3px solid #ff6b6b;
+
+            padding: 10px 10px 10px 15px;
+
+            margin-bottom: 15px;
+
+            background-color: #f5f5f5;
+
+            border-radius: 0 8px 8px 0;
+
+        }
+
+
+
+        .fragrance-name {
+
+            font-weight: bold;
+
+            margin-bottom: 5px;
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+        }
+
+
+
+        .versatility {
+
+            color: #ff6b6b;
+
+            font-size: 0.9rem;
+
+        }
+
+
+
+        .notes {
+
+            font-style: italic;
+
+            font-size: 0.9rem;
+
+            color: #666;
+
+        }
+
+
+
+        label {
+
+            display: flex;
+
+            align-items: flex-start;
+
+            margin-bottom: 5px;
+
+            cursor: pointer;
+
+        }
+
+
+
+        input[type="checkbox"], input[type="radio"] {
+
+            margin-right: 10px;
+
+            margin-top: 5px;
+
+        }
+
+
+
+        .instructions, .collection {
+
+            background-color: #fff;
+
+            border-radius: 8px;
+
+            padding: 15px;
+
+            margin-top: 20px;
+
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+
+        }
+
+
+
+        ol, ul {
+
+            padding-left: 20px;
+
+            margin: 10px 0;
+
+        }
+
+
+
+        #actions {
+
+            position: fixed;
+
+            bottom: 0;
+
+            left: 0;
+
+            width: 100%;
+
+            background-color: #fff;
+
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+
+            padding: 15px;
+
+            text-align: center;
+
+            z-index: 1000;
+
+        }
+
+
+
+        button {
+
+            background-color: #3a6ea5;
+
+            color: white;
+
+            border: none;
+
+            padding: 12px 20px;
+
+            margin: 0 5px;
+
+            border-radius: 5px;
+
+            cursor: pointer;
+
+            font-weight: bold;
+
+        }
+
+
+
+        #resultModal {
+
+            display: none;
+
+            position: fixed;
+
+            top: 0;
+
+            left: 0;
+
+            width: 100%;
+
+            height: 100%;
+
+            background-color: rgba(0, 0, 0, 0.7);
+
+            z-index: 2000;
+
+        }
+
+
+
+        .modal-content {
+
+            background-color: #fff;
+
+            margin: 20% auto;
+
+            padding: 20px;
+
+            width: 85%;
+
+            border-radius: 8px;
+
+            max-height: 60vh;
+
+            overflow-y: auto;
+
+        }
+
+
+
+        .close {
+
+            color: #aaa;
+
+            float: right;
+
+            font-size: 28px;
+
+            font-weight: bold;
+
+            cursor: pointer;
+
+        }
+
+
+
+        #resultsText {
+
+            white-space: pre-wrap;
+
+            margin-top: 15px;
+
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h1>Fragrance Testing Guide</h1>
+
+
+
+        <form id="fragranceForm">
+
+            <!-- DAILY DRIVER BATTLE -->
+
+            <div class="category">
+
+                <h2>DAILY DRIVER BATTLE</h2>
+
+                <div class="category-info">
+
+                    <div class="purpose"><strong>Purpose:</strong> Everyday use when you need reliability</div>
+
+                    <div class="examples"><strong>Examples:</strong> Work commute, gym, errands, casual lunch</div>
+
+                    <div class="how-to-choose">Pick the TWO that feel most comfortable and versatile</div>
+
+                </div>
+
+
+
+                <div class="fragrance">
+
+                    <label>
+
+                        <input type="checkbox" name="daily_driver" value="Sauvage EDP">
+
+                        <div>
+
+                            <div class="fragrance-name">Sauvage EDP <span class="versatility">Versatility: 5/5</span></div>
+
+                            <div class="notes">Notes: Bergamot, pepper, lavender, ambroxan, vanilla</div>
+
+                        </div>
+
+                    </label>
+
+                </div>
+
+
+
+                <div class="fragrance">
+
+                    <label>
+
+                        <input type="checkbox" name="daily_driver" value="D&G Light Blue">
+
+                        <div>
+
+                            <div class="fragrance-name">D&G Light Blue <span class="versatility">Versatility: 4/5</span></div>
+
+                            <div class="notes">Notes: Citrus, juniper, pepper, rosemary, musk</div>
+
+                        </div>
+
+                    </label>
+
+                </div>
+
+
+
+                <div class="fragrance">
+
+                    <label>
+
+                        <input type="checkbox" name="daily_driver" value="Coach for Men">
+
+                        <div>
+
+                            <div class="fragrance-name">Coach for Men <span class="versatility">Versatility: 4/5</span></div>
+
+                            <div class="notes">Notes: Pear, bergamot, cardamom, geranium, suede</div>
+
+                        </div>
+
+                    </label>
+
+                </div>
+
+
+
+                <div class="fragrance">
+
+                    <label>
+
+                        <input type="checkbox" name="daily_driver" value="Versace Pour Homme">
+
+                        <div>
+
+                            <div class="fragrance-name">Versace Pour Homme <span class="versatility">Versatility: 4/5</span></div>
+
+                            <div class="notes">Notes: Citrus, neroli, hyacinth, cedar, tonka bean, musk</div>
+
+                        </div>
+
+                    </label>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- COLLEGE/CAMPUS BATTLE -->
+
+            <div class="category">
+
+                <h2>COLLEGE/CAMPUS BATTLE</h2>
+
+                <div class="category-info">
+
+                    <div class="purpose"><strong>Purpose:</strong> For classroom, study sessions, and campus social life</div>
+
+                    <div class="examples"><strong>Examples:</strong> Lectures, library sessions, campus events</div>
+
+                    <div class="how-to-choose">Pick ONE that's pleasant, not distracting, and crowd-pleasing</div>
+
+                </div>
+
+
+
+                <div class="fragrance">
+
+                    <label>
+
+                        <input type="radio" name="college" value="Y EDT (Yves Saint Laurent)">
+
+                        <div>
+
+                            <div class="fragrance-name">Y EDT (Yves Saint Laurent) <span class="versatility">Versatility: 4/5</span></div>
+
+                            <div class="notes">Notes: Bergamot, ginger, sage, geranium, balsam fir, cedar, amberwood</div>
+
+                        </div>
+
+                    </label>
+
+                </div>
+
+
+
+                <div class="fragrance">
+
+                    <label>
+
+                        <input type="radio" name="college" value="Y EDP">
+
+                        <div>
+
+                            <div class="fragrance-name">Y EDP <span class="versatility">Versatility: 4/5</span></div>
+
+                            <div class="notes">Notes: Bergamot, ginger, sage, geranium, fir balsam, cedar, amberwood</div>
+
+                        </div>
+
+                    </label>
+
+                </div>
+
+
+
+                <div class="fragrance">
+
+                    <label>
+
+                        <input type="radio" name="college" value="D&G Light Blue">
+
+                        <div>
+
+                            <div class="fragrance-name">D&G Light Blue <span class="versatility">Versatility: 4/5</span></div>
+
+                            <div class="notes">Notes: Citrus, juniper, pepper, rosemary, musk</div>
+
+                        </div>
+
+                    </label>
+
+                </div>
+
+
+
+                <div class="fragrance">
+
+                    <label>
+
+                        <input type="radio" name="college" value="Versace Pour Homme">
+
+                        <div>
+
+                            <div class="fragrance-name">Versace Pour Homme <span class="versatility">Versatility: 4/5</span></div>
+
+                            <div class="notes">Notes: Citrus, neroli, hyacinth, cedar, tonka bean, musk</div>
+
+                        </div>
+
+                    </label>
+
+                </div>
+
+            </div>
+            <!-- SUMMER/WARM WEATHER BATTLE -->
+
+            <div class="category">
+
+                <h2>SUMMER/WARM WEATHER BATTLE</h2>
+
+                <div class="category-info">
+
+                    <div class="purpose"><strong>Purpose:</strong> For hot, humid days when you need something refreshing</div>
+
+                    <div class="examples"><strong>Examples:</strong> Beach days, outdoor activities, park outings</div>
+
+                    <div class="how-to-choose">Pick ONE that feels most cooling and pleasant</div>
+
+                </div>
+
+
+
+                <div class="fragrance">
+
+                    <label>
+
+                        <input type="radio" name="summer" value="Acqua di Gio">
+
+                        <div>
+
+                            <div class="fragrance-name">Acqua di Gio <span class="versatility">Versatility: 4/5</span></div>
+
+                            <div class="notes">Notes: Citrus, marine notes, rosemary, jasmine, woods</div>
+
+                        </div>
+
+                    </label>
+
+                </div>
+
+
+
+                <div class="fragrance">
+
+                    <label>
+
+                        <input type="radio" name="summer" value="Acqua di Gio Profondo">
+
+                        <div>
+
+                            <div class="fragrance-name">Acqua di Gio Profondo <span class="versatility">Versatility: 3.5/5</span></div>
+
+                            <div class="notes">Notes: Marine notes, bergamot, green mandarin, cypress, patchouli</div>
+
+                        </div>
+
+                    </label>
+
+                </div>
+
+
+
+                <div class="fragrance">
+
+                    <label>
+
+                        <input type="radio" name="summer" value="D&G Light Blue">
+
+                        <div>
+
+                            <div class="fragrance-name">D&G Light Blue <span class="versatility">Versatility: 4/5</span></div>
+
+                            <div class="notes">Notes: Citrus, juniper, pepper, rosemary, musk</div>
+
+                        </div>
+
+                    </label>
+
+                </div>
+
+
+
+                <div class="fragrance">
+
+                    <label>
+
+                        <input type="radio" name="summer" value="Eternity Aqua">
+
+                        <div>
+
+                            <div class="fragrance-name">Eternity Aqua <span class="versatility">Versatility: 3.5/5</span></div>
+
+                            <div class="notes">Notes: Citrus, cucumber, lavender, water notes, cedar</div>
+
+                        </div>
+
+                    </label>
+
+                </div>
+
+
+
+                <div class="fragrance">
+
+                    <label>
+
+                        <input type="radio" name="summer" value="Versace Pour Homme">
+
+                        <div>
+
+                            <div class="fragrance-name">Versace Pour Homme <span class="versatility">Versatility: 4/5</span></div>
+
+                            <div class="notes">Notes: Citrus, neroli, hyacinth, cedar, tonka bean, musk</div>
+
+                        </div>
+
+                    </label>
+
+                </div>
+
+
+
+                <div class="fragrance">
+
+                    <label>
+
+                        <input type="radio" name="summer" value="Light Blue Eau Intense">
+
+                        <div>
+
+                            <div class="fragrance-name">Light Blue Eau Intense <span class="versatility">Versatility: 4/5</span></div>
+
+                            <div class="notes">Notes: Grapefruit, juniper, sea water, amber woods, musk</div>
+
+                        </div>
+
+                    </label>
+
+                </div>
+
+
+
+                <div class="fragrance">
+
+                    <label>
+
+                        <input type="radio" name="summer" value="Luna Rossa Ocean">
+
+                        <div>
+
+                            <div class="fragrance-name">Luna Rossa Ocean <span class="versatility">Versatility: 4/5</span></div>
+
+                            <div class="notes">Notes: Bergamot, pink pepper, iris, vetiver, patchouli, caramel</div>
+
+                        </div>
+
+                    </label>
+
+                </div>
+
+
+
+                <div class="fragrance">
+
+                    <label>
+
+                        <input type="radio" name="summer" value="Eros Energy">
+
+                        <div>
+
+                            <div class="fragrance-name">Eros Energy <span class="versatility">Versatility: 3.5/5</span></div>
+
+                            <div class="notes">Notes: Citrus, grapefruit, pink pepper, rosemary, cedar, amber</div>
+
+                        </div>
+
+                    </label>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- OFFICE/PROFESSIONAL BATTLE -->
+
+            <div class="category">
+
+                <h2>OFFICE/PROFESSIONAL BATTLE</h2>
+
+                <div class="category-info">
+
+                    <div class="purpose"><strong>Purpose:</strong> For work settings requiring confidence and professionalism</div>
+
+                    <div class="examples"><strong>Examples:</strong> Job interviews, business meetings, presentations</div>
+
+                    <div class="how-to-choose">Pick ONE that feels sophisticated but not overpowering</div>
+
+                </div>
+
+
+
+                <div class="fragrance">
+
+                    <label>
+
+                        <input type="radio" name="office" value="Sauvage EDP">
+
+                        <div>
+
+                            <div class="fragrance-name">Sauvage EDP <span class="versatility">Versatility: 5/5</span></div>
+
+                            <div class="notes">Notes: Bergamot, pepper, lavender, ambroxan, vanilla</div>
+
+                        </div>
+
+                    </label>
+
+                </div>
+
+
+
+                <div class="fragrance">
+
+                    <label>
+
+                        <input type="radio" name="office" value="Bleu de Chanel EDP">
+
+                        <div>
+
+                            <div class="fragrance-name">Bleu de Chanel EDP <span class="versatility">Versatility: 5/5</span></div>
+
+                            <div class="notes">Notes: Citrus, mint, pink pepper, ginger, jasmine, cedar, sandalwood</div>
+
+                        </div>
+
+                    </label>
+
+                </div>
+
+
+
+                <div class="fragrance">
+
+                    <label>
+
+                        <input type="radio" name="office" value="Acqua di Gio Parfum">
+
+                        <div>
+
+                            <div class="fragrance-name">Acqua di Gio Parfum <span class="versatility">Versatility: 4.5/5</span></div>
+
+                            <div class="notes">Notes: Marine notes, bergamot, rosemary, patchouli, incense</div>
+
+                        </div>
+
+                    </label>
+
+                </div>
+
+
+
+                <div class="fragrance">
+
+                    <label>
+
+                        <input type="radio" name="office" value="Coach for Men">
+
+                        <div>
+
+                            <div class="fragrance-name">Coach for Men <span class="versatility">Versatility: 4/5</span></div>
+
+                            <div class="notes">Notes: Pear, bergamot, cardamom, geranium, suede</div>
+
+                        </div>
+
+                    </label>
+
+                </div>
+
+
+
+                <div class="fragrance">
+
+                    <label>
+
+                        <input type="radio" name="office" value="Dior Homme">
+
+                        <div>
+
+                            <div class="fragrance-name">Dior Homme <span class="versatility">Versatility: 4/5</span></div>
+
+                            <div class="notes">Notes: Bergamot, lavender, iris, vetiver, cocoa, vanilla</div>
+
+                        </div>
+
+                    </label>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- CLUB/NIGHT OUT BATTLE -->
+
+            <div class="category">
+
+                <h2>CLUB/NIGHT OUT BATTLE</h2>
+
+                <div class="category-info">
+
+                    <div class="purpose"><strong>Purpose:</strong> For nightlife when you want to make an impression</div>
+
+                    <div class="examples"><strong>Examples:</strong> Clubs, bars, concerts, parties</div>
+
+                    <div class="how-to-choose">Pick ONE with the best projection and appeal</div>
+
+                </div>
+
+
+
+                <div class="fragrance">
+
+                    <label>
+
+                        <input type="radio" name="club" value="Versace Eros">
+
+                        <div>
+
+                            <div class="fragrance-name">Versace Eros <span class="versatility">Versatility: 3.5/5</span></div>
+
+                            <div class="notes">Notes: Mint, apple, lemon, tonka bean, vanilla, cedar, vetiver</div>
+
+                        </div>
+
+                    </label>
+
+                </div>
+
+
+
+                <div class="fragrance">
+
+                    <label>
+
+                        <input type="radio" name="club" value="Versace Eros Flame">
+
+                        <div>
+
+                            <div class="fragrance-name">Versace Eros Flame <span class="versatility">Versatility: 3.5/5</span></div>
+
+                            <div class="notes">Notes: Citrus, black pepper, rosemary, pepper, vanilla, woods</div>
+
+                        </div>
+
+                    </label>
+
+                </div>
+
+
+
+                <div class="fragrance">
+
+                    <label>
+
+                        <input type="radio" name="club" value="Spicebomb Extreme">
+
+                        <div>
+
+                            <div class="fragrance-name">Spicebomb Extreme <span class="versatility">Versatility: 3/5</span></div>
+
+                            <div class="notes">Notes: Black pepper, lavender, caraway, tobacco, vanilla</div>
+
+                        </div>
+
+                    </label>
+
+                </div>
+
+
+
+                <div class="fragrance">
+
+                    <label>
+
+                        <input type="radio" name="club" value="Sauvage EDP">
+
+                        <div>
+
+                            <div class="fragrance-name">Sauvage EDP <span class="versatility">Versatility: 5/5</span></div>
+
+                            <div class="notes">Notes: Bergamot, pepper, lavender, ambroxan, vanilla</div>
+
+                        </div>
+
+                    </label>
+
+                </div>
+
+            </div>
+            <!-- DATE NIGHT BATTLE -->
+
+            <div class="category">
+
+                <h2>DATE NIGHT BATTLE</h2>
+
+                <div class="category-info">
+
+                    <div class="purpose"><strong>Purpose:</strong> For romantic settings when you want to create attraction</div>
+
+                    <div class="examples"><strong>Examples:</strong> Dinner dates, intimate evenings</div>
+
+                    <div class="how-to-choose">Pick ONE that feels most seductive and memorable</div>
+
+                </div>
+
+
+
+                <div class="fragrance">
+
+                    <label>
+
+                        <input type="radio" name="date" value="The One EDP">
+
+                        <div>
+
+                            <div class="fragrance-name">The One EDP <span class="versatility">Versatility: 3.5/5</span></div>
+
+                            <div class="notes">Notes: Grapefruit, cardamom, ginger, tobacco, cedar, amber</div>
+
+                        </div>
+
+                    </label>
+
+                </div>
+
+
+
+                <div class="fragrance">
+
+                    <label>
+
+                        <input type="radio" name="date" value="Y EDT (Yves Saint Laurent)">
+
+                        <div>
+
+                            <div class="fragrance-name">Y EDT (Yves Saint Laurent) <span class="versatility">Versatility: 4/5</span></div>
+
+                            <div class="notes">Notes: Bergamot, ginger, sage, geranium, balsam fir, cedar, amberwood</div>
+
+                        </div>
+
+                    </label>
+
+                </div>
+
+
+
+                <div class="fragrance">
+
+                    <label>
+
+                        <input type="radio" name="date" value="Y EDP">
+
+                        <div>
+
+                            <div class="fragrance-name">Y EDP <span class="versatility">Versatility: 4/5</span></div>
+
+                            <div class="notes">Notes: Bergamot, ginger, sage, geranium, fir balsam, cedar, amberwood</div>
+
+                        </div>
+
+                    </label>
+
+                </div>
+
+
+
+                <div class="fragrance">
+
+                    <label>
+
+                        <input type="radio" name="date" value="Versace Eros">
+
+                        <div>
+
+                            <div class="fragrance-name">Versace Eros <span class="versatility">Versatility: 3.5/5</span></div>
+
+                            <div class="notes">Notes: Mint, apple, lemon, tonka bean, vanilla, cedar, vetiver</div>
+
+                        </div>
+
+                    </label>
+
+                </div>
+
+
+
+                <div class="fragrance">
+
+                    <label>
+
+                        <input type="radio" name="date" value="Uomo Born in Roma Intense">
+
+                        <div>
+
+                            <div class="fragrance-name">Uomo Born in Roma Intense <span class="versatility">Versatility: 3.5/5</span></div>
+
+                            <div class="notes">Notes: Salt accord, spices, violet leaves, vanilla, vetiver</div>
+
+                        </div>
+
+                    </label>
+
+                </div>
+
+
+
+                <div class="fragrance">
+
+                    <label>
+
+                        <input type="radio" name="date" value="Le Male Le Parfum">
+
+                        <div>
+
+                            <div class="fragrance-name">Le Male Le Parfum <span class="versatility">Versatility: 3/5</span></div>
+
+                            <div class="notes">Notes: Lavender, iris, vanilla, honey, woods</div>
+
+                        </div>
+
+                    </label>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- SIGNATURE SCENT BATTLE -->
+
+            <div class="category">
+
+                <h2>SIGNATURE SCENT BATTLE</h2>
+
+                <div class="category-info">
+
+                    <div class="purpose"><strong>Purpose:</strong> Your personal trademark that becomes identified with you</div>
+
+                    <div class="examples"><strong>Examples:</strong> Everyday life when you want to be consistently recognized</div>
+
+                    <div class="how-to-choose">Pick ONE that feels most "you" and versatile year-round</div>
+
+                </div>
+
+
+
+                <div class="fragrance">
+
+                    <label>
+
+                        <input type="radio" name="signature" value="Sauvage EDP">
+
+                        <div>
+
+                            <div class="fragrance-name">Sauvage EDP <span class="versatility">Versatility: 5/5</span></div>
+
+                            <div class="notes">Notes: Bergamot, pepper, lavender, ambroxan, vanilla</div>
+
+                        </div>
+
+                    </label>
+
+                </div>
+
+
+
+                <div class="fragrance">
+
+                    <label>
+
+                        <input type="radio" name="signature" value="Bleu de Chanel EDP">
+
+                        <div>
+
+                            <div class="fragrance-name">Bleu de Chanel EDP <span class="versatility">Versatility: 5/5</span></div>
+
+                            <div class="notes">Notes: Citrus, mint, pink pepper, ginger, jasmine, cedar, sandalwood</div>
+
+                        </div>
+
+                    </label>
+
+                </div>
+
+
+
+                <div class="fragrance">
+
+                    <label>
+
+                        <input type="radio" name="signature" value="Acqua di Gio Parfum">
+
+                        <div>
+
+                            <div class="fragrance-name">Acqua di Gio Parfum <span class="versatility">Versatility: 4.5/5</span></div>
+
+                            <div class="notes">Notes: Marine notes, bergamot, rosemary, patchouli, incense</div>
+
+                        </div>
+
+                    </label>
+
+                </div>
+
+
+
+                <div class="fragrance">
+
+                    <label>
+
+                        <input type="radio" name="signature" value="Y EDT (Yves Saint Laurent)">
+
+                        <div>
+
+                            <div class="fragrance-name">Y EDT (Yves Saint Laurent) <span class="versatility">Versatility: 4/5</span></div>
+
+                            <div class="notes">Notes: Bergamot, ginger, sage, geranium, balsam fir, cedar, amberwood</div>
+
+                        </div>
+
+                    </label>
+
+                </div>
+
+
+
+                <div class="fragrance">
+
+                    <label>
+
+                        <input type="radio" name="signature" value="Y EDP">
+
+                        <div>
+
+                            <div class="fragrance-name">Y EDP <span class="versatility">Versatility: 4/5</span></div>
+
+                            <div class="notes">Notes: Bergamot, ginger, sage, geranium, fir balsam, cedar, amberwood</div>
+
+                        </div>
+
+                    </label>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- FALL/WINTER BATTLE -->
+
+            <div class="category">
+
+                <h2>FALL/WINTER BATTLE</h2>
+
+                <div class="category-info">
+
+                    <div class="purpose"><strong>Purpose:</strong> For cold weather when you need something warmer</div>
+
+                    <div class="examples"><strong>Examples:</strong> Holiday gatherings, cold days, winter activities</div>
+
+                    <div class="how-to-choose">Pick ONE that feels cozy and substantial</div>
+
+                </div>
+
+
+
+                <div class="fragrance">
+
+                    <label>
+
+                        <input type="radio" name="winter" value="Stronger With You Intensely">
+
+                        <div>
+
+                            <div class="fragrance-name">Stronger With You Intensely <span class="versatility">Versatility: 3.5/5</span></div>
+
+                            <div class="notes">Notes: Pink pepper, juniper, lavender, vanilla, amber, woods</div>
+
+                        </div>
+
+                    </label>
+
+                </div>
+
+
+
+                <div class="fragrance">
+
+                    <label>
+
+                        <input type="radio" name="winter" value="Le Male Le Parfum">
+
+                        <div>
+
+                            <div class="fragrance-name">Le Male Le Parfum <span class="versatility">Versatility: 3/5</span></div>
+
+                            <div class="notes">Notes: Lavender, iris, vanilla, honey, woods</div>
+
+                        </div>
+
+                    </label>
+
+                </div>
+
+
+
+                <div class="fragrance">
+
+                    <label>
+
+                        <input type="radio" name="winter" value="Spicebomb Extreme">
+
+                        <div>
+
+                            <div class="fragrance-name">Spicebomb Extreme <span class="versatility">Versatility: 3/5</span></div>
+
+                            <div class="notes">Notes: Black pepper, lavender, caraway, tobacco, vanilla</div>
+
+                        </div>
+
+                    </label>
+
+                </div>
+
+
+
+                <div class="fragrance">
+
+                    <label>
+
+                        <input type="radio" name="winter" value="The One EDP">
+
+                        <div>
+
+                            <div class="fragrance-name">The One EDP <span class="versatility">Versatility: 3.5/5</span></div>
+
+                            <div class="notes">Notes: Grapefruit, cardamom, ginger, tobacco, cedar, amber</div>
+
+                        </div>
+
+                    </label>
+
+                </div>
+
+
+
+                <div class="fragrance">
+
+                    <label>
+
+                        <input type="radio" name="winter" value="Oud Wood">
+
+                        <div>
+
+                            <div class="fragrance-name">Oud Wood <span class="versatility">Versatility: 3/5</span></div>
+
+                            <div class="notes">Notes: Oud, rosewood, cardamom, sandalwood, vetiver, amber</div>
+
+                        </div>
+
+                    </label>
+
+                </div>
+
+
+
+                <div class="fragrance">
+
+                    <label>
+
+                        <input type="radio" name="winter" value="Versace Eros Flame">
+
+                        <div>
+
+                            <div class="fragrance-name">Versace Eros Flame <span class="versatility">Versatility: 3.5/5</span></div>
+
+                            <div class="notes">Notes: Citrus, black pepper, rosemary, pepper, vanilla, woods</div>
+
+                        </div>
+
+                    </label>
+
+                </div>
+
+
+
+                <div class="fragrance">
+
+                    <label>
+
+                        <input type="radio" name="winter" value="Y Le Parfum">
+
+                        <div>
+
+                            <div class="fragrance-name">Y Le Parfum <span class="versatility">Versatility: 4/5</span></div>
+
+                            <div class="notes">Notes: Bergamot, ginger, sage, fir balsam, cedar, olibanum</div>
+
+                        </div>
+
+                    </label>
+
+                </div>
+
+
+
+                <div class="fragrance">
+
+                    <label>
+
+                        <input type="radio" name="winter" value="Y EDP">
+
+                        <div>
+
+                            <div class="fragrance-name">Y EDP <span class="versatility">Versatility: 4/5</span></div>
+
+                            <div class="notes">Notes: Bergamot, ginger, sage, geranium, fir balsam, cedar, amberwood</div>
+
+                        </div>
+
+                    </label>
+
+                </div>
+
+
+
+                <div class="fragrance">
+
+                    <label>
+
+                        <input type="radio" name="winter" value="L'Homme Le Parfum">
+
+                        <div>
+
+                            <div class="fragrance-name">L'Homme Le Parfum <span class="versatility">Versatility: 3.5/5</span></div>
+
+                            <div class="notes">Notes: Bergamot, iris, cedar, vetiver, vanilla, tonka bean</div>
+
+                        </div>
+
+                    </label>
+
+                </div>
+
+            </div>
+            <!-- SPECIAL OCCASION BATTLE -->
+
+            <div class="category">
+
+                <h2>SPECIAL OCCASION BATTLE</h2>
+
+                <div class="category-info">
+
+                    <div class="purpose"><strong>Purpose:</strong> For important events requiring sophistication</div>
+
+                    <div class="examples"><strong>Examples:</strong> Weddings, formal dinners, milestone celebrations</div>
+
+                    <div class="how-to-choose">Pick ONE that feels most refined and impressive</div>
+
+                </div>
+
+
+
+                <div class="fragrance">
+
+                    <label>
+
+                        <input type="radio" name="special" value="Oud Wood">
+
+                        <div>
+
+                            <div class="fragrance-name">Oud Wood <span class="versatility">Versatility: 3/5</span></div>
+
+                            <div class="notes">Notes: Oud, rosewood, cardamom, sandalwood, vetiver, amber</div>
+
+                        </div>
+
+                    </label>
+
+                </div>
+
+
+
+                <div class="fragrance">
+
+                    <label>
+
+                        <input type="radio" name="special" value="Bleu de Chanel EDP">
+
+                        <div>
+
+                            <div class="fragrance-name">Bleu de Chanel EDP <span class="versatility">Versatility: 5/5</span></div>
+
+                            <div class="notes">Notes: Citrus, mint, pink pepper, ginger, jasmine, cedar, sandalwood</div>
+
+                        </div>
+
+                    </label>
+
+                </div>
+
+
+
+                <div class="fragrance">
+
+                    <label>
+
+                        <input type="radio" name="special" value="Acqua di Gio Parfum">
+
+                        <div>
+
+                            <div class="fragrance-name">Acqua di Gio Parfum <span class="versatility">Versatility: 4.5/5</span></div>
+
+                            <div class="notes">Notes: Marine notes, bergamot, rosemary, patchouli, incense</div>
+
+                        </div>
+
+                    </label>
+
+                </div>
+
+
+
+                <div class="fragrance">
+
+                    <label>
+
+                        <input type="radio" name="special" value="The One EDP">
+
+                        <div>
+
+                            <div class="fragrance-name">The One EDP <span class="versatility">Versatility: 3.5/5</span></div>
+
+                            <div class="notes">Notes: Grapefruit, cardamom, ginger, tobacco, cedar, amber</div>
+
+                        </div>
+
+                    </label>
+
+                </div>
+
+
+
+                <div class="fragrance">
+
+                    <label>
+
+                        <input type="radio" name="special" value="Sauvage EDP">
+
+                        <div>
+
+                            <div class="fragrance-name">Sauvage EDP <span class="versatility">Versatility: 5/5</span></div>
+
+                            <div class="notes">Notes: Bergamot, pepper, lavender, ambroxan, vanilla</div>
+
+                        </div>
+
+                    </label>
+
+                </div>
+
+
+
+                <div class="fragrance">
+
+                    <label>
+
+                        <input type="radio" name="special" value="Percival">
+
+                        <div>
+
+                            <div class="fragrance-name">Percival <span class="versatility">Versatility: 3.5/5</span></div>
+
+                            <div class="notes">Notes: Bergamot, lavender, cardamom, iris, cedar, ambroxan</div>
+
+                        </div>
+
+                    </label>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- Testing Instructions -->
+
+            <div class="instructions">
+
+                <h2>Testing Instructions</h2>
+
+                <ol>
+
+                    <li>For each category, have your friend label test strips A, B, C (and D if needed)</li>
+
+                    <li>Don't look at which fragrance is which - smell them blind</li>
+
+                    <li>Pick your favorite(s) for each category by checking the boxes</li>
+
+                    <li>After all testing is complete, have your friend reveal which fragrances you selected</li>
+
+                    <li>Use the "Save Results" button to save or share your selections</li>
+
+                </ol>
+
+            </div>
+
+
+
+            <!-- Building Your Collection -->
+
+            <div class="collection">
+
+                <h2>Building Your Collection</h2>
+
+                <p>Start with:</p>
+
+                <ul>
+
+                    <li>2 Daily Drivers (rotation)</li>
+
+                    <li>1 College/Campus fragrance</li>
+
+                    <li>1 each from the other categories you regularly encounter</li>
+
+                </ul>
+
+                <p>This will give you a well-rounded collection covering all occasions without unnecessary duplication.</p>
+
+            </div>
+
+        </form>
+
+    </div>
+
+
+
+    <!-- Fixed Action Buttons -->
+
+    <div id="actions">
+
+        <button type="button" id="saveButton">Save Results</button>
+
+        <button type="button" id="resetButton">Reset Form</button>
+
+    </div>
+
+
+
+    <!-- Results Modal -->
+
+    <div id="resultModal">
+
+        <div class="modal-content">
+
+            <span class="close">&times;</span>
+
+            <h2>Your Fragrance Selections</h2>
+
+            <div id="resultsText"></div>
+
+        </div>
+
+    </div>
+
+    <script>
+
+        // DOM elements
+
+        const form = document.getElementById('fragranceForm');
+
+        const saveButton = document.getElementById('saveButton');
+
+        const resetButton = document.getElementById('resetButton');
+
+        const modal = document.getElementById('resultModal');
+
+        const closeBtn = document.getElementsByClassName('close')[0];
+
+        const resultsText = document.getElementById('resultsText');
+
+
+
+        // Event listeners
+
+        saveButton.addEventListener('click', saveResults);
+
+        resetButton.addEventListener('click', resetForm);
+
+        closeBtn.addEventListener('click', closeModal);
+
+
+
+        // Daily driver checkboxes (limit to 2)
+
+        const dailyDriverCheckboxes = document.querySelectorAll('input[name="daily_driver"]');
+
+        dailyDriverCheckboxes.forEach(checkbox => {
+
+            checkbox.addEventListener('change', function() {
+
+                const checkedCount = document.querySelectorAll('input[name="daily_driver"]:checked').length;
+
+                if (checkedCount > 2) {
+
+                    this.checked = false;
+
+                    alert('You can only select TWO daily drivers');
+
+                }
+
+            });
+
+        });
+
+
+
+        // Save results function
+
+        function saveResults() {
+
+            let resultString = "MY FRAGRANCE SELECTIONS\n\n";
+
+
+
+            // Categories
+
+            const categories = [
+
+                { name: "DAILY DRIVERS", inputName: "daily_driver", multiple: true },
+
+                { name: "COLLEGE/CAMPUS", inputName: "college", multiple: false },
+
+                { name: "SUMMER/WARM WEATHER", inputName: "summer", multiple: false },
+
+                { name: "OFFICE/PROFESSIONAL", inputName: "office", multiple: false },
+
+                { name: "CLUB/NIGHT OUT", inputName: "club", multiple: false },
+
+                { name: "DATE NIGHT", inputName: "date", multiple: false },
+
+                { name: "SIGNATURE SCENT", inputName: "signature", multiple: false },
+
+                { name: "FALL/WINTER", inputName: "winter", multiple: false },
+
+                { name: "SPECIAL OCCASION", inputName: "special", multiple: false }
+
+            ];
+
+
+
+            // Get selections for each category
+
+            categories.forEach(category => {
+
+                resultString += `${category.name}: `;
+
+
+
+                if (category.multiple) {
+
+                    const selected = [];
+
+                    document.querySelectorAll(`input[name="${category.inputName}"]:checked`).forEach(input => {
+
+                        selected.push(input.value);
+
+                    });
+
+
+
+                    if (selected.length > 0) {
+
+                        resultString += selected.join(", ");
+
+                    } else {
+
+                        resultString += "None selected";
+
+                    }
+
+                } else {
+
+                    const selected = document.querySelector(`input[name="${category.inputName}"]:checked`);
+
+                    resultString += selected ? selected.value : "None selected";
+
+                }
+
+
+
+                resultString += "\n\n";
+
+            });
+
+
+
+            // Display results
+
+            resultsText.textContent = resultString;
+
+            modal.style.display = "block";
+
+
+
+            // Enable sharing on iOS
+
+            if (navigator.share) {
+
+                resultsText.innerHTML += '<button id="nativeShare" style="display:block; margin:10px auto;">Share Results</button>';
+
+                document.getElementById('nativeShare').addEventListener('click', function() {
+
+                    navigator.share({
+
+                        title: 'My Fragrance Selections',
+
+                        text: resultString
+
+                    })
+
+                    .catch(console.error);
+
+                });
+
+            }
+
+        }
+
+
+
+        // Reset form function
+
+        function resetForm() {
+
+            form.reset();
+
+        }
+
+
+
+        // Close modal function
+
+        function closeModal() {
+
+            modal.style.display = "none";
+
+        }
+
+
+
+        // Close modal when clicking outside
+
+        window.onclick = function(event) {
+
+            if (event.target == modal) {
+
+                closeModal();
+
+            }
+
+        };
+
+    </script>
+
+</body>
+
+</html>
