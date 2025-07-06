@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Request, Response } from 'express';
 import { prisma } from '@fragrance-battle/database';
 import {
   CreateFragranceRequest,
@@ -11,11 +11,19 @@ import {
 import { validate, validateParams, validateQuery, schemas } from '../middleware/validation';
 import { authenticateToken, optionalAuth } from '../middleware/auth';
 import { asyncHandler, createError } from '../middleware/errorHandler';
+import { formatFragrance, formatBrandName } from '../utils/formatting';
+import { searchRateLimiter, generalRateLimiter } from '../middleware/rateLimiter';
+import { generateSearchVariations, normalizeSearchTerm, buildSmartSearchQuery } from '../utils/searchNormalization';
 
 const router = express.Router();
 
+// Simple in-memory cache for filter options
+let filterOptionsCache: any = null;
+let filterOptionsCacheTime = 0;
+const FILTER_CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
 // Get all fragrances with optional filters
-router.get('/', optionalAuth, validateQuery(schemas.pagination), asyncHandler(async (req, res) => {
+router.get('/', generalRateLimiter, optionalAuth, validateQuery(schemas.fragranceFilters), asyncHandler(async (req: Request, res: Response) => {
   const {
     page = 1,
     limit = 20,
@@ -58,7 +66,7 @@ router.get('/', optionalAuth, validateQuery(schemas.pagination), asyncHandler(as
   }
 
   // Get fragrances and total count
-  const [fragrances, total] = await Promise.all([
+  const [rawFragrances, total] = await Promise.all([
     prisma.fragrance.findMany({
       where,
       orderBy,
@@ -67,6 +75,9 @@ router.get('/', optionalAuth, validateQuery(schemas.pagination), asyncHandler(as
     }),
     prisma.fragrance.count({ where })
   ]);
+
+  // Format the fragrances
+  const fragrances = rawFragrances.map(formatFragrance);
 
   const response: APIResponse<FragranceSearchResponse> = {
     success: true,
@@ -83,7 +94,7 @@ router.get('/', optionalAuth, validateQuery(schemas.pagination), asyncHandler(as
 }));
 
 // Search fragrances
-router.post('/search', optionalAuth, validate(schemas.searchFragrances), asyncHandler(async (req, res) => {
+router.post('/search', searchRateLimiter, optionalAuth, validate(schemas.searchFragrances), asyncHandler(async (req: Request, res: Response) => {
   const searchRequest: FragranceSearchRequest = req.body;
   const {
     query,
@@ -99,15 +110,24 @@ router.post('/search', optionalAuth, validate(schemas.searchFragrances), asyncHa
   // Build where clause
   const where: any = {};
 
-  // Text search
-  if (query) {
-    where.OR = [
-      { name: { contains: query, mode: 'insensitive' } },
-      { brand: { contains: query, mode: 'insensitive' } },
-      { topNotes: { hasSome: [query] } },
-      { middleNotes: { hasSome: [query] } },
-      { baseNotes: { hasSome: [query] } }
-    ];
+  // Get all brands for smart abbreviation generation
+  const allBrandsResult = await prisma.fragrance.findMany({
+    select: { brand: true },
+    distinct: ['brand']
+  });
+  const allBrands = allBrandsResult.map(item => item.brand);
+
+  // Smart search with variations
+  if (query && typeof query === 'string') {
+    const smartConditions = buildSmartSearchQuery(query, allBrands);
+    where.OR = smartConditions;
+  } else if (query === '') {
+    // Handle empty query gracefully - return error but don't crash
+    const response = {
+      success: false,
+      error: 'Search query cannot be empty'
+    };
+    return res.status(400).json(response);
   }
 
   // Apply filters
@@ -133,7 +153,7 @@ router.post('/search', optionalAuth, validate(schemas.searchFragrances), asyncHa
   }
 
   // Get fragrances and total count
-  const [fragrances, total] = await Promise.all([
+  const [rawFragrances, total] = await Promise.all([
     prisma.fragrance.findMany({
       where,
       orderBy,
@@ -142,6 +162,9 @@ router.post('/search', optionalAuth, validate(schemas.searchFragrances), asyncHa
     }),
     prisma.fragrance.count({ where })
   ]);
+
+  // Format the fragrances
+  const fragrances = rawFragrances.map(formatFragrance);
 
   const response: APIResponse<FragranceSearchResponse> = {
     success: true,
@@ -157,11 +180,177 @@ router.post('/search', optionalAuth, validate(schemas.searchFragrances), asyncHa
   res.json(response);
 }));
 
+// Get available filter options from database
+router.get('/filters', generalRateLimiter, asyncHandler(async (req: Request, res: Response) => {
+  try {
+    // Check cache first
+    const now = Date.now();
+    if (filterOptionsCache && now - filterOptionsCacheTime < FILTER_CACHE_DURATION) {
+      return res.json({
+        success: true,
+        data: filterOptionsCache
+      });
+    }
+
+    // Get all fragrances to extract unique filter values
+    const fragrances = await prisma.fragrance.findMany({
+      select: {
+        brand: true,
+        aiSeasons: true,
+        aiOccasions: true,
+        aiMoods: true,
+        concentration: true,
+        year: true
+      }
+    });
+
+    // Extract unique values
+    const brands = new Set<string>();
+    const seasons = new Set<string>();
+    const occasions = new Set<string>();
+    const moods = new Set<string>();
+    const concentrations = new Set<string>();
+    let minYear = Infinity;
+    let maxYear = -Infinity;
+
+    fragrances.forEach(f => {
+      if (f.brand) brands.add(f.brand);
+      if (f.aiSeasons) f.aiSeasons.forEach(s => seasons.add(s));
+      if (f.aiOccasions) f.aiOccasions.forEach(o => occasions.add(o));
+      if (f.aiMoods) f.aiMoods.forEach(m => moods.add(m));
+      if (f.concentration) concentrations.add(f.concentration);
+      if (f.year) {
+        minYear = Math.min(minYear, f.year);
+        maxYear = Math.max(maxYear, f.year);
+      }
+    });
+
+    // Sort brands by frequency (get top brands for initial display)
+    const brandCounts = await prisma.fragrance.groupBy({
+      by: ['brand'],
+      _count: { brand: true },
+      orderBy: { _count: { brand: 'desc' } },
+      take: 20 // Reduced to 20 for initial display
+    });
+
+    // Format brand names
+    const formattedBrands = brandCounts.map(b => formatBrandName(b.brand));
+
+    const filterData = {
+      brands: formattedBrands,
+      seasons: [...seasons].sort(),
+      occasions: [...occasions].sort(),
+      moods: [...moods].sort(),
+      concentrations: [...concentrations].sort(),
+      yearRange: {
+        min: minYear === Infinity ? 1900 : minYear,
+        max: maxYear === -Infinity ? new Date().getFullYear() : maxYear
+      }
+    };
+
+    // Cache the results
+    filterOptionsCache = filterData;
+    filterOptionsCacheTime = now;
+
+    const response: APIResponse<typeof filterData> = {
+      success: true,
+      data: filterData
+    };
+
+    res.json(response);
+  } catch (error) {
+    console.error('Error getting filter options:', error);
+    throw createError('Failed to get filter options', 500, 'INTERNAL_ERROR');
+  }
+}));
+
+// Search brands dynamically
+router.get('/brands/search', searchRateLimiter, asyncHandler(async (req: Request, res: Response) => {
+  const { q: query, limit = 10 } = req.query;
+
+  if (!query || typeof query !== 'string') {
+    return res.json({
+      success: true,
+      data: { brands: [] }
+    });
+  }
+
+  try {
+    // Search for brands that contain the query string
+    const brands = await prisma.fragrance.groupBy({
+      by: ['brand'],
+      _count: { brand: true },
+      where: {
+        brand: {
+          contains: query,
+          mode: 'insensitive'
+        }
+      },
+      orderBy: [
+        { _count: { brand: 'desc' } }, // Most popular first
+        { brand: 'asc' } // Then alphabetical
+      ],
+      take: Number(limit)
+    });
+
+    // Format brand names but keep original for filtering
+    const formattedBrands = brands.map(b => ({
+      name: formatBrandName(b.brand),
+      originalName: b.brand, // Keep original for filtering
+      count: b._count.brand
+    }));
+
+    const response: APIResponse<{
+      brands: Array<{ name: string; originalName: string; count: number }>;
+    }> = {
+      success: true,
+      data: {
+        brands: formattedBrands
+      }
+    };
+
+    res.json(response);
+  } catch (error) {
+    console.error('Error searching brands:', error);
+    throw createError('Failed to search brands', 500, 'INTERNAL_ERROR');
+  }
+}));
+
+// Test smart search normalization (development only)
+router.get('/test-search-normalization', asyncHandler(async (req: Request, res: Response) => {
+  const { query: searchTerm } = req.query;
+
+  if (!searchTerm || typeof searchTerm !== 'string') {
+    return res.status(400).json({
+      success: false,
+      message: 'Query parameter required'
+    });
+  }
+
+  const variations = generateSearchVariations(searchTerm);
+  const normalized = normalizeSearchTerm(searchTerm);
+
+  const response = {
+    success: true,
+    data: {
+      original: searchTerm,
+      normalized,
+      variations,
+      searchWould: {
+        variations: variations.length,
+        conditions: variations.length * 2 // Each variation searches name + brand
+      }
+    }
+  };
+
+  res.json(response);
+}));
+
 // Get fragrance by ID
-router.get('/:id', optionalAuth, validateParams(schemas.id), asyncHandler(async (req, res) => {
+router.get('/:id', optionalAuth, validateParams(schemas.id), asyncHandler(async (req: Request, res: Response) => {
   const { id } = req.params;
 
-  const fragrance = await prisma.fragrance.findUnique({
+  const rawFragrance = await prisma.fragrance.findUnique({
     where: { id },
     include: {
       feedbacks: {
@@ -176,9 +365,12 @@ router.get('/:id', optionalAuth, validateParams(schemas.id), asyncHandler(async 
     }
   });
 
-  if (!fragrance) {
+  if (!rawFragrance) {
     throw createError('Fragrance not found', 404, 'NOT_FOUND');
   }
+
+  // Format the fragrance
+  const fragrance = formatFragrance(rawFragrance);
 
   const response: APIResponse<Fragrance> = {
     success: true,

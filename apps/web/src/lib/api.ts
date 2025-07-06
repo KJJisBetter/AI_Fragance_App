@@ -23,6 +23,12 @@ const api = axios.create({
   },
 })
 
+// Debug logging
+console.log('🔧 API Configuration:', {
+  baseURL: import.meta.env.VITE_API_URL || '/api',
+  environment: import.meta.env.MODE
+})
+
 // Request interceptor to add auth token
 api.interceptors.request.use(
   (config) => {
@@ -138,6 +144,18 @@ export const fragrancesApi = {
   getRandom: async (count?: number) => {
     const response = await api.get('/fragrances/random/discover', {
       params: { count }
+    })
+    return handleApiResponse(response)
+  },
+
+  getFilters: async () => {
+    const response = await api.get('/fragrances/filters')
+    return handleApiResponse(response)
+  },
+
+  searchBrands: async (query: string, limit?: number) => {
+    const response = await api.get('/fragrances/brands/search', {
+      params: { q: query, limit }
     })
     return handleApiResponse(response)
   }

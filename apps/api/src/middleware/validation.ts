@@ -178,5 +178,21 @@ export const schemas = {
     limit: Joi.number().integer().min(1).max(100).optional(),
     sortBy: Joi.string().optional(),
     sortOrder: Joi.string().valid('asc', 'desc').optional()
+  }),
+
+  // Fragrance filtering query schema
+  fragranceFilters: Joi.object({
+    page: Joi.number().integer().min(1).optional(),
+    limit: Joi.number().integer().min(1).max(100).optional(),
+    sortBy: Joi.string().valid('name', 'brand', 'year', 'rating', 'createdAt').optional(),
+    sortOrder: Joi.string().valid('asc', 'desc').optional(),
+    brand: Joi.string().optional(),
+    season: Joi.string().optional(),
+    occasion: Joi.string().optional(),
+    mood: Joi.string().optional(),
+    yearFrom: Joi.number().integer().min(1900).optional(),
+    yearTo: Joi.number().integer().min(1900).optional(),
+    concentration: Joi.string().optional(),
+    verified: Joi.string().valid('true', 'false').optional()
   })
 };
