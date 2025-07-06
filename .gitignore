@@ -23,3 +23,6 @@ apps/*/node_modules/
 
 # Turbo
 .turbo/
+
+# Vite
+.vite/
