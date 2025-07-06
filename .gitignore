@@ -21,3 +21,5 @@ build/
 packages/*/node_modules/
 apps/*/node_modules/
 
+# Turbo
+.turbo/
