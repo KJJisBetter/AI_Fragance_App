@@ -21,6 +21,7 @@
     "db:seed": "turbo run db:seed",
     "db:import": "cd packages/database && npm run db:import",
     "db:studio": "cd packages/database && npm run db:studio",
+    "import-parfumo-bulk": "tsx packages/database/src/import-parfumo-simple.ts",
     "docker:up": "docker-compose up -d",
     "docker:down": "docker-compose down",
     "docker:logs": "docker-compose logs -f",

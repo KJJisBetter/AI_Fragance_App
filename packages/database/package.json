@@ -15,6 +15,15 @@
     "db:migrate:reset": "prisma migrate reset",
     "db:seed": "tsx src/seed.ts",
     "db:import": "tsx src/import-csv.ts",
+    "db:import:parfumo": "tsx src/import-parfumo.ts",
+    "db:import:parfumo:merge": "tsx src/import-parfumo.ts ../../../data/parfumo_datos.csv merge",
+    "db:import:parfumo:replace": "tsx src/import-parfumo.ts ../../../data/parfumo_datos.csv replace",
+    "db:import:parfumo:skip": "tsx src/import-parfumo.ts ../../../data/parfumo_datos.csv skip_existing",
+    "db:import:parfumo:bulk": "tsx src/import-parfumo-simple.ts",
+    "db:fix-notes": "tsx src/fix-missing-notes.ts",
+    "db:cleanup": "tsx src/cleanup-fragrances.ts",
+    "db:cleanup-dry": "tsx src/cleanup-fragrances.ts --dry-run",
+    "db:deduplicate": "node deduplicate.js",
     "db:studio": "prisma studio"
   },
   "dependencies": {
