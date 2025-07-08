@@ -1,4 +1,7 @@
 import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { fragrancesApi } from "../lib/api";
+import { Fragrance } from "@fragrance-battle/types";
 
 const featureCardStyle = {
   background: "white",
@@ -39,8 +42,34 @@ const secondaryButtonStyle = {
   border: "2px solid #1e293b"
 };
 
-export const HomePage = () => (
-  <div style={{ background: "#f8fafc", minHeight: "100vh" }}>
+export const HomePage = () => {
+  const [popularFragrances, setPopularFragrances] = useState<Fragrance[]>([]);
+  const [popularLoading, setPopularLoading] = useState(true);
+
+  // Fetch popular fragrances
+  useEffect(() => {
+    const fetchPopularFragrances = async () => {
+      try {
+        setPopularLoading(true);
+        const result = await fragrancesApi.getAll({
+          page: 1,
+          limit: 6,
+          sortBy: 'popularity',
+          sortOrder: 'desc'
+        });
+        setPopularFragrances((result as any).fragrances);
+      } catch (error) {
+        console.error('Error fetching popular fragrances:', error);
+      } finally {
+        setPopularLoading(false);
+      }
+    };
+
+    fetchPopularFragrances();
+  }, []);
+
+  return (
+    <div style={{ background: "#f8fafc", minHeight: "100vh" }}>
     {/* Hero Section */}
     <section style={{
       background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
@@ -169,6 +198,182 @@ export const HomePage = () => (
             Personal Curation
           </p>
         </div>
+      </div>
+    </section>
+
+    {/* Popular Right Now Section */}
+    <section style={{
+      padding: "80px 32px",
+      backgroundColor: "white"
+    }}>
+      <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
+        <div style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: "48px"
+        }}>
+          <div>
+            <h2 style={{
+              fontSize: "2.5rem",
+              fontWeight: "bold",
+              color: "#1e293b",
+              marginBottom: "8px"
+            }}>
+              🔥 Popular Right Now
+            </h2>
+            <p style={{
+              color: "#64748b",
+              fontSize: "1.1rem"
+            }}>
+              Discover the most loved fragrances in our community
+            </p>
+          </div>
+          <Link
+            to="/fragrances?sortBy=popularity"
+            style={{
+              ...primaryButtonStyle,
+              padding: "12px 24px",
+              fontSize: "14px"
+            }}
+            onMouseEnter={(e) => {
+              (e.target as HTMLElement).style.backgroundColor = "#0f172a";
+              (e.target as HTMLElement).style.transform = "translateY(-2px)";
+            }}
+            onMouseLeave={(e) => {
+              (e.target as HTMLElement).style.backgroundColor = "#1e293b";
+              (e.target as HTMLElement).style.transform = "translateY(0)";
+            }}
+          >
+            View All Popular
+          </Link>
+        </div>
+
+        {popularLoading ? (
+          <div style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            height: "200px"
+          }}>
+            <div style={{
+              width: "40px",
+              height: "40px",
+              border: "4px solid #e2e8f0",
+              borderTop: "4px solid #1e293b",
+              borderRadius: "50%",
+              animation: "spin 1s linear infinite"
+            }}></div>
+          </div>
+        ) : (
+          <div style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+            gap: "24px"
+          }}>
+            {popularFragrances.map((fragrance) => (
+              <Link
+                key={fragrance.id}
+                to={`/fragrances/${fragrance.id}`}
+                style={{
+                  textDecoration: "none",
+                  color: "inherit"
+                }}
+              >
+                <div style={{
+                  ...featureCardStyle,
+                  padding: "20px",
+                  height: "100%",
+                  display: "flex",
+                  flexDirection: "column"
+                }}
+                onMouseEnter={(e) => {
+                  Object.assign((e.target as HTMLElement).style, featureCardHoverStyle);
+                }}
+                onMouseLeave={(e) => {
+                  Object.assign((e.target as HTMLElement).style, featureCardStyle);
+                }}
+                >
+                  <div style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "flex-start",
+                    marginBottom: "12px"
+                  }}>
+                    <div style={{ flex: 1 }}>
+                      <h3 style={{
+                        fontSize: "1.25rem",
+                        fontWeight: "bold",
+                        color: "#1e293b",
+                        marginBottom: "4px",
+                        lineHeight: 1.2
+                      }}>
+                        {fragrance.name}
+                      </h3>
+                      <p style={{
+                        color: "#64748b",
+                        fontSize: "1rem",
+                        marginBottom: "8px"
+                      }}>
+                        {fragrance.brand}
+                      </p>
+                    </div>
+                    <div style={{ display: "flex", gap: "4px", alignItems: "center" }}>
+                      {fragrance.year && (
+                        <span style={{
+                          backgroundColor: "#64748b",
+                          color: "white",
+                          fontSize: "10px",
+                          padding: "2px 6px",
+                          borderRadius: "4px",
+                          fontWeight: "600"
+                        }}>
+                          {fragrance.year}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  <div style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    marginBottom: "12px"
+                  }}>
+                    {fragrance.communityRating && (
+                      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                        <span style={{
+                          fontSize: "16px",
+                          fontWeight: "600",
+                          color: fragrance.communityRating >= 4.5 ? "#22c55e" :
+                                 fragrance.communityRating >= 4.0 ? "#3b82f6" :
+                                 fragrance.communityRating >= 3.5 ? "#f59e0b" : "#ef4444"
+                        }}>
+                          ★ {fragrance.communityRating.toFixed(1)}
+                        </span>
+                        <span style={{
+                          fontSize: "12px",
+                          color: "#94a3b8"
+                        }}>
+                          Fragantica
+                        </span>
+                      </div>
+                    )}
+                  </div>
+
+                  <div style={{
+                    fontSize: "14px",
+                    color: "#64748b",
+                    lineHeight: 1.4,
+                    marginTop: "auto"
+                  }}>
+                    <strong>Top Notes:</strong> {fragrance.topNotes?.slice(0, 3).join(", ") || "Not specified"}
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
       </div>
     </section>
 
@@ -338,5 +543,16 @@ export const HomePage = () => (
         </Link>
       </div>
     </section>
-  </div>
-);
+
+    {/* Add CSS animation for spinner */}
+    <style dangerouslySetInnerHTML={{
+      __html: `
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      `
+    }} />
+      </div>
+  );
+};

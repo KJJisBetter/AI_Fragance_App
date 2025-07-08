@@ -23,6 +23,7 @@
     "db:fix-notes": "tsx src/fix-missing-notes.ts",
     "db:cleanup": "tsx src/cleanup-fragrances.ts",
     "db:cleanup-dry": "tsx src/cleanup-fragrances.ts --dry-run",
+    "db:normalize": "tsx src/normalize-concentrations.ts",
     "db:deduplicate": "node deduplicate.js",
     "db:studio": "prisma studio"
   },

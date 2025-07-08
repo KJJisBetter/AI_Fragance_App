@@ -7,14 +7,14 @@ import {
   AICategorFeedbackRequest,
   APIResponse
 } from '@fragrance-battle/types';
-import { validate, validateParams, schemas } from '../middleware/validation';
+import { validateBody, validateParams, aiSchemas, paramSchemas } from '../middleware/validation';
 import { authenticateToken, optionalAuth } from '../middleware/auth';
 import { asyncHandler, createError } from '../middleware/errorHandler';
 
 const router = express.Router();
 
 // Categorize fragrance using AI
-router.post('/categorize', optionalAuth, validate(schemas.categorizeFragrance), asyncHandler(async (req, res) => {
+router.post('/categorize', optionalAuth, validateBody(aiSchemas.categorizeFragrance), asyncHandler(async (req, res) => {
   const categorizationRequest: AICategorizationRequest = req.body;
 
   try {
@@ -67,7 +67,7 @@ router.post('/categorize', optionalAuth, validate(schemas.categorizeFragrance), 
 }));
 
 // Submit feedback for AI categorization
-router.post('/feedback', authenticateToken, validate(schemas.aiFeedback), asyncHandler(async (req, res) => {
+router.post('/feedback', authenticateToken, validateBody(aiSchemas.aiFeedback), asyncHandler(async (req, res) => {
   const feedbackRequest: AICategorFeedbackRequest = req.body;
   const userId = req.user!.id;
 
@@ -128,7 +128,7 @@ router.post('/feedback', authenticateToken, validate(schemas.aiFeedback), asyncH
 }));
 
 // Get AI categorization for existing fragrance
-router.get('/categorize/:fragranceId', optionalAuth, validateParams(schemas.id), asyncHandler(async (req, res) => {
+router.get('/categorize/:fragranceId', optionalAuth, validateParams(paramSchemas.fragranceId), asyncHandler(async (req, res) => {
   const { fragranceId } = req.params;
 
   const fragrance = await prisma.fragrance.findUnique({
@@ -199,176 +199,87 @@ router.get('/categorize/:fragranceId', optionalAuth, validateParams(schemas.id),
         seasons: fragrance.aiSeasons,
         occasions: fragrance.aiOccasions,
         moods: fragrance.aiMoods,
-        confidence: 85 // Default confidence for existing categorizations
+        confidence: 0.85 // Default confidence for existing data
       },
-      reasoning: 'Previously categorized fragrance',
-      fragrance
+      reasoning: 'Previously categorized fragrance data',
+      fragrance: fragrance
     }
   };
 
   res.json(response);
 }));
 
-// Get user's feedback history
-router.get('/feedback', authenticateToken, asyncHandler(async (req, res) => {
-  const userId = req.user!.id;
-  const page = Number(req.query.page) || 1;
-  const limit = Math.min(Number(req.query.limit) || 20, 100);
-  const skip = (page - 1) * limit;
+// Get AI health status
+router.get('/health', asyncHandler(async (req, res) => {
+  try {
+    const health = await checkAIHealth();
 
-  const [feedbacks, total] = await Promise.all([
-    prisma.aICategorFeedback.findMany({
-      where: { userId },
-      include: {
-        fragrance: {
-          select: {
-            id: true,
-            name: true,
-            brand: true
-          }
-        }
-      },
-      orderBy: { createdAt: 'desc' },
-      skip,
-      take: limit
+    const response: APIResponse<typeof health> = {
+      success: true,
+      data: health
+    };
+
+    res.json(response);
+  } catch (error) {
+    console.error('AI health check error:', error);
+    throw createError(
+      'Failed to check AI service health',
+      500,
+      'AI_SERVICE_ERROR'
+    );
+  }
+}));
+
+// Get AI statistics
+router.get('/stats', authenticateToken, asyncHandler(async (req, res) => {
+  const [
+    totalCategorizations,
+    totalFeedback,
+    recentCategorizations,
+    feedbackByType
+  ] = await Promise.all([
+    prisma.fragrance.count({
+      where: {
+        OR: [
+          { aiSeasons: { isEmpty: false } },
+          { aiOccasions: { isEmpty: false } },
+          { aiMoods: { isEmpty: false } }
+        ]
+      }
     }),
-    prisma.aICategorFeedback.count({
-      where: { userId }
+    prisma.aICategorFeedback.count(),
+    prisma.fragrance.count({
+      where: {
+        AND: [
+          { updatedAt: { gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) } }, // Last 7 days
+          {
+            OR: [
+              { aiSeasons: { isEmpty: false } },
+              { aiOccasions: { isEmpty: false } },
+              { aiMoods: { isEmpty: false } }
+            ]
+          }
+        ]
+      }
+    }),
+    prisma.aICategorFeedback.groupBy({
+      by: ['feedbackType'],
+      _count: { feedbackType: true }
     })
   ]);
 
   const response: APIResponse<{
-    feedbacks: typeof feedbacks;
-    total: number;
-    page: number;
-    limit: number;
-    totalPages: number;
+    totalCategorizations: number;
+    totalFeedback: number;
+    recentCategorizations: number;
+    feedbackByType: typeof feedbackByType;
   }> = {
     success: true,
     data: {
-      feedbacks,
-      total,
-      page,
-      limit,
-      totalPages: Math.ceil(total / limit)
-    }
-  };
-
-  res.json(response);
-}));
-
-// Get AI service health
-router.get('/health', asyncHandler(async (req, res) => {
-  try {
-    const isHealthy = await checkAIHealth();
-
-    const response: APIResponse<{
-      status: string;
-      healthy: boolean;
-      timestamp: string;
-    }> = {
-      success: true,
-      data: {
-        status: isHealthy ? 'healthy' : 'unhealthy',
-        healthy: isHealthy,
-        timestamp: new Date().toISOString()
-      }
-    };
-
-    res.status(isHealthy ? 200 : 503).json(response);
-  } catch (error) {
-    const response: APIResponse<{
-      status: string;
-      healthy: boolean;
-      timestamp: string;
-      error: string;
-    }> = {
-      success: false,
-      data: {
-        status: 'error',
-        healthy: false,
-        timestamp: new Date().toISOString(),
-        error: error instanceof Error ? error.message : 'Unknown error'
-      }
-    };
-
-    res.status(503).json(response);
-  }
-}));
-
-// Batch categorize fragrances
-router.post('/categorize-batch', authenticateToken, asyncHandler(async (req, res) => {
-  const { fragranceIds } = req.body;
-
-  if (!Array.isArray(fragranceIds) || fragranceIds.length === 0) {
-    throw createError('fragranceIds must be a non-empty array', 400, 'VALIDATION_ERROR');
-  }
-
-  if (fragranceIds.length > 10) {
-    throw createError('Maximum 10 fragrances can be categorized at once', 400, 'VALIDATION_ERROR');
-  }
-
-  // Get fragrances
-  const fragrances = await prisma.fragrance.findMany({
-    where: {
-      id: { in: fragranceIds }
-    }
-  });
-
-  if (fragrances.length !== fragranceIds.length) {
-    throw createError('Some fragrances not found', 404, 'NOT_FOUND');
-  }
-
-  // Categorize each fragrance
-  const results = [];
-  for (const fragrance of fragrances) {
-    try {
-      const aiResponse = await categorizeFragrance({
-        name: fragrance.name,
-        brand: fragrance.brand,
-        topNotes: fragrance.topNotes,
-        middleNotes: fragrance.middleNotes,
-        baseNotes: fragrance.baseNotes,
-        year: fragrance.year || undefined,
-        concentration: fragrance.concentration || undefined
-      });
-
-      // Update fragrance with AI categorization
-      await prisma.fragrance.update({
-        where: { id: fragrance.id },
-        data: {
-          aiSeasons: aiResponse.categorization.seasons,
-          aiOccasions: aiResponse.categorization.occasions,
-          aiMoods: aiResponse.categorization.moods,
-          updatedAt: new Date()
-        }
-      });
-
-      results.push({
-        fragranceId: fragrance.id,
-        success: true,
-        categorization: aiResponse.categorization
-      });
-    } catch (error) {
-      console.error(`Failed to categorize fragrance ${fragrance.id}:`, error);
-      results.push({
-        fragranceId: fragrance.id,
-        success: false,
-        error: 'Failed to categorize fragrance'
-      });
-    }
-  }
-
-  const response: APIResponse<{
-    results: typeof results;
-    successful: number;
-    failed: number;
-  }> = {
-    success: true,
-    data: {
-      results,
-      successful: results.filter(r => r.success).length,
-      failed: results.filter(r => !r.success).length
+      totalCategorizations,
+      totalFeedback,
+      recentCategorizations,
+      feedbackByType
     }
   };
 

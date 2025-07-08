@@ -15,6 +15,11 @@ let openai: OpenAI | null = null;
 export const initializeOpenAI = (apiKey: string) => {
   openai = new OpenAI({
     apiKey: apiKey,
+    timeout: 30000, // 30 second timeout
+    maxRetries: 3, // Retry failed requests up to 3 times
+    defaultHeaders: {
+      'User-Agent': 'fragrance-battle-ai/1.0.0',
+    },
   });
 };
 
@@ -28,6 +33,22 @@ const getOpenAIClient = () => {
     initializeOpenAI(apiKey);
   }
   return openai!;
+};
+
+// Rate limiting helper
+let lastRequestTime = 0;
+const MIN_REQUEST_INTERVAL = 1000; // 1 second between requests
+
+const enforceRateLimit = async () => {
+  const now = Date.now();
+  const timeSinceLastRequest = now - lastRequestTime;
+
+  if (timeSinceLastRequest < MIN_REQUEST_INTERVAL) {
+    const waitTime = MIN_REQUEST_INTERVAL - timeSinceLastRequest;
+    await new Promise(resolve => setTimeout(resolve, waitTime));
+  }
+
+  lastRequestTime = Date.now();
 };
 
 // Generate the AI categorization prompt
@@ -109,6 +130,17 @@ const parseAIResponse = (response: string): AICategorization & { reasoning: stri
     // Validate confidence
     const confidence = Math.max(0, Math.min(100, parsed.confidence));
 
+    // Ensure we have at least one valid value for each category
+    if (validSeasons.length === 0) {
+      validSeasons.push('Spring'); // Default fallback
+    }
+    if (validOccasions.length === 0) {
+      validOccasions.push('Daily'); // Default fallback
+    }
+    if (validMoods.length === 0) {
+      validMoods.push('Fresh'); // Default fallback
+    }
+
     return {
       seasons: validSeasons,
       occasions: validOccasions,
@@ -117,7 +149,9 @@ const parseAIResponse = (response: string): AICategorization & { reasoning: stri
       reasoning: parsed.reasoning || 'No reasoning provided'
     };
   } catch (error) {
-    throw new Error(`Failed to parse AI response: ${error}`);
+    console.error('Failed to parse AI response:', error);
+    console.error('Raw response:', response);
+    throw new Error(`Failed to parse AI response: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 };
 
@@ -126,11 +160,15 @@ export const categorizeFragrance = async (
   request: AICategorizationRequest
 ): Promise<AICategorizationResponse> => {
   try {
+    await enforceRateLimit();
+
     const client = getOpenAIClient();
     const prompt = generateCategorizationPrompt(request);
 
+    console.log(`🤖 Categorizing fragrance: ${request.name} by ${request.brand}`);
+
     const completion = await client.chat.completions.create({
-      model: 'gpt-4-turbo-preview',
+      model: 'gpt-3.5-turbo-1106', // Using GPT-3.5-turbo-1106 for optimal cost efficiency
       messages: [
         {
           role: 'system',
@@ -153,6 +191,8 @@ export const categorizeFragrance = async (
 
     const parsed = parseAIResponse(response);
 
+    console.log(`✅ Successfully categorized ${request.name}: ${parsed.seasons.join(', ')} | ${parsed.occasions.join(', ')} | ${parsed.moods.join(', ')} (${parsed.confidence}% confidence)`);
+
     return {
       categorization: {
         seasons: parsed.seasons,
@@ -164,6 +204,18 @@ export const categorizeFragrance = async (
     };
   } catch (error) {
     console.error('Error categorizing fragrance:', error);
+
+    // Provide more specific error messages
+    if (error instanceof OpenAI.APIError) {
+      if (error.status === 401) {
+        throw new Error('Invalid OpenAI API key. Please check your OPENAI_API_KEY environment variable.');
+      } else if (error.status === 429) {
+        throw new Error('OpenAI API rate limit exceeded. Please try again in a few minutes.');
+      } else if (error.status === 500) {
+        throw new Error('OpenAI API is currently experiencing issues. Please try again later.');
+      }
+    }
+
     throw new Error(`Failed to categorize fragrance: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 };
@@ -173,25 +225,46 @@ export const categorizeFragrancesBatch = async (
   requests: AICategorizationRequest[]
 ): Promise<AICategorizationResponse[]> => {
   const results: AICategorizationResponse[] = [];
+  const errors: string[] = [];
+
+  console.log(`🚀 Starting batch categorization of ${requests.length} fragrances`);
 
   // Process in batches to avoid rate limiting
-  const batchSize = 5;
+  const batchSize = 3; // Reduced batch size to be more conservative
   for (let i = 0; i < requests.length; i += batchSize) {
     const batch = requests.slice(i, i + batchSize);
-    const batchPromises = batch.map(request => categorizeFragrance(request));
+
+    console.log(`📦 Processing batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(requests.length / batchSize)}`);
+
+    const batchPromises = batch.map(async (request) => {
+      try {
+        return await categorizeFragrance(request);
+      } catch (error) {
+        const errorMsg = `Failed to categorize ${request.name} by ${request.brand}: ${error instanceof Error ? error.message : 'Unknown error'}`;
+        console.error(errorMsg);
+        errors.push(errorMsg);
+        return null;
+      }
+    });
 
     try {
       const batchResults = await Promise.all(batchPromises);
-      results.push(...batchResults);
+      results.push(...batchResults.filter(result => result !== null) as AICategorizationResponse[]);
     } catch (error) {
       console.error(`Error processing batch ${i / batchSize + 1}:`, error);
-      // Continue with next batch
     }
 
     // Add delay between batches to respect rate limits
     if (i + batchSize < requests.length) {
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      console.log('⏳ Waiting before next batch...');
+      await new Promise(resolve => setTimeout(resolve, 2000)); // 2 second delay
     }
+  }
+
+  console.log(`✅ Batch categorization complete: ${results.length} successful, ${errors.length} failed`);
+
+  if (errors.length > 0) {
+    console.warn('❌ Errors encountered:', errors);
   }
 
   return results;
@@ -208,9 +281,11 @@ export const improveCategorization = async (
   }
 ): Promise<AICategorizationResponse> => {
   try {
+    await enforceRateLimit();
+
     const client = getOpenAIClient();
 
-    const prompt = `You are an expert fragrance consultant. A user has provided feedback on your previous categorization. Learn from this feedback to provide a better categorization.
+    const feedbackPrompt = `You are an expert fragrance consultant. A user has provided feedback on your previous categorization. Learn from this feedback and provide an improved categorization.
 
 Original Fragrance:
 - Name: ${originalRequest.name}
@@ -225,31 +300,27 @@ ${userFeedback.correctOccasions ? `Correct Occasions: ${userFeedback.correctOcca
 ${userFeedback.correctMoods ? `Correct Moods: ${userFeedback.correctMoods.join(', ')}` : ''}
 ${userFeedback.feedbackNotes ? `Additional Notes: ${userFeedback.feedbackNotes}` : ''}
 
-Based on this feedback, provide an improved categorization following the same JSON format as before.
+Based on this feedback, provide an improved categorization that takes into account the user's corrections. Use the same JSON format as before.
 
-Return ONLY a JSON object in this exact format:
-{
-  "seasons": ["Season1", "Season2"],
-  "occasions": ["Occasion1", "Occasion2"],
-  "moods": ["Mood1", "Mood2"],
-  "confidence": 85,
-  "reasoning": "Brief explanation incorporating the user feedback"
-}`;
+Available options:
+- Seasons: ${FRAGRANCE_SEASONS.join(', ')}
+- Occasions: ${FRAGRANCE_OCCASIONS.join(', ')}
+- Moods: ${FRAGRANCE_MOODS.join(', ')}`;
 
     const completion = await client.chat.completions.create({
-      model: 'gpt-4-turbo-preview',
+      model: 'gpt-3.5-turbo-1106',
       messages: [
         {
           role: 'system',
-          content: 'You are an expert fragrance consultant learning from user feedback to improve your categorizations. Always respond with valid JSON.'
+          content: 'You are learning from user feedback to improve your fragrance categorization accuracy. Always respond with valid JSON.'
         },
         {
           role: 'user',
-          content: prompt
+          content: feedbackPrompt
         }
       ],
       max_tokens: 1000,
-      temperature: 0.2,
+      temperature: 0.2, // Even lower temperature for learning-based responses
       response_format: { type: 'json_object' }
     });
 
@@ -267,7 +338,7 @@ Return ONLY a JSON object in this exact format:
         moods: parsed.moods,
         confidence: parsed.confidence
       },
-      reasoning: parsed.reasoning
+      reasoning: `Improved based on user feedback: ${parsed.reasoning}`
     };
   } catch (error) {
     console.error('Error improving categorization:', error);
@@ -275,26 +346,32 @@ Return ONLY a JSON object in this exact format:
   }
 };
 
-// Health check function
+// Check AI service health
 export const checkAIHealth = async (): Promise<boolean> => {
   try {
     const client = getOpenAIClient();
 
-    // Simple test request
-    const completion = await client.chat.completions.create({
-      model: 'gpt-4-turbo-preview',
+    // Simple test request to check if the API is accessible
+    const testCompletion = await client.chat.completions.create({
+      model: 'gpt-3.5-turbo-1106',
       messages: [
         {
           role: 'user',
-          content: 'Respond with "OK" if you are working properly.'
+          content: 'Return a simple JSON object with a "status" field set to "healthy".'
         }
       ],
-      max_tokens: 10,
-      temperature: 0
+      max_tokens: 50,
+      temperature: 0,
+      response_format: { type: 'json_object' }
     });
 
-    const response = completion.choices[0]?.message?.content;
-    return response?.toLowerCase().includes('ok') || false;
+    const response = testCompletion.choices[0]?.message?.content;
+    if (!response) {
+      return false;
+    }
+
+    const parsed = JSON.parse(response);
+    return parsed.status === 'healthy';
   } catch (error) {
     console.error('AI health check failed:', error);
     return false;
@@ -308,6 +385,35 @@ export {
   FRAGRANCE_MOODS,
   FRAGRANCE_CONCENTRATIONS
 } from '@fragrance-battle/types';
+
+// Export brand research functions
+export { researchBrand, researchBrandsBatch } from './brand-research';
+
+// Export popularity algorithm functions
+export {
+  calculatePopularityScore,
+  calculatePopularityScoresBatch,
+  analyzePopularityBreakdown,
+  MAINSTREAM_BRAND_SCORES,
+  getPriceAccessibilityScore,
+  getCulturalImpactScore,
+  getTrendingScore,
+  getUserBehaviorScore
+} from './popularity-algorithm';
+
+// Export the brand research script runner
+export { runBrandResearch } from './brand-research-script';
+
+// Export sales research functions
+export {
+  researchFragranceSales,
+  researchFragranceSalesBatch,
+  calculateEnhancedPopularityScore,
+  analyzeSalesResearch
+} from './sales-research';
+
+// Export the sales research script runner
+export { runSalesResearch } from './sales-research-script';
 
 export default {
   categorizeFragrance,

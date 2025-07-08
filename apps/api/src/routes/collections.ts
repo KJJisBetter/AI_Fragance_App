@@ -6,7 +6,7 @@ import {
   CollectionWithItems,
   APIResponse
 } from '@fragrance-battle/types';
-import { validate, validateParams, schemas } from '../middleware/validation';
+import { validateBody, validateParams, collectionSchemas } from '../middleware/validation';
 import { authenticateToken } from '../middleware/auth';
 import { asyncHandler, createError } from '../middleware/errorHandler';
 
@@ -59,7 +59,7 @@ router.get('/', authenticateToken, asyncHandler(async (req, res) => {
 }));
 
 // Create new collection
-router.post('/', authenticateToken, validate(schemas.createCollection), asyncHandler(async (req, res) => {
+router.post('/', authenticateToken, validateBody(collectionSchemas.create), asyncHandler(async (req, res) => {
   const userId = req.user!.id;
   const collectionData: CreateCollectionRequest = req.body;
 
@@ -86,7 +86,7 @@ router.post('/', authenticateToken, validate(schemas.createCollection), asyncHan
 }));
 
 // Get collection by ID
-router.get('/:id', authenticateToken, validateParams(schemas.id), asyncHandler(async (req, res) => {
+router.get('/:id', authenticateToken, validateParams(collectionSchemas.getById), asyncHandler(async (req, res) => {
   const { id } = req.params;
   const userId = req.user!.id;
 
@@ -115,7 +115,7 @@ router.get('/:id', authenticateToken, validateParams(schemas.id), asyncHandler(a
 }));
 
 // Update collection
-router.put('/:id', authenticateToken, validateParams(schemas.id), asyncHandler(async (req, res) => {
+router.put('/:id', authenticateToken, validateParams(collectionSchemas.getById), asyncHandler(async (req, res) => {
   const { id } = req.params;
   const userId = req.user!.id;
   const { name, description } = req.body;
@@ -153,7 +153,7 @@ router.put('/:id', authenticateToken, validateParams(schemas.id), asyncHandler(a
 }));
 
 // Delete collection
-router.delete('/:id', authenticateToken, validateParams(schemas.id), asyncHandler(async (req, res) => {
+router.delete('/:id', authenticateToken, validateParams(collectionSchemas.getById), asyncHandler(async (req, res) => {
   const { id } = req.params;
   const userId = req.user!.id;
 
@@ -181,7 +181,7 @@ router.delete('/:id', authenticateToken, validateParams(schemas.id), asyncHandle
 }));
 
 // Add fragrance to collection
-router.post('/:id/items', authenticateToken, validateParams(schemas.id), validate(schemas.addToCollection), asyncHandler(async (req, res) => {
+router.post('/:id/items', authenticateToken, validateParams(collectionSchemas.getById), validateBody(collectionSchemas.addFragrance), asyncHandler(async (req, res) => {
   const { id: collectionId } = req.params;
   const userId = req.user!.id;
   const itemData: AddToCollectionRequest = req.body;
@@ -205,27 +205,23 @@ router.post('/:id/items', authenticateToken, validateParams(schemas.id), validat
   }
 
   // Check if fragrance is already in collection
-  const existingItem = await prisma.collectionItem.findUnique({
+  const existingItem = await prisma.collectionItem.findFirst({
     where: {
-      collectionId_fragranceId: {
-        collectionId,
-        fragranceId: itemData.fragranceId
-      }
+      collectionId,
+      fragranceId: itemData.fragranceId
     }
   });
 
   if (existingItem) {
-    throw createError('Fragrance already in collection', 400, 'DUPLICATE_ITEM');
+    throw createError('Fragrance already in collection', 400, 'ALREADY_EXISTS');
   }
 
-  // Add fragrance to collection
+  // Add to collection
   const collectionItem = await prisma.collectionItem.create({
     data: {
       collectionId,
       fragranceId: itemData.fragranceId,
-      personalRating: itemData.personalRating,
-      personalNotes: itemData.personalNotes,
-      bottleSize: itemData.bottleSize
+      notes: itemData.notes
     },
     include: {
       fragrance: true
@@ -240,11 +236,10 @@ router.post('/:id/items', authenticateToken, validateParams(schemas.id), validat
   res.status(201).json(response);
 }));
 
-// Update collection item
-router.put('/:id/items/:itemId', authenticateToken, validateParams(schemas.id), asyncHandler(async (req, res) => {
+// Remove fragrance from collection
+router.delete('/:id/items/:itemId', authenticateToken, validateParams(collectionSchemas.getById), asyncHandler(async (req, res) => {
   const { id: collectionId, itemId } = req.params;
   const userId = req.user!.id;
-  const { personalRating, personalNotes, bottleSize } = req.body;
 
   // Check if collection exists and belongs to user
   const collection = await prisma.collection.findFirst({
@@ -256,25 +251,63 @@ router.put('/:id/items/:itemId', authenticateToken, validateParams(schemas.id), 
   }
 
   // Check if item exists in collection
-  const existingItem = await prisma.collectionItem.findFirst({
+  const collectionItem = await prisma.collectionItem.findFirst({
     where: {
       id: itemId,
       collectionId
     }
   });
 
-  if (!existingItem) {
-    throw createError('Collection item not found', 404, 'NOT_FOUND');
+  if (!collectionItem) {
+    throw createError('Item not found in collection', 404, 'NOT_FOUND');
   }
 
-  // Update item
+  // Remove from collection
+  await prisma.collectionItem.delete({
+    where: { id: itemId }
+  });
+
+  const response: APIResponse<{ message: string }> = {
+    success: true,
+    data: {
+      message: 'Fragrance removed from collection'
+    }
+  };
+
+  res.json(response);
+}));
+
+// Update collection item notes
+router.put('/:id/items/:itemId', authenticateToken, validateParams(collectionSchemas.getById), asyncHandler(async (req, res) => {
+  const { id: collectionId, itemId } = req.params;
+  const userId = req.user!.id;
+  const { notes } = req.body;
+
+  // Check if collection exists and belongs to user
+  const collection = await prisma.collection.findFirst({
+    where: { id: collectionId, userId }
+  });
+
+  if (!collection) {
+    throw createError('Collection not found', 404, 'NOT_FOUND');
+  }
+
+  // Check if item exists in collection
+  const collectionItem = await prisma.collectionItem.findFirst({
+    where: {
+      id: itemId,
+      collectionId
+    }
+  });
+
+  if (!collectionItem) {
+    throw createError('Item not found in collection', 404, 'NOT_FOUND');
+  }
+
+  // Update item notes
   const updatedItem = await prisma.collectionItem.update({
     where: { id: itemId },
-    data: {
-      ...(personalRating !== undefined && { personalRating }),
-      ...(personalNotes !== undefined && { personalNotes }),
-      ...(bottleSize !== undefined && { bottleSize })
-    },
+    data: { notes },
     include: {
       fragrance: true
     }
@@ -288,41 +321,112 @@ router.put('/:id/items/:itemId', authenticateToken, validateParams(schemas.id), 
   res.json(response);
 }));
 
-// Remove fragrance from collection
-router.delete('/:id/items/:itemId', authenticateToken, validateParams(schemas.id), asyncHandler(async (req, res) => {
-  const { id: collectionId, itemId } = req.params;
+// Get collection statistics
+router.get('/:id/stats', authenticateToken, validateParams(collectionSchemas.getById), asyncHandler(async (req, res) => {
+  const { id } = req.params;
   const userId = req.user!.id;
 
   // Check if collection exists and belongs to user
   const collection = await prisma.collection.findFirst({
-    where: { id: collectionId, userId }
+    where: { id, userId }
   });
 
   if (!collection) {
     throw createError('Collection not found', 404, 'NOT_FOUND');
   }
 
-  // Check if item exists in collection
-  const existingItem = await prisma.collectionItem.findFirst({
-    where: {
-      id: itemId,
-      collectionId
-    }
-  });
+  const [
+    totalItems,
+    brandStats,
+    yearStats,
+    concentrationStats
+  ] = await Promise.all([
+    prisma.collectionItem.count({
+      where: { collectionId: id }
+    }),
+    prisma.collectionItem.groupBy({
+      by: ['fragranceId'],
+      where: { collectionId: id },
+      _count: true
+    }).then(async (items) => {
+      const fragranceIds = items.map(item => item.fragranceId);
+      const fragrances = await prisma.fragrance.findMany({
+        where: { id: { in: fragranceIds } },
+        select: { id: true, brand: true }
+      });
 
-  if (!existingItem) {
-    throw createError('Collection item not found', 404, 'NOT_FOUND');
-  }
+      const brandCounts: Record<string, number> = {};
+      fragrances.forEach(fragrance => {
+        brandCounts[fragrance.brand] = (brandCounts[fragrance.brand] || 0) + 1;
+      });
 
-  // Remove item from collection
-  await prisma.collectionItem.delete({
-    where: { id: itemId }
-  });
+      return Object.entries(brandCounts).map(([brand, count]) => ({
+        brand,
+        count
+      }));
+    }),
+    prisma.collectionItem.groupBy({
+      by: ['fragranceId'],
+      where: { collectionId: id },
+      _count: true
+    }).then(async (items) => {
+      const fragranceIds = items.map(item => item.fragranceId);
+      const fragrances = await prisma.fragrance.findMany({
+        where: { id: { in: fragranceIds } },
+        select: { id: true, year: true }
+      });
 
-  const response: APIResponse<{ message: string }> = {
+      const yearCounts: Record<string, number> = {};
+      fragrances.forEach(fragrance => {
+        if (fragrance.year) {
+          const decade = Math.floor(fragrance.year / 10) * 10;
+          const yearRange = `${decade}s`;
+          yearCounts[yearRange] = (yearCounts[yearRange] || 0) + 1;
+        }
+      });
+
+      return Object.entries(yearCounts).map(([year, count]) => ({
+        year,
+        count
+      }));
+    }),
+    prisma.collectionItem.groupBy({
+      by: ['fragranceId'],
+      where: { collectionId: id },
+      _count: true
+    }).then(async (items) => {
+      const fragranceIds = items.map(item => item.fragranceId);
+      const fragrances = await prisma.fragrance.findMany({
+        where: { id: { in: fragranceIds } },
+        select: { id: true, concentration: true }
+      });
+
+      const concentrationCounts: Record<string, number> = {};
+      fragrances.forEach(fragrance => {
+        if (fragrance.concentration) {
+          concentrationCounts[fragrance.concentration] = (concentrationCounts[fragrance.concentration] || 0) + 1;
+        }
+      });
+
+      return Object.entries(concentrationCounts).map(([concentration, count]) => ({
+        concentration,
+        count
+      }));
+    })
+  ]);
+
+  const response: APIResponse<{
+    totalItems: number;
+    brandStats: Array<{ brand: string; count: number }>;
+    yearStats: Array<{ year: string; count: number }>;
+    concentrationStats: Array<{ concentration: string; count: number }>;
+  }> = {
     success: true,
     data: {
-      message: 'Fragrance removed from collection'
+      totalItems,
+      brandStats,
+      yearStats,
+      concentrationStats
     }
   };
 

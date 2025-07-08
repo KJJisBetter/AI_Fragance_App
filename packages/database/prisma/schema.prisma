@@ -39,13 +39,44 @@ model Fragrance {
   longevity          Int?
   sillage            Int?
   projection         Int?
+  prestigeScore      Float?              @default(0)  // Prestige score (community + brand + verification + age + notes)
+  popularityScore    Float?              @default(0)  // Sales-based popularity (market share + trends + availability)
   createdAt          DateTime            @default(now())
   updatedAt          DateTime            @updatedAt
   feedbacks          AICategorFeedback[]
   battleItems        BattleItem[]
   collections        CollectionItem[]
 
+  // Performance indexes for search operations
+  @@index([name])
+  @@index([brand])
+  @@index([communityRating(sort: Desc)])
+  @@index([prestigeScore(sort: Desc)])
+  @@index([popularityScore(sort: Desc)])
+  @@index([aiSeasons], type: Gin)
+  @@index([aiOccasions], type: Gin)
+  @@index([aiMoods], type: Gin)
+  @@index([year])
+  @@index([concentration])
+  @@index([verified])
+  @@index([brand, year])
+  @@index([createdAt])
   @@map("fragrances")
+}
+
+model BrandPrestige {
+  id           String   @id @default(cuid())
+  brand        String   @unique
+  tier         String   // luxury, high-end-designer, designer, niche, mass-market, unknown
+  priceRange   String   // under-50, 50-150, 150-300, 300-500, 500+, unknown
+  confidence   Float    // 0.1-1.0 confidence score from AI
+  reasoning    String   // Brief explanation from AI
+  researchedAt DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([tier])
+  @@index([brand])
+  @@map("brand_prestige")
 }
 
 model Collection {
@@ -123,4 +154,22 @@ enum BattleStatus {
   ACTIVE
   COMPLETED
   CANCELLED
+}
+
+enum BrandTier {
+  LUXURY
+  HIGH_END_DESIGNER
+  DESIGNER
+  NICHE
+  MASS_MARKET
+  UNKNOWN
+}
+
+enum PriceRange {
+  UNDER_50
+  RANGE_50_150
+  RANGE_150_300
+  RANGE_300_500
+  OVER_500
+  UNKNOWN
 }

@@ -1,38 +1,22 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import { fragrancesApi } from "../lib/api";
 import { Fragrance, FragranceSearchFilters } from "@fragrance-battle/types";
-
-const cardStyle = {
-  background: "white",
-  borderRadius: "12px",
-  padding: "20px",
-  boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
-  transition: "all 0.3s ease",
-  border: "1px solid rgba(0,0,0,0.05)",
-  cursor: "pointer"
-};
-
-const cardHoverStyle = {
-  transform: "translateY(-2px)",
-  boxShadow: "0 8px 24px rgba(0,0,0,0.12)"
-};
+import { VirtualizedList } from "../components/VirtualizedList";
+import { SmartLoading, FilterSkeleton, PageHeaderSkeleton } from "../components/LoadingStates";
+import { FragranceInfiniteScroll, BackToTop } from "../components/InfiniteScroll";
+import { useInfiniteData, useInfiniteScroll } from "../hooks/useInfiniteScroll";
+import { searchAnalytics } from "../lib/searchAnalytics";
+import "./FragrancesPage.css";
 
 export const FragrancesPage = () => {
   const [searchParams] = useSearchParams();
-  const [fragrances, setFragrances] = useState<Fragrance[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [searchLoading, setSearchLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState(searchQuery);
   const [filters, setFilters] = useState<FragranceSearchFilters>({});
   const [brandSearch, setBrandSearch] = useState('');
-  const [sortBy, setSortBy] = useState<'name' | 'brand' | 'year' | 'rating' | 'createdAt'>('rating');
+  const [sortBy, setSortBy] = useState<'name' | 'brand' | 'year' | 'rating' | 'createdAt' | 'popularity' | 'prestige'>('popularity');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [totalFragrances, setTotalFragrances] = useState(0);
 
   // Dynamic filter options from database
   const [filterOptions, setFilterOptions] = useState<{
@@ -54,18 +38,199 @@ export const FragrancesPage = () => {
   const [brandSuggestions, setBrandSuggestions] = useState<Array<{ name: string; originalName: string; count: number }>>([]);
   const [showBrandDropdown, setShowBrandDropdown] = useState(false);
 
+  // Infinite scroll data fetching function
+  const fetchData = useCallback(async (page: number) => {
+    console.log('🔍 Fetching fragrances with params:', {
+      searchQuery: debouncedSearchQuery,
+      filters,
+      page,
+      sortBy,
+      sortOrder
+    });
+
+    let result;
+    const limit = 20;
+
+    try {
+      // Use search if there's a query, otherwise get all with filters
+      if (debouncedSearchQuery.trim()) {
+        console.log('🔍 Using search API');
+        result = await fragrancesApi.search({
+          query: debouncedSearchQuery,
+          filters,
+          page,
+          limit,
+          sortBy,
+          sortOrder
+        });
+      } else {
+        console.log('🔍 Using getAll API');
+        result = await fragrancesApi.getAll({
+          page,
+          limit,
+          sortBy,
+          sortOrder,
+          ...filters
+        });
+      }
+
+      console.log('✅ API Response:', result);
+
+      // Handle the nested response format from the backend
+      const responseData = (result as any).data || (result as any);
+      const fragrances = responseData.fragrances || [];
+      const totalCount = responseData.pagination?.totalCount || responseData.total || 0;
+      const totalPages = responseData.pagination?.totalPages || responseData.totalPages || 1;
+      const hasMore = page < totalPages;
+
+      // Track search analytics for first page only
+      if (page === 1 && debouncedSearchQuery.trim()) {
+        searchAnalytics.trackSearch(
+          debouncedSearchQuery,
+          fragrances.length,
+          'page'
+        );
+      }
+
+      return {
+        items: fragrances,
+        hasMore,
+        totalCount
+      };
+    } catch (error) {
+      console.error('❌ Error fetching fragrances:', error);
+      throw error;
+    }
+  }, [debouncedSearchQuery, filters, sortBy, sortOrder]);
+
+  // Use infinite scroll hook
+  const {
+    data: fragrances,
+    hasMore,
+    isLoading,
+    isInitialLoading,
+    error,
+    totalCount: totalFragrances,
+    loadMore,
+    refresh
+  } = useInfiniteData<Fragrance>({
+    fetchData,
+    dependencies: [debouncedSearchQuery, filters, sortBy, sortOrder],
+    initialPage: 1
+  });
+
+  // Intersection observer for infinite scroll trigger
+  const { loadingRef } = useInfiniteScroll({
+    hasMore,
+    isLoading,
+    onLoadMore: loadMore,
+    threshold: 1.0,
+    rootMargin: '100px'
+  });
+
+  // Virtual scrolling configuration
+  const VIRTUAL_SCROLL_THRESHOLD = 50; // Use virtual scrolling for more than 50 items
+  const ITEM_HEIGHT = 280; // Height of each fragrance card in pixels
+  const CONTAINER_HEIGHT = 600; // Height of the virtual scroll container
+
+  // Should use virtual scrolling?
+  const shouldUseVirtualScrolling = useMemo(() => {
+    return fragrances.length > VIRTUAL_SCROLL_THRESHOLD;
+  }, [fragrances.length]);
+
+  // Render function for virtual list items
+  const renderFragranceItem = useMemo(() =>
+    (fragrance: Fragrance, index: number) => (
+      <Link
+        key={fragrance.id}
+        to={`/fragrances/${fragrance.id}`}
+        className="fragrance-card"
+        style={{ margin: '8px' }}
+      >
+        <div className="fragrance-card-content">
+          <div className="fragrance-card-header">
+            <h3 className="fragrance-card-name">{fragrance.name}</h3>
+            <p className="fragrance-card-brand">{fragrance.brand}</p>
+          </div>
+
+          <div className="fragrance-card-details">
+            {fragrance.year && (
+              <div className="fragrance-card-year">
+                📅 {fragrance.year}
+              </div>
+            )}
+            {fragrance.concentration && (
+              <div className="fragrance-card-concentration">
+                💧 {fragrance.concentration}
+              </div>
+            )}
+          </div>
+
+          <div className="fragrance-card-notes">
+            <div className="notes-section">
+              <span className="notes-label">Top:</span>
+              <span className="notes-text">
+                {formatNotes(fragrance.topNotes || [])}
+              </span>
+            </div>
+            <div className="notes-section">
+              <span className="notes-label">Heart:</span>
+              <span className="notes-text">
+                {formatNotes(fragrance.heartNotes || [])}
+              </span>
+            </div>
+            <div className="notes-section">
+              <span className="notes-label">Base:</span>
+              <span className="notes-text">
+                {formatNotes(fragrance.baseNotes || [])}
+              </span>
+            </div>
+          </div>
+
+          <div className="fragrance-card-footer">
+            <div className="fragrance-card-rating">
+              <span
+                className="rating-value"
+                style={{ color: getRatingColor(fragrance.communityRating) }}
+              >
+                ⭐ {fragrance.communityRating?.toFixed(1) || 'N/A'}
+              </span>
+              <span className="rating-label">Community Rating</span>
+            </div>
+
+            {fragrance.verified && (
+              <div className="verified-badge">
+                ✅ Verified
+              </div>
+            )}
+          </div>
+        </div>
+      </Link>
+    ), []);
+
   // Fetch filter options
   const fetchFilterOptions = async () => {
     try {
       setFiltersLoading(true);
-      const options = await fragrancesApi.getFilters() as {
-        brands: string[];
+      const result = await fragrancesApi.getFilters() as {
+        brands: Array<{ name: string; count: number }>;
         seasons: string[];
         occasions: string[];
         moods: string[];
-        concentrations: string[];
-        yearRange: { min: number; max: number };
+        concentrations: Array<{ name: string; count: number }>;
+        yearRange?: { min: number; max: number };
       };
+
+      // Convert the response to the expected format
+      const options = {
+        brands: result.brands.map(b => b.name),
+        seasons: result.seasons,
+        occasions: result.occasions,
+        moods: result.moods,
+        concentrations: result.concentrations.map(c => c.name),
+        yearRange: result.yearRange || { min: 1900, max: new Date().getFullYear() }
+      };
+
       setFilterOptions(options);
     } catch (err) {
       console.error('❌ Error fetching filter options:', err);
@@ -74,70 +239,16 @@ export const FragrancesPage = () => {
     }
   };
 
-  // Debounce search query
+  // Debounce search query - OPTIMIZED to 300ms
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       setDebouncedSearchQuery(searchQuery);
-    }, 500); // 500ms debounce for search
+    }, 300); // 300ms debounce for search - faster response
 
     return () => clearTimeout(timeoutId);
   }, [searchQuery]);
 
-  // Fetch fragrances
-  const fetchFragrances = async () => {
-    try {
-      // Show search loading for quick searches, regular loading for initial/filter changes
-      if (debouncedSearchQuery.trim() && fragrances.length > 0) {
-        setSearchLoading(true);
-      } else {
-        setLoading(true);
-      }
-      setError(null);
 
-      console.log('🔍 Fetching fragrances with params:', {
-        searchQuery: debouncedSearchQuery,
-        filters,
-        page: currentPage,
-        sortBy,
-        sortOrder
-      });
-
-      let result;
-
-      // Use search if there's a query, otherwise get all with filters
-      if (debouncedSearchQuery.trim()) {
-        console.log('🔍 Using search API');
-        result = await fragrancesApi.search({
-          query: debouncedSearchQuery,
-          filters,
-          page: currentPage,
-          limit: 20,
-          sortBy,
-          sortOrder
-        });
-      } else {
-        console.log('🔍 Using getAll API');
-        result = await fragrancesApi.getAll({
-          page: currentPage,
-          limit: 20,
-          sortBy,
-          sortOrder,
-          ...filters
-        });
-      }
-
-      console.log('✅ API Response:', result);
-      setFragrances((result as any).fragrances);
-      setTotalPages((result as any).totalPages);
-      setTotalFragrances((result as any).total);
-    } catch (err) {
-      console.error('❌ Error fetching fragrances:', err);
-      setError(`Failed to load fragrances: ${err instanceof Error ? err.message : 'Unknown error'}`);
-    } finally {
-      setLoading(false);
-      setSearchLoading(false);
-    }
-  };
 
   // Effect to fetch filter options on mount
   useEffect(() => {
@@ -153,8 +264,9 @@ export const FragrancesPage = () => {
     }
 
     try {
-      const result = await fragrancesApi.searchBrands(query, 10) as { brands: Array<{ name: string; originalName: string; count: number }> };
-      setBrandSuggestions(result.brands);
+      const result = await fragrancesApi.searchBrands(query, 10);
+      const responseData = (result as any).data || (result as any);
+      setBrandSuggestions(responseData.brands || []);
       setShowBrandDropdown(true);
     } catch (err) {
       console.error('Error searching brands:', err);
@@ -189,25 +301,18 @@ export const FragrancesPage = () => {
     setFilters(updatedFilters);
   }, [brandSearch, selectedBrandOriginal]);
 
-  // Effect to fetch fragrances when dependencies change
-  useEffect(() => {
-    fetchFragrances();
-  }, [debouncedSearchQuery, filters, sortBy, sortOrder, currentPage]);
-
   // Effect to handle URL search params
   useEffect(() => {
     const urlSearch = searchParams.get('search');
     if (urlSearch && urlSearch !== searchQuery) {
       setSearchQuery(urlSearch);
-      setCurrentPage(1);
     }
   }, [searchParams]);
 
   // Handle search
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    setCurrentPage(1);
-    // Don't call fetchFragrances here - let the debounced effect handle it
+    // The debounced effect will handle the actual search
   };
 
   // Handle filter changes
@@ -216,7 +321,6 @@ export const FragrancesPage = () => {
       ...prev,
       [filterType]: value === '' ? undefined : value
     }));
-    setCurrentPage(1);
   };
 
   // Clear all filters
@@ -225,7 +329,6 @@ export const FragrancesPage = () => {
     setSearchQuery('');
     setBrandSearch('');
     setSelectedBrandOriginal('');
-    setCurrentPage(1);
   };
 
   // Format notes for display
@@ -244,103 +347,97 @@ export const FragrancesPage = () => {
   };
 
   return (
-    <div style={{ backgroundColor: "#f8fafc", minHeight: "100vh" }}>
+    <div className="fragrances-page">
       {/* Header Section */}
-      <div style={{
-        backgroundColor: "white",
-        padding: "32px",
-        borderBottom: "1px solid #e2e8f0",
-        marginBottom: "32px"
-      }}>
-        <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
-          <div style={{ textAlign: "center", marginBottom: "32px" }}>
-            <h1 style={{
-              fontSize: "2.5rem",
-              fontWeight: "bold",
-              color: "#1e293b",
-              marginBottom: "16px"
-            }}>
+      <div className="fragrances-header">
+        <div className="fragrances-header-container">
+          <div className="fragrances-header-title">
+            <h1>
               Discover Fragrances
             </h1>
-            <p style={{
-              fontSize: "1.1rem",
-              color: "#64748b",
-              maxWidth: "600px",
-              margin: "0 auto"
-            }}>
+            <p>
               Explore our collection of {totalFragrances.toLocaleString()} fragrances from the world's finest perfumers
             </p>
           </div>
 
           {/* Search Bar */}
-          <form onSubmit={handleSearch} style={{ marginBottom: "24px" }}>
-            <div style={{
-              display: "flex",
-              gap: "12px",
-              maxWidth: "600px",
-              margin: "0 auto",
-              position: "relative"
-            }}>
-              <div style={{ flex: 1, position: "relative" }}>
+          <form onSubmit={handleSearch} className="search-form">
+            <div className="search-container">
+              <div className="search-input-container">
                 <input
                   type="text"
                   placeholder="Search fragrances, brands, or notes..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  style={{
-                    width: "100%",
-                    padding: "12px 16px",
-                    fontSize: "16px",
-                    border: "2px solid #e2e8f0",
-                    borderRadius: "8px",
-                    outline: "none",
-                    transition: "border-color 0.2s"
-                  }}
-                  onFocus={(e) => (e.target as HTMLInputElement).style.borderColor = "#1e293b"}
-                  onBlur={(e) => (e.target as HTMLInputElement).style.borderColor = "#e2e8f0"}
+                  className="search-input"
                 />
-                {searchLoading && (
-                  <div style={{
-                    position: "absolute",
-                    right: "16px",
-                    top: "50%",
-                    transform: "translateY(-50%)",
-                    width: "16px",
-                    height: "16px",
-                    border: "2px solid #e2e8f0",
-                    borderTop: "2px solid #1e293b",
-                    borderRadius: "50%",
-                    animation: "spin 1s linear infinite"
-                  }}></div>
+                {isLoading && (
+                  <div className="search-loading"></div>
                 )}
               </div>
               <button
                 type="submit"
-                style={{
-                  padding: "12px 24px",
-                  backgroundColor: "#1e293b",
-                  color: "white",
-                  border: "none",
-                  borderRadius: "8px",
-                  fontWeight: "600",
-                  cursor: "pointer",
-                  transition: "all 0.2s"
-                }}
-                onMouseEnter={(e) => (e.target as HTMLButtonElement).style.backgroundColor = "#0f172a"}
-                onMouseLeave={(e) => (e.target as HTMLButtonElement).style.backgroundColor = "#1e293b"}
+                className="search-button"
               >
                 Search
               </button>
             </div>
           </form>
 
-          {/* Filters */}
+          {/* Popular Filter Chips */}
           <div style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-            gap: "16px",
-            marginBottom: "24px"
+            display: "flex",
+            gap: "8px",
+            flexWrap: "wrap",
+            marginBottom: "16px"
           }}>
+
+
+            <button
+              onClick={() => {
+                setSortBy('rating');
+                setSortOrder('desc');
+              }}
+              style={{
+                padding: "6px 12px",
+                backgroundColor: sortBy === 'rating' ? "#f59e0b" : "transparent",
+                color: sortBy === 'rating' ? "white" : "#f59e0b",
+                border: "1px solid #f59e0b",
+                borderRadius: "20px",
+                cursor: "pointer",
+                fontSize: "12px",
+                fontWeight: "600",
+                transition: "all 0.2s"
+              }}
+              onMouseEnter={(e) => {
+                if (sortBy !== 'rating') {
+                  (e.target as HTMLElement).style.backgroundColor = "#f59e0b";
+                  (e.target as HTMLElement).style.color = "white";
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (sortBy !== 'rating') {
+                  (e.target as HTMLElement).style.backgroundColor = "transparent";
+                  (e.target as HTMLElement).style.color = "#f59e0b";
+                }
+              }}
+            >
+              ⭐ Top Rated
+            </button>
+
+
+          </div>
+
+          {/* Filters */}
+          {filtersLoading ? (
+            <FilterSkeleton />
+          ) : (
+            <div style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+              gap: "16px",
+              marginBottom: "24px"
+            }}>
             <div style={{ position: "relative" }}>
               <div style={{ position: "relative" }}>
                 <input
@@ -519,6 +616,7 @@ export const FragrancesPage = () => {
               </select>
             )}
           </div>
+          )}
 
           {/* Sort and Actions */}
           <div style={{
@@ -539,11 +637,13 @@ export const FragrancesPage = () => {
                   fontSize: "14px"
                 }}
               >
-                <option value="name">Sort by Name</option>
-                <option value="brand">Sort by Brand</option>
-                <option value="year">Sort by Year</option>
-                <option value="rating">Sort by Rating</option>
-                <option value="createdAt">Sort by Date Added</option>
+                                      <option value="popularity">🔥 Most Popular (Sales Volume)</option>
+                      <option value="prestige">⭐ Highest Prestige (Quality)</option>
+                      <option value="rating">Sort by Fragantica Rating</option>
+                      <option value="name">Sort by Name</option>
+                      <option value="brand">Sort by Brand</option>
+                      <option value="year">Sort by Year</option>
+                      <option value="createdAt">Sort by Date Added</option>
               </select>
 
               <button
@@ -580,393 +680,300 @@ export const FragrancesPage = () => {
       </div>
 
       {/* Content */}
-      <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "0 32px" }}>
-        {loading && (
-          <div style={{
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-            alignItems: "center",
-            minHeight: "400px"
-          }}>
-            <div style={{
-              width: "40px",
-              height: "40px",
-              border: "4px solid #e2e8f0",
-              borderTop: "4px solid #1e293b",
-              borderRadius: "50%",
-              animation: "spin 1s linear infinite",
-              marginBottom: "16px"
-            }}></div>
-            <p style={{ color: "#64748b", fontSize: "14px" }}>Loading fragrances...</p>
-          </div>
+      <div className="content-container">
+        {isInitialLoading && (
+          <SmartLoading
+            type="page"
+            count={20}
+            message="Loading fragrances..."
+          />
         )}
 
         {error && (
-          <div style={{
-            backgroundColor: "#fef2f2",
-            border: "1px solid #fca5a5",
-            borderRadius: "8px",
-            padding: "16px",
-            marginBottom: "32px",
-            textAlign: "center",
-            color: "#dc2626"
-          }}>
+          <div className="error-container">
             {error}
+            <button onClick={refresh} style={{ marginLeft: "8px", padding: "4px 8px" }}>
+              Retry
+            </button>
           </div>
         )}
 
-        {!loading && !error && (
+        {!isInitialLoading && !error && (
           <>
             {/* Results Count */}
-            <div style={{ marginBottom: "24px" }}>
-              <p style={{ color: "#64748b", fontSize: "14px" }}>
+            <div className="results-count">
+              <p>
                 Showing {fragrances.length} of {totalFragrances.toLocaleString()} fragrances
                 {searchQuery && ` for "${searchQuery}"`}
-                {searchLoading && (
+                {isLoading && (
                   <span style={{ marginLeft: "8px" }}>
-                    <span style={{
-                      display: "inline-block",
-                      width: "12px",
-                      height: "12px",
-                      border: "2px solid #e2e8f0",
-                      borderTop: "2px solid #64748b",
-                      borderRadius: "50%",
-                      animation: "spin 1s linear infinite"
-                    }}></span>
+                    <span className="results-loading"></span>
                   </span>
                 )}
               </p>
             </div>
 
             {/* Fragrances Grid */}
-            <div style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
-              gap: "24px",
-              marginBottom: "48px"
-            }}>
-              {fragrances.map((fragrance) => (
-                <Link
-                  key={fragrance.id}
-                  to={`/fragrances/${fragrance.id}`}
-                  style={{
-                    textDecoration: "none",
-                    color: "inherit"
-                  }}
-                >
-                  <div
-                    style={cardStyle}
-                    onMouseEnter={(e) => {
-                      Object.assign(e.currentTarget.style, cardHoverStyle);
+            {shouldUseVirtualScrolling ? (
+              <div className="virtualized-fragrances-container">
+                <div style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  marginBottom: "16px",
+                  padding: "8px 16px",
+                  backgroundColor: "#f1f5f9",
+                  borderRadius: "8px",
+                  border: "1px solid #e2e8f0"
+                }}>
+                  <span style={{
+                    fontSize: "14px",
+                    fontWeight: "600",
+                    color: "#1e293b",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px"
+                  }}>
+                    ⚡ Virtual Scrolling Active
+                    <span style={{
+                      fontSize: "12px",
+                      color: "#64748b",
+                      fontWeight: "normal"
+                    }}>
+                      ({fragrances.length} items)
+                    </span>
+                  </span>
+                  <span style={{
+                    fontSize: "12px",
+                    color: "#64748b"
+                  }}>
+                    Optimized for large datasets
+                  </span>
+                </div>
+                <VirtualizedList
+                  items={fragrances}
+                  itemHeight={ITEM_HEIGHT}
+                  containerHeight={CONTAINER_HEIGHT}
+                  renderItem={renderFragranceItem}
+                  className="border border-gray-200 rounded-lg"
+                />
+              </div>
+            ) : (
+              <div className="fragrances-grid">
+                {fragrances.map((fragrance) => (
+                  <Link
+                    key={fragrance.id}
+                    to={`/fragrances/${fragrance.id}`}
+                    style={{
+                      textDecoration: "none",
+                      color: "inherit"
                     }}
-                    onMouseLeave={(e) => {
-                      Object.assign(e.currentTarget.style, cardStyle);
+                    onClick={() => {
+                      // Track search result click for analytics
+                      if (debouncedSearchQuery.trim()) {
+                        searchAnalytics.trackSearchClick(debouncedSearchQuery);
+                      }
                     }}
                   >
-                    {/* Fragrance Header */}
-                    <div style={{ marginBottom: "16px" }}>
-                      <div style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "flex-start",
-                        marginBottom: "8px"
-                      }}>
-                        <h3 style={{
-                          fontSize: "1.25rem",
-                          fontWeight: "bold",
-                          color: "#1e293b",
-                          margin: 0,
-                          lineHeight: 1.2
-                        }}>
-                          {fragrance.name}
-                        </h3>
-                        {fragrance.verified && (
-                          <span style={{
-                            backgroundColor: "#22c55e",
-                            color: "white",
-                            fontSize: "10px",
-                            padding: "2px 6px",
-                            borderRadius: "4px",
-                            fontWeight: "600"
-                          }}>
-                            VERIFIED
-                          </span>
-                        )}
+                    <div className="fragrance-card">
+                      {/* Fragrance Header */}
+                      <div className="fragrance-header">
+                        <div className="fragrance-title-row">
+                          <h3 className="fragrance-title">
+                            {fragrance.name}
+                          </h3>
+                          <div style={{ display: "flex", gap: "4px", alignItems: "center" }}>
+                            {fragrance.year && (
+                              <span style={{
+                                backgroundColor: "#64748b",
+                                color: "white",
+                                fontSize: "10px",
+                                padding: "2px 6px",
+                                borderRadius: "4px",
+                                fontWeight: "600"
+                              }}>
+                                {fragrance.year}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        <p className="fragrance-brand">
+                          {fragrance.brand}
+                        </p>
                       </div>
-                      <p style={{
-                        fontSize: "1rem",
-                        color: "#64748b",
-                        margin: 0,
-                        fontWeight: "500"
-                      }}>
-                        {fragrance.brand}
-                      </p>
-                    </div>
 
-                    {/* Details */}
-                    <div style={{ marginBottom: "16px" }}>
-                      <div style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        marginBottom: "8px"
-                      }}>
-                        {fragrance.year && (
-                          <span style={{
-                            fontSize: "14px",
-                            color: "#64748b",
-                            backgroundColor: "#f1f5f9",
-                            padding: "4px 8px",
-                            borderRadius: "4px"
-                          }}>
-                            {fragrance.year}
-                          </span>
-                        )}
-                        {fragrance.concentration && (
-                          <span style={{
-                            fontSize: "14px",
-                            color: "#1e293b",
-                            backgroundColor: "#e2e8f0",
-                            padding: "4px 8px",
-                            borderRadius: "4px",
-                            fontWeight: "500"
-                          }}>
-                            {fragrance.concentration}
-                          </span>
+                      {/* Details */}
+                      <div className="fragrance-details">
+                        <div className="fragrance-meta">
+                          {fragrance.year && (
+                            <span className="year-badge">
+                              {fragrance.year}
+                            </span>
+                          )}
+                          {fragrance.concentration && (
+                            <span className="concentration-badge">
+                              {fragrance.concentration}
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Rating */}
+                        {fragrance.communityRating && (
+                          <div className="rating-container" style={{ marginBottom: "8px" }}>
+                            <span className="rating-value" style={{
+                              color: getRatingColor(fragrance.communityRating)
+                            }}>
+                              ★ {fragrance.communityRating.toFixed(1)}
+                            </span>
+                            <span style={{
+                              fontSize: "12px",
+                              color: "#94a3b8",
+                              marginLeft: "8px"
+                            }}>
+                              Fragantica Rating
+                            </span>
+                          </div>
                         )}
                       </div>
 
-                      {/* Rating */}
-                      {fragrance.communityRating && (
-                        <div style={{
-                          display: "flex",
-                          alignItems: "center",
-                          marginBottom: "8px"
-                        }}>
-                          <span style={{
-                            fontSize: "14px",
-                            fontWeight: "600",
-                            color: getRatingColor(fragrance.communityRating)
-                          }}>
-                            ★ {fragrance.communityRating.toFixed(1)}
-                          </span>
-                          <span style={{
-                            fontSize: "12px",
-                            color: "#94a3b8",
-                            marginLeft: "8px"
-                          }}>
-                            Community Rating
-                          </span>
+                      {/* Notes */}
+                      <div className="fragrance-notes">
+                        <div className="notes-section">
+                          <h4 className="notes-title">
+                            Top Notes
+                          </h4>
+                          <p className="notes-content">
+                            {formatNotes(fragrance.topNotes)}
+                          </p>
+                        </div>
+                        <div className="notes-section">
+                          <h4 className="notes-title">
+                            Heart Notes
+                          </h4>
+                          <p className="notes-content">
+                            {formatNotes(fragrance.middleNotes)}
+                          </p>
+                        </div>
+                        <div className="notes-section">
+                          <h4 className="notes-title">
+                            Base Notes
+                          </h4>
+                          <p className="notes-content">
+                            {formatNotes(fragrance.baseNotes)}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* AI Categories */}
+                      {(fragrance.aiSeasons?.length > 0 || fragrance.aiOccasions?.length > 0 || fragrance.aiMoods?.length > 0) && (
+                        <div>
+                          <div className="ai-categories">
+                            {(fragrance.aiSeasons || []).slice(0, 2).map((season) => (
+                              <span
+                                key={season}
+                                className="category-badge category-season"
+                              >
+                                {season}
+                              </span>
+                            ))}
+                            {(fragrance.aiOccasions || []).slice(0, 2).map((occasion) => (
+                              <span
+                                key={occasion}
+                                className="category-badge category-occasion"
+                              >
+                                {occasion}
+                              </span>
+                            ))}
+                            {(fragrance.aiMoods || []).slice(0, 1).map((mood) => (
+                              <span
+                                key={mood}
+                                className="category-badge category-mood"
+                              >
+                                {mood}
+                              </span>
+                            ))}
+                          </div>
                         </div>
                       )}
                     </div>
+                  </Link>
+                ))}
+              </div>
+            )}
 
-                    {/* Notes */}
-                    <div style={{ marginBottom: "16px" }}>
-                      <div style={{ marginBottom: "8px" }}>
-                        <h4 style={{
-                          fontSize: "12px",
-                          fontWeight: "600",
-                          color: "#64748b",
-                          margin: "0 0 4px 0",
-                          textTransform: "uppercase"
-                        }}>
-                          Top Notes
-                        </h4>
-                        <p style={{
-                          fontSize: "14px",
-                          color: "#1e293b",
-                          margin: 0,
-                          lineHeight: 1.4
-                        }}>
-                          {formatNotes(fragrance.topNotes)}
-                        </p>
-                      </div>
-                      <div style={{ marginBottom: "8px" }}>
-                        <h4 style={{
-                          fontSize: "12px",
-                          fontWeight: "600",
-                          color: "#64748b",
-                          margin: "0 0 4px 0",
-                          textTransform: "uppercase"
-                        }}>
-                          Heart Notes
-                        </h4>
-                        <p style={{
-                          fontSize: "14px",
-                          color: "#1e293b",
-                          margin: 0,
-                          lineHeight: 1.4
-                        }}>
-                          {formatNotes(fragrance.middleNotes)}
-                        </p>
-                      </div>
-                      <div>
-                        <h4 style={{
-                          fontSize: "12px",
-                          fontWeight: "600",
-                          color: "#64748b",
-                          margin: "0 0 4px 0",
-                          textTransform: "uppercase"
-                        }}>
-                          Base Notes
-                        </h4>
-                        <p style={{
-                          fontSize: "14px",
-                          color: "#1e293b",
-                          margin: 0,
-                          lineHeight: 1.4
-                        }}>
-                          {formatNotes(fragrance.baseNotes)}
-                        </p>
-                      </div>
-                    </div>
+            {/* Infinite scroll loading more */}
+            {hasMore && (
+              <div
+                ref={loadingRef}
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  padding: "32px",
+                  gap: "8px"
+                }}
+              >
+                {isLoading && (
+                  <>
+                    <div className="results-loading" style={{
+                      width: "16px",
+                      height: "16px",
+                      border: "2px solid #e2e8f0",
+                      borderTop: "2px solid #3b82f6",
+                      borderRadius: "50%",
+                      animation: "spin 1s linear infinite"
+                    }}></div>
+                    <span style={{ color: "#64748b" }}>Loading more fragrances...</span>
+                  </>
+                )}
+              </div>
+            )}
 
-                    {/* AI Categories */}
-                    {(fragrance.aiSeasons?.length > 0 || fragrance.aiOccasions?.length > 0 || fragrance.aiMoods?.length > 0) && (
-                      <div>
-                        <div style={{
-                          display: "flex",
-                          flexWrap: "wrap",
-                          gap: "4px"
-                        }}>
-                          {(fragrance.aiSeasons || []).slice(0, 2).map((season) => (
-                            <span
-                              key={season}
-                              style={{
-                                fontSize: "10px",
-                                backgroundColor: "#dbeafe",
-                                color: "#1e40af",
-                                padding: "2px 6px",
-                                borderRadius: "4px",
-                                fontWeight: "500"
-                              }}
-                            >
-                              {season}
-                            </span>
-                          ))}
-                          {(fragrance.aiOccasions || []).slice(0, 2).map((occasion) => (
-                            <span
-                              key={occasion}
-                              style={{
-                                fontSize: "10px",
-                                backgroundColor: "#fef3c7",
-                                color: "#92400e",
-                                padding: "2px 6px",
-                                borderRadius: "4px",
-                                fontWeight: "500"
-                              }}
-                            >
-                              {occasion}
-                            </span>
-                          ))}
-                          {(fragrance.aiMoods || []).slice(0, 1).map((mood) => (
-                            <span
-                              key={mood}
-                              style={{
-                                fontSize: "10px",
-                                backgroundColor: "#dcfce7",
-                                color: "#166534",
-                                padding: "2px 6px",
-                                borderRadius: "4px",
-                                fontWeight: "500"
-                              }}
-                            >
-                              {mood}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </Link>
-              ))}
-            </div>
-
-            {/* Pagination */}
-            {totalPages > 1 && (
+            {/* End of results */}
+            {!hasMore && fragrances.length > 0 && (
               <div style={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                gap: "8px",
-                marginBottom: "48px"
+                textAlign: "center",
+                padding: "32px",
+                borderTop: "1px solid #e2e8f0",
+                marginTop: "32px"
               }}>
+                <p style={{ color: "#64748b", marginBottom: "16px" }}>
+                  🎉 You've viewed all {totalFragrances.toLocaleString()} fragrances!
+                </p>
                 <button
-                  onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                  disabled={currentPage === 1}
+                  onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
                   style={{
                     padding: "8px 16px",
-                    backgroundColor: currentPage === 1 ? "#f1f5f9" : "#1e293b",
-                    color: currentPage === 1 ? "#94a3b8" : "white",
-                    border: "none",
+                    backgroundColor: "#f1f5f9",
+                    border: "1px solid #e2e8f0",
                     borderRadius: "6px",
-                    cursor: currentPage === 1 ? "not-allowed" : "pointer",
+                    cursor: "pointer",
                     fontSize: "14px",
-                    fontWeight: "500"
+                    color: "#64748b",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    margin: "0 auto"
                   }}
                 >
-                  Previous
-                </button>
-
-                <span style={{
-                  padding: "8px 16px",
-                  fontSize: "14px",
-                  color: "#64748b"
-                }}>
-                  Page {currentPage} of {totalPages}
-                </span>
-
-                <button
-                  onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-                  disabled={currentPage === totalPages}
-                  style={{
-                    padding: "8px 16px",
-                    backgroundColor: currentPage === totalPages ? "#f1f5f9" : "#1e293b",
-                    color: currentPage === totalPages ? "#94a3b8" : "white",
-                    border: "none",
-                    borderRadius: "6px",
-                    cursor: currentPage === totalPages ? "not-allowed" : "pointer",
-                    fontSize: "14px",
-                    fontWeight: "500"
-                  }}
-                >
-                  Next
+                  ↑ Back to Top
                 </button>
               </div>
             )}
 
             {/* No Results */}
-            {fragrances.length === 0 && (
-              <div style={{
-                textAlign: "center",
-                padding: "48px",
-                color: "#64748b"
-              }}>
-                <div style={{ fontSize: "4rem", marginBottom: "16px" }}>🔍</div>
-                <h3 style={{
-                  fontSize: "1.5rem",
-                  fontWeight: "600",
-                  marginBottom: "8px"
-                }}>
+            {fragrances.length === 0 && !isInitialLoading && (
+              <div className="no-results">
+                <div className="no-results-icon">🔍</div>
+                <h3 className="no-results-title">
                   No fragrances found
                 </h3>
-                <p style={{ fontSize: "1rem", marginBottom: "24px" }}>
+                <p className="no-results-text">
                   Try adjusting your search terms or filters
                 </p>
                 <button
                   onClick={clearFilters}
-                  style={{
-                    padding: "12px 24px",
-                    backgroundColor: "#1e293b",
-                    color: "white",
-                    border: "none",
-                    borderRadius: "8px",
-                    cursor: "pointer",
-                    fontSize: "14px",
-                    fontWeight: "600"
-                  }}
+                  className="no-results-button"
                 >
                   Clear All Filters
                 </button>
@@ -975,6 +982,9 @@ export const FragrancesPage = () => {
           </>
         )}
       </div>
+
+      {/* Back to top button */}
+      <BackToTop showThreshold={400} />
 
       {/* Add spin animation */}
       <style dangerouslySetInnerHTML={{

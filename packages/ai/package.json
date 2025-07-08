@@ -8,16 +8,30 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
-    "clean": "rimraf dist"
+    "clean": "rimraf dist",
+    "test": "npm run build && node dist/test-ai.js",
+    "test-popularity": "npm run build && node dist/test-popularity.js",
+    "brand-research": "npm run build && node dist/brand-research-script.js",
+    "brand-research-dry-run": "npm run build && node dist/brand-research-script.js --dry-run",
+    "brand-research-test": "npm run build && node dist/brand-research-script.js --max-brands 10",
+    "update-popularity": "npm run build && node dist/update-popularity-scores.js",
+    "update-popularity-dry-run": "npm run build && node dist/update-popularity-scores.js --dry-run",
+    "update-popularity-test": "npm run build && node dist/update-popularity-scores.js --max-fragrances 100",
+    "sales-research": "npm run build && node dist/sales-research-script.js",
+    "sales-research-test": "npm run build && node dist/sales-research-script.js",
+    "targeted-sales-research": "ts-node src/targeted-sales-research.ts",
+    "top-brands-research": "npm run build && node dist/top-brands-research.js"
   },
   "dependencies": {
-    "openai": "^4.28.4",
-    "@fragrance-battle/types": "*"
+    "@fragrance-battle/types": "*",
+    "@fragrance-battle/database": "*",
+    "dotenv": "^16.6.1",
+    "openai": "^4.28.4"
   },
   "devDependencies": {
     "@types/node": "^20.11.24",
-    "typescript": "^5.4.2",
-    "rimraf": "^5.0.5"
+    "rimraf": "^5.0.5",
+    "typescript": "^5.4.2"
   },
   "exports": {
     ".": {

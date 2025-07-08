@@ -1,0 +1,506 @@
+/* FragrancesPage.css - Optimized styles to prevent re-renders */
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.fragrances-page {
+  background-color: #f8fafc;
+  min-height: 100vh;
+}
+
+.fragrances-header {
+  background-color: white;
+  padding: 32px;
+  border-bottom: 1px solid #e2e8f0;
+  margin-bottom: 32px;
+}
+
+.fragrances-header-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.fragrances-header-title {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.fragrances-header-title h1 {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #1e293b;
+  margin-bottom: 16px;
+}
+
+.fragrances-header-title p {
+  font-size: 1.1rem;
+  color: #64748b;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.search-form {
+  margin-bottom: 24px;
+}
+
+.search-container {
+  display: flex;
+  gap: 12px;
+  max-width: 600px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.search-input-container {
+  flex: 1;
+  position: relative;
+}
+
+.search-input {
+  width: 100%;
+  padding: 12px 16px;
+  font-size: 16px;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.search-input:focus {
+  border-color: #1e293b;
+}
+
+.search-loading {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  border: 2px solid #e2e8f0;
+  border-top: 2px solid #1e293b;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.search-button {
+  padding: 12px 24px;
+  background-color: #1e293b;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.search-button:hover {
+  background-color: #0f172a;
+}
+
+.filters-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.brand-search-container {
+  position: relative;
+}
+
+.brand-search-input {
+  padding: 8px 32px 8px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 14px;
+  min-width: 150px;
+  width: 100%;
+}
+
+.brand-clear-button {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  font-size: 16px;
+  color: #64748b;
+  cursor: pointer;
+  padding: 0;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.brand-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background-color: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  z-index: 1000;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.brand-dropdown-item {
+  padding: 8px 12px;
+  cursor: pointer;
+  border-bottom: 1px solid #f1f5f9;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.brand-dropdown-item:hover {
+  background-color: #f8fafc;
+}
+
+.brand-dropdown-item span:last-child {
+  font-size: 12px;
+  color: #64748b;
+  margin-left: 8px;
+}
+
+.filter-select {
+  padding: 8px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.sort-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.sort-controls {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.sort-order-button {
+  padding: 8px 12px;
+  background-color: transparent;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.clear-filters-button {
+  padding: 8px 16px;
+  background-color: transparent;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #64748b;
+}
+
+.content-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 32px;
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #e2e8f0;
+  border-top: 4px solid #1e293b;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
+}
+
+.loading-text {
+  color: #64748b;
+  font-size: 14px;
+}
+
+.error-container {
+  background-color: #fef2f2;
+  border: 1px solid #fca5a5;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 32px;
+  text-align: center;
+  color: #dc2626;
+}
+
+.results-count {
+  margin-bottom: 24px;
+}
+
+.results-count p {
+  color: #64748b;
+  font-size: 14px;
+}
+
+.results-loading {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border: 2px solid #e2e8f0;
+  border-top: 2px solid #64748b;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-left: 8px;
+}
+
+.fragrances-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 24px;
+  margin-bottom: 48px;
+}
+
+.fragrance-card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  transition: all 0.3s ease;
+  border: 1px solid rgba(0,0,0,0.05);
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
+}
+
+.fragrance-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+}
+
+.fragrance-header {
+  margin-bottom: 16px;
+}
+
+.fragrance-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+
+.fragrance-title {
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: #1e293b;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.verified-badge {
+  background-color: #22c55e;
+  color: white;
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+.fragrance-brand {
+  font-size: 1rem;
+  color: #64748b;
+  margin: 0;
+  font-weight: 500;
+}
+
+.fragrance-details {
+  margin-bottom: 16px;
+}
+
+.fragrance-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.year-badge {
+  font-size: 14px;
+  color: #64748b;
+  background-color: #f1f5f9;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.concentration-badge {
+  font-size: 14px;
+  color: #1e293b;
+  background-color: #e2e8f0;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.rating-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.rating-value {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.rating-stars {
+  display: flex;
+  gap: 1px;
+}
+
+.rating-star {
+  width: 12px;
+  height: 12px;
+}
+
+.fragrance-notes {
+  margin-bottom: 16px;
+}
+
+.notes-section {
+  margin-bottom: 8px;
+}
+
+.notes-section:last-child {
+  margin-bottom: 0;
+}
+
+.notes-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748b;
+  margin: 0 0 4px 0;
+  text-transform: uppercase;
+}
+
+.notes-content {
+  font-size: 14px;
+  color: #1e293b;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.ai-categories {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.category-badge {
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.category-season {
+  background-color: #dbeafe;
+  color: #1e40af;
+}
+
+.category-occasion {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.category-mood {
+  background-color: #dcfce7;
+  color: #166534;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 48px;
+}
+
+.pagination-button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.pagination-button:disabled {
+  cursor: not-allowed;
+}
+
+.pagination-button.active {
+  background-color: #1e293b;
+  color: white;
+}
+
+.pagination-button.inactive {
+  background-color: #f1f5f9;
+  color: #94a3b8;
+}
+
+.pagination-text {
+  padding: 8px 16px;
+  font-size: 14px;
+  color: #64748b;
+}
+
+.no-results {
+  text-align: center;
+  padding: 48px;
+  color: #64748b;
+}
+
+.no-results-icon {
+  font-size: 4rem;
+  margin-bottom: 16px;
+}
+
+.no-results-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.no-results-text {
+  font-size: 1rem;
+  margin-bottom: 24px;
+}
+
+.no-results-button {
+  padding: 12px 24px;
+  background-color: #1e293b;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+}

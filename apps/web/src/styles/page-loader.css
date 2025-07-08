@@ -1,0 +1,229 @@
+/* Page Loader Styles */
+.page-loader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  padding: 40px 20px;
+  background-color: var(--color-background, #ffffff);
+}
+
+.page-loader__container {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.page-loader__spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--color-border, #e5e7eb);
+  border-top: 3px solid var(--color-primary, #3b82f6);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.page-loader__text {
+  color: var(--color-text-secondary, #6b7280);
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin: 0;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Skeleton loader variants */
+.page-loader--skeleton {
+  background-color: transparent;
+  min-height: auto;
+  padding: 20px;
+}
+
+.page-loader--skeleton .page-loader__container {
+  gap: 20px;
+  max-width: 800px;
+  width: 100%;
+}
+
+.page-loader--skeleton .page-loader__spinner {
+  display: none;
+}
+
+.page-loader--skeleton .page-loader__text {
+  display: none;
+}
+
+/* Skeleton elements */
+.skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+  border-radius: 4px;
+}
+
+.skeleton--title {
+  height: 32px;
+  width: 60%;
+  margin-bottom: 16px;
+}
+
+.skeleton--subtitle {
+  height: 20px;
+  width: 40%;
+  margin-bottom: 12px;
+}
+
+.skeleton--text {
+  height: 16px;
+  width: 100%;
+  margin-bottom: 8px;
+}
+
+.skeleton--text:nth-child(odd) {
+  width: 85%;
+}
+
+.skeleton--button {
+  height: 40px;
+  width: 120px;
+  margin: 8px;
+}
+
+.skeleton--card {
+  height: 200px;
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.skeleton--avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+}
+
+@keyframes loading {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .page-loader {
+    min-height: 50vh;
+    padding: 20px;
+  }
+
+  .page-loader__spinner {
+    width: 32px;
+    height: 32px;
+    border-width: 2px;
+  }
+
+  .page-loader__text {
+    font-size: 0.8rem;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .page-loader {
+    --color-background: #1f2937;
+    --color-text-secondary: #9ca3af;
+    --color-border: #374151;
+    --color-primary: #60a5fa;
+  }
+
+  .skeleton {
+    background: linear-gradient(90deg, #374151 25%, #4b5563 50%, #374151 75%);
+    background-size: 200% 100%;
+  }
+}
+
+/* Integration with existing design system */
+.page-loader {
+  font-family: inherit;
+}
+
+/* Accessibility */
+.page-loader__spinner {
+  /* Screen reader will announce this via aria-live region */
+}
+
+.page-loader[aria-live="polite"] {
+  /* Ensures screen readers announce loading state */
+}
+
+/* Performance optimizations */
+.page-loader__spinner {
+  will-change: transform;
+  transform: translateZ(0); /* Force hardware acceleration */
+}
+
+.skeleton {
+  will-change: background-position;
+  transform: translateZ(0);
+}
+
+/* Custom loading messages */
+.page-loader--search .page-loader__text::after {
+  content: " search results...";
+}
+
+.page-loader--fragrance .page-loader__text::after {
+  content: " fragrances...";
+}
+
+.page-loader--collection .page-loader__text::after {
+  content: " collections...";
+}
+
+.page-loader--battle .page-loader__text::after {
+  content: " battles...";
+}
+
+.page-loader--profile .page-loader__text::after {
+  content: " profile...";
+}
+
+/* Loading states with progress */
+.page-loader--progress {
+  position: relative;
+}
+
+.page-loader--progress::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--color-primary, #3b82f6), var(--color-secondary, #8b5cf6));
+  animation: progress 2s ease-in-out infinite;
+}
+
+@keyframes progress {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+/* Smooth transitions */
+.page-loader {
+  transition: opacity 0.3s ease-in-out;
+}
+
+.page-loader--fade-out {
+  opacity: 0;
+}
+
+.page-loader--fade-in {
+  opacity: 1;
+}

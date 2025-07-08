@@ -26,7 +26,19 @@ export interface Fragrance {
   longevity?: number;
   sillage?: number;
   projection?: number;
+  popularityScore?: number;
   createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface BrandPrestige {
+  id: string;
+  brand: string;
+  tier: BrandTier;
+  priceRange: PriceRange;
+  confidence: number;
+  reasoning: string;
+  researchedAt: Date;
   updatedAt: Date;
 }
 
@@ -83,6 +95,24 @@ export enum BattleStatus {
   ACTIVE = 'ACTIVE',
   COMPLETED = 'COMPLETED',
   CANCELLED = 'CANCELLED'
+}
+
+export enum BrandTier {
+  LUXURY = 'LUXURY',
+  HIGH_END_DESIGNER = 'HIGH_END_DESIGNER',
+  DESIGNER = 'DESIGNER',
+  NICHE = 'NICHE',
+  MASS_MARKET = 'MASS_MARKET',
+  UNKNOWN = 'UNKNOWN'
+}
+
+export enum PriceRange {
+  UNDER_50 = 'UNDER_50',
+  RANGE_50_150 = 'RANGE_50_150',
+  RANGE_150_300 = 'RANGE_150_300',
+  RANGE_300_500 = 'RANGE_300_500',
+  OVER_500 = 'OVER_500',
+  UNKNOWN = 'UNKNOWN'
 }
 
 // API Request/Response Types
@@ -145,6 +175,19 @@ export interface AICategorFeedbackRequest {
   feedbackType: string;
 }
 
+// Brand Research Types
+export interface BrandResearchRequest {
+  brand: string;
+}
+
+export interface BrandResearchResponse {
+  brand: string;
+  tier: 'luxury' | 'high-end-designer' | 'designer' | 'niche' | 'mass-market' | 'unknown';
+  priceRange: 'under-50' | '50-150' | '150-300' | '300-500' | '500+' | 'unknown';
+  confidence: number;
+  reasoning: string;
+}
+
 // AI Service Types
 export interface AICategorization {
   seasons: string[];
@@ -185,7 +228,7 @@ export interface FragranceSearchRequest {
   filters?: FragranceSearchFilters;
   page?: number;
   limit?: number;
-  sortBy?: 'name' | 'brand' | 'year' | 'rating' | 'createdAt';
+  sortBy?: 'name' | 'brand' | 'year' | 'rating' | 'popularity' | 'prestige' | 'createdAt';
   sortOrder?: 'asc' | 'desc';
 }
 
@@ -267,7 +310,13 @@ export const FRAGRANCE_OCCASIONS = ['Daily', 'Evening', 'Formal', 'Casual', 'Dat
 export const FRAGRANCE_MOODS = ['Fresh', 'Confident', 'Sophisticated', 'Playful', 'Romantic', 'Energetic'] as const;
 export const FRAGRANCE_CONCENTRATIONS = ['EDT', 'EDP', 'Parfum', 'Cologne', 'Eau Fraiche'] as const;
 
+export const BRAND_TIERS = ['luxury', 'high-end-designer', 'designer', 'niche', 'mass-market', 'unknown'] as const;
+export const PRICE_RANGES = ['under-50', '50-150', '150-300', '300-500', '500+', 'unknown'] as const;
+
 export type FragranceSeason = typeof FRAGRANCE_SEASONS[number];
 export type FragranceOccasion = typeof FRAGRANCE_OCCASIONS[number];
 export type FragranceMood = typeof FRAGRANCE_MOODS[number];
 export type FragranceConcentration = typeof FRAGRANCE_CONCENTRATIONS[number];
+
+export type BrandTierType = typeof BRAND_TIERS[number];
+export type PriceRangeType = typeof PRICE_RANGES[number];

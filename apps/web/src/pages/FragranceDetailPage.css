@@ -1,0 +1,345 @@
+/* FragranceDetailPage Styles */
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.fragrance-detail-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.fragrance-detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.fragrance-detail-card {
+  background-color: white;
+  border-radius: 12px;
+  padding: 32px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  border: 1px solid rgba(0,0,0,0.05);
+}
+
+.note-pyramid-level {
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.note-pyramid-level:last-child {
+  margin-bottom: 0;
+}
+
+.note-badge {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  margin: 4px;
+  display: inline-block;
+}
+
+.performance-meter {
+  height: 8px;
+  background-color: #e2e8f0;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 4px;
+}
+
+.performance-fill {
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+.category-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 24px;
+}
+
+.category-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.category-badge {
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+  border: 1px solid;
+}
+
+.collection-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 24px;
+}
+
+.collection-modal {
+  background-color: white;
+  border-radius: 12px;
+  padding: 32px;
+  max-width: 500px;
+  width: 100%;
+  max-height: 80vh;
+  overflow: auto;
+}
+
+.collection-option {
+  padding: 16px;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  background-color: white;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s;
+  margin-bottom: 12px;
+}
+
+.collection-option:hover {
+  border-color: #1e293b;
+}
+
+.collection-option:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Button Styles */
+.btn {
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+  text-decoration: none;
+  display: inline-block;
+  text-align: center;
+}
+
+.btn-primary {
+  background-color: #1e293b;
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: #0f172a;
+  transform: translateY(-2px);
+}
+
+.btn-secondary {
+  background-color: transparent;
+  color: #1e293b;
+  border: 2px solid #1e293b;
+}
+
+.btn-secondary:hover {
+  background-color: #1e293b;
+  color: white;
+}
+
+.btn:disabled {
+  background-color: #94a3b8;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .fragrance-detail-container {
+    padding: 16px;
+  }
+
+  .fragrance-detail-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .fragrance-detail-card {
+    padding: 24px;
+  }
+
+  .category-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .fragrance-header-content {
+    flex-direction: column;
+    align-items: flex-start !important;
+    gap: 16px;
+  }
+
+  .fragrance-actions {
+    width: 100%;
+  }
+
+  .fragrance-actions .btn {
+    width: 100%;
+    margin-bottom: 8px;
+  }
+
+  .breadcrumb-nav {
+    flex-wrap: wrap;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .fragrance-detail-container {
+    padding: 12px;
+  }
+
+  .fragrance-detail-card {
+    padding: 16px;
+  }
+
+  .fragrance-title {
+    font-size: 1.8rem !important;
+  }
+
+  .fragrance-brand {
+    font-size: 1.2rem !important;
+  }
+
+  .note-pyramid-level {
+    padding: 16px;
+  }
+
+  .collection-modal {
+    padding: 24px;
+    margin: 12px;
+  }
+}
+
+/* Loading Animation */
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #e2e8f0;
+  border-top: 4px solid #1e293b;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+/* Performance Rating Colors */
+.performance-excellent { background-color: #22c55e; }
+.performance-good { background-color: #3b82f6; }
+.performance-moderate { background-color: #f59e0b; }
+.performance-poor { background-color: #ef4444; }
+
+/* Category Badge Colors */
+.category-season {
+  background-color: #dbeafe;
+  color: #1e40af;
+  border-color: #3b82f6;
+}
+
+.category-occasion {
+  background-color: #fef3c7;
+  color: #92400e;
+  border-color: #f59e0b;
+}
+
+.category-mood {
+  background-color: #dcfce7;
+  color: #166534;
+  border-color: #22c55e;
+}
+
+/* Note Level Colors */
+.top-notes {
+  background-color: #fef3c7;
+  border: 2px solid #f59e0b;
+}
+
+.top-notes h4 {
+  color: #92400e;
+}
+
+.top-notes .note-badge {
+  background-color: #f59e0b;
+  color: white;
+}
+
+.middle-notes {
+  background-color: #dcfce7;
+  border: 2px solid #22c55e;
+}
+
+.middle-notes h4 {
+  color: #166534;
+}
+
+.middle-notes .note-badge {
+  background-color: #22c55e;
+  color: white;
+}
+
+.base-notes {
+  background-color: #e0e7ff;
+  border: 2px solid #3b82f6;
+}
+
+.base-notes h4 {
+  color: #1e40af;
+}
+
+.base-notes .note-badge {
+  background-color: #3b82f6;
+  color: white;
+}
+
+/* Hover Effects */
+.fragrance-detail-card:hover {
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+}
+
+.note-badge:hover {
+  transform: scale(1.05);
+}
+
+/* Focus States for Accessibility */
+.btn:focus,
+.collection-option:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Print Styles */
+@media print {
+  .fragrance-actions,
+  .collection-modal-overlay {
+    display: none;
+  }
+
+  .fragrance-detail-container {
+    max-width: none;
+    padding: 0;
+  }
+
+  .fragrance-detail-card {
+    box-shadow: none;
+    border: 1px solid #e2e8f0;
+  }
+}

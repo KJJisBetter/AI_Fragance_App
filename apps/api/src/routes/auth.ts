@@ -1,5 +1,6 @@
 import express from 'express';
 import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 import { prisma } from '@fragrance-battle/database';
 import {
   LoginRequest,
@@ -7,14 +8,16 @@ import {
   AuthResponse,
   APIResponse
 } from '@fragrance-battle/types';
-import { validate, schemas } from '../middleware/validation';
+import { validateBody, userSchemas } from '../middleware/validation';
 import { authenticateToken, generateToken } from '../middleware/auth';
 import { asyncHandler, createError } from '../middleware/errorHandler';
+import { config } from '../config';
+import { log } from '../utils/logger';
 
 const router = express.Router();
 
 // Register a new user
-router.post('/register', validate(schemas.register), asyncHandler(async (req, res) => {
+router.post('/register', validateBody(userSchemas.register), asyncHandler(async (req, res) => {
   const { email, username, password }: RegisterRequest = req.body;
 
   // Check if user already exists
@@ -28,6 +31,7 @@ router.post('/register', validate(schemas.register), asyncHandler(async (req, re
   });
 
   if (existingUser) {
+    log.api.error(req.method, req.originalUrl, new Error('User registration failed - user exists'), undefined);
     throw createError(
       existingUser.email === email ? 'Email already exists' : 'Username already exists',
       400,
@@ -66,6 +70,12 @@ router.post('/register', validate(schemas.register), asyncHandler(async (req, re
   // Generate token
   const token = generateToken(user);
 
+  log.info('🔐 User registered successfully', {
+    userId: user.id,
+    email: user.email,
+    username: user.username
+  });
+
   const response: APIResponse<AuthResponse> = {
     success: true,
     data: {
@@ -78,7 +88,7 @@ router.post('/register', validate(schemas.register), asyncHandler(async (req, re
 }));
 
 // Login user
-router.post('/login', validate(schemas.login), asyncHandler(async (req, res) => {
+router.post('/login', validateBody(userSchemas.login), asyncHandler(async (req, res) => {
   const { email, password }: LoginRequest = req.body;
 
   // Find user
@@ -87,6 +97,7 @@ router.post('/login', validate(schemas.login), asyncHandler(async (req, res) => 
   });
 
   if (!user || !await bcrypt.compare(password, user.passwordHash)) {
+    log.api.error(req.method, req.originalUrl, new Error('Login failed - invalid credentials'), undefined);
     throw createError('Invalid email or password', 401, 'INVALID_CREDENTIALS');
   }
 
@@ -100,6 +111,11 @@ router.post('/login', validate(schemas.login), asyncHandler(async (req, res) => 
     createdAt: user.createdAt,
     updatedAt: user.updatedAt
   };
+
+  log.info('🔐 User logged in successfully', {
+    userId: user.id,
+    email: user.email
+  });
 
   const response: APIResponse<AuthResponse> = {
     success: true,
@@ -127,41 +143,24 @@ router.get('/me', authenticateToken, asyncHandler(async (req, res) => {
 }));
 
 // Update user profile
-router.put('/me', authenticateToken, asyncHandler(async (req, res) => {
+router.put('/me', authenticateToken, validateBody(userSchemas.updateProfile), asyncHandler(async (req, res) => {
   const userId = req.user!.id;
-  const { username, email } = req.body;
+  const { username, bio } = req.body;
 
-  // Validation
-  if (username && (typeof username !== 'string' || username.length < 3)) {
-    throw createError('Username must be at least 3 characters', 400, 'VALIDATION_ERROR');
-  }
-
-  if (email && (typeof email !== 'string' || !email.includes('@'))) {
-    throw createError('Invalid email format', 400, 'VALIDATION_ERROR');
-  }
-
-  // Check if username/email already exists (excluding current user)
-  if (username || email) {
+  // Check if username already exists (excluding current user)
+  if (username) {
     const existingUser = await prisma.user.findFirst({
       where: {
         AND: [
           { id: { not: userId } },
-          {
-            OR: [
-              username ? { username } : {},
-              email ? { email } : {}
-            ].filter(condition => Object.keys(condition).length > 0)
-          }
+          { username }
         ]
       }
     });
 
     if (existingUser) {
-      throw createError(
-        existingUser.username === username ? 'Username already exists' : 'Email already exists',
-        400,
-        'USER_EXISTS'
-      );
+      log.api.error(req.method, req.originalUrl, new Error('Profile update failed - username exists'), userId);
+      throw createError('Username already exists', 400, 'USER_EXISTS');
     }
   }
 
@@ -170,15 +169,21 @@ router.put('/me', authenticateToken, asyncHandler(async (req, res) => {
     where: { id: userId },
     data: {
       ...(username && { username }),
-      ...(email && { email })
+      ...(bio && { bio })
     },
     select: {
       id: true,
       email: true,
       username: true,
+      bio: true,
       createdAt: true,
       updatedAt: true
     }
+  });
+
+  log.info('🔐 User profile updated successfully', {
+    userId: updatedUser.id,
+    changes: Object.keys(req.body)
   });
 
   const response: APIResponse<Omit<AuthResponse, 'token'>> = {

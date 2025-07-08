@@ -95,6 +95,26 @@ export const Layout = () => {
             </button>
           </form>
 
+          {/* Global Search Hint */}
+          <div style={{
+            display: "flex",
+            alignItems: "center",
+            fontSize: "12px",
+            color: "rgba(255,255,255,0.6)",
+            marginLeft: "16px"
+          }}>
+            <span style={{
+              backgroundColor: "rgba(255,255,255,0.1)",
+              padding: "2px 6px",
+              borderRadius: "4px",
+              fontFamily: "monospace",
+              fontSize: "11px"
+            }}>
+              ⌘K
+            </span>
+            <span style={{ marginLeft: "4px" }}>Quick search</span>
+          </div>
+
           {/* Navigation Links */}
           <div style={{
             display: "flex",

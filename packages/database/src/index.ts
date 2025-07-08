@@ -52,7 +52,7 @@ export const checkDatabaseHealth = async () => {
 
 // Transaction utility
 export const executeTransaction = async <T>(
-  fn: (prisma: PrismaClient) => Promise<T>
+  fn: (prisma: Omit<PrismaClient, '$connect' | '$disconnect' | '$on' | '$transaction' | '$use' | '$extends'>) => Promise<T>
 ): Promise<T> => {
   return await prisma.$transaction(fn);
 };
