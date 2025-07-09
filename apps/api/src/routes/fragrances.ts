@@ -2,10 +2,10 @@
  * Fragrances API Routes
  */
 
-import express, { Request, Response } from 'express';
+import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { prisma } from '@fragrance-battle/database';
 import { authenticateToken, optionalAuth } from '../middleware/auth';
-import { asyncHandler, createError } from '../middleware/errorHandler';
+import { createError } from '../middleware/errorHandler';
 import { formatFragrance } from '../utils/formatting';
 import { rateLimiters } from '../middleware/rateLimiter';
 import { validateBody, validateQuery, validateParams, fragranceSchemas } from '../middleware/validation';
@@ -13,17 +13,14 @@ import { searchService } from '../services/searchService';
 import { config } from '../config';
 import { log } from '../utils/logger';
 
-const router = express.Router();
-
-/**
- * Search fragrances
- */
-router.post('/search',
-  rateLimiters.search,
-  optionalAuth,
-  validateBody(fragranceSchemas.search),
-  asyncHandler(async (req: Request, res: Response) => {
-    const { query, filters = {}, page = 1, limit = 20, sortBy = 'relevance', sortOrder = 'desc' } = req.body;
+export default async function fragrancesRoutes(app: FastifyInstance) {
+  /**
+   * Search fragrances
+   */
+  app.post('/search', {
+    preHandler: [rateLimiters.search, optionalAuth, validateBody(fragranceSchemas.search)]
+  }, async (request: FastifyRequest<{ Body: any }>, reply: FastifyReply) => {
+    const { query, filters = {}, page = 1, limit = 20, sortBy = 'relevance', sortOrder = 'desc' } = request.body;
 
     try {
       const searchResponse = await searchService.search(query || '', {
@@ -46,7 +43,7 @@ router.post('/search',
         source: result.source
       }));
 
-      res.json({
+      reply.send({
         success: true,
         data: {
           fragrances,
@@ -67,22 +64,20 @@ router.post('/search',
       log.search.error(query || 'browse', error as Error);
       throw error;
     }
-  })
-);
+  });
 
-/**
- * Get all fragrances
- */
-router.get('/',
-  rateLimiters.general,
-  optionalAuth,
-  asyncHandler(async (req: Request, res: Response) => {
+  /**
+   * Get all fragrances
+   */
+  app.get('/', {
+    preHandler: [rateLimiters.general, optionalAuth]
+  }, async (request: FastifyRequest<{ Querystring: any }>, reply: FastifyReply) => {
     const {
       page = 1,
       limit = 20,
       sortBy = 'name',
       sortOrder = 'asc'
-    } = req.query as any;
+    } = request.query;
 
     // Convert strings to integers
     const pageNum = parseInt(page as string, 10) || 1;
@@ -109,7 +104,7 @@ router.get('/',
 
     const totalPages = Math.ceil(totalCount / limitNum);
 
-    res.json({
+    reply.send({
       success: true,
       data: {
         fragrances: fragrances.map(formatFragrance),
@@ -123,16 +118,14 @@ router.get('/',
         }
       }
     });
-  })
-);
+  });
 
-/**
- * Get filters
- */
-router.get('/filters',
-  rateLimiters.general,
-  optionalAuth,
-  asyncHandler(async (req: Request, res: Response) => {
+  /**
+   * Get filters
+   */
+  app.get('/filters', {
+    preHandler: [rateLimiters.general, optionalAuth]
+  }, async (request: FastifyRequest, reply: FastifyReply) => {
     const brands = await prisma.fragrance.groupBy({
       by: ['brand'],
       _count: { brand: true },
@@ -147,7 +140,7 @@ router.get('/filters',
       orderBy: { _count: { concentration: 'desc' } }
     });
 
-    res.json({
+    reply.send({
       success: true,
       data: {
         brands: brands.map(b => ({ name: b.brand, count: b._count.brand })),
@@ -160,20 +153,18 @@ router.get('/filters',
         moods: ['Fresh', 'Warm', 'Mysterious', 'Elegant', 'Bold']
       }
     });
-  })
-);
+  });
 
-/**
- * Search brands for autocomplete
- */
-router.get('/brands/search',
-  rateLimiters.general,
-  optionalAuth,
-  asyncHandler(async (req: Request, res: Response) => {
-    const { q: query, limit = 10 } = req.query as any;
+  /**
+   * Search brands for autocomplete
+   */
+  app.get('/brands/search', {
+    preHandler: [rateLimiters.general, optionalAuth]
+  }, async (request: FastifyRequest<{ Querystring: any }>, reply: FastifyReply) => {
+    const { q: query, limit = 10 } = request.query;
 
     if (!query || typeof query !== 'string') {
-      return res.json({
+      return reply.send({
         success: true,
         data: { brands: [] }
       });
@@ -199,7 +190,7 @@ router.get('/brands/search',
         count: brand._count.brand
       }));
 
-      res.json({
+      reply.send({
         success: true,
         data: { brands: formattedBrands }
       });
@@ -207,18 +198,15 @@ router.get('/brands/search',
       log.api.error('GET', '/fragrances/brands/search', error as Error);
       throw error;
     }
-  })
-);
+  });
 
-/**
- * Get fragrance by ID
- */
-router.get('/:id',
-  rateLimiters.general,
-  optionalAuth,
-  validateParams(fragranceSchemas.getById),
-  asyncHandler(async (req: Request, res: Response) => {
-    const { id } = req.params;
+  /**
+   * Get fragrance by ID
+   */
+  app.get('/:id', {
+    preHandler: [rateLimiters.general, optionalAuth, validateParams(fragranceSchemas.getById)]
+  }, async (request: FastifyRequest<{ Params: any }>, reply: FastifyReply) => {
+    const { id } = request.params;
 
     const fragrance = await prisma.fragrance.findUnique({
       where: { id },
@@ -244,11 +232,9 @@ router.get('/:id',
       }
     };
 
-    res.json({
+    reply.send({
       success: true,
       data: formattedFragrance
     });
-  })
-);
-
-export default router;
+  });
+}

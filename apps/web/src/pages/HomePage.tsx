@@ -1,7 +1,10 @@
 import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { Clock, TrendingUp, Search, Zap } from "lucide-react";
 import { fragrancesApi } from "../lib/api";
 import { Fragrance } from "@fragrance-battle/types";
+import { searchAnalytics } from "../lib/searchAnalytics";
+import { useSearchStore } from "../stores/searchStore";
 
 const featureCardStyle = {
   background: "white",
@@ -45,6 +48,11 @@ const secondaryButtonStyle = {
 export const HomePage = () => {
   const [popularFragrances, setPopularFragrances] = useState<Fragrance[]>([]);
   const [popularLoading, setPopularLoading] = useState(true);
+  const [trendingSearches, setTrendingSearches] = useState<string[]>([]);
+  const [recentSearches, setRecentSearches] = useState<string[]>([]);
+
+  // Get search data from Zustand store
+  const recentSearchesFromStore = useSearchStore((state) => state.recentSearches);
 
   // Fetch popular fragrances
   useEffect(() => {
@@ -67,6 +75,21 @@ export const HomePage = () => {
 
     fetchPopularFragrances();
   }, []);
+
+  // Get trending and recent searches
+  useEffect(() => {
+    const getSearchData = () => {
+      // Get trending searches from analytics
+      const trending = searchAnalytics.getTrendingSearches(6);
+      setTrendingSearches(trending.map(s => s.query));
+
+      // Get recent searches from Zustand store
+      const recent = recentSearchesFromStore.slice(0, 6);
+      setRecentSearches(recent.map(s => s.query));
+    };
+
+    getSearchData();
+  }, [recentSearchesFromStore]);
 
   return (
     <div style={{ background: "#f8fafc", minHeight: "100vh" }}>
@@ -374,6 +397,194 @@ export const HomePage = () => {
             ))}
           </div>
         )}
+      </div>
+    </section>
+
+    {/* Trending & Recent Searches Section */}
+    <section style={{
+      padding: "60px 32px",
+      backgroundColor: "#f8fafc"
+    }}>
+      <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(400px, 1fr))",
+          gap: "40px"
+        }}>
+          {/* Trending Searches */}
+          <div style={{
+            ...featureCardStyle,
+            padding: "24px"
+          }}>
+            <div style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "12px",
+              marginBottom: "20px"
+            }}>
+              <TrendingUp className="w-6 h-6 text-orange-500" />
+              <h3 style={{
+                fontSize: "1.5rem",
+                fontWeight: "bold",
+                color: "#1e293b",
+                margin: 0
+              }}>
+                🔥 Trending Searches
+              </h3>
+            </div>
+            <p style={{
+              color: "#64748b",
+              fontSize: "1rem",
+              marginBottom: "20px",
+              lineHeight: 1.5
+            }}>
+              See what fragrances and brands are trending in our community
+            </p>
+            <div style={{
+              display: "flex",
+              flexWrap: "wrap",
+              gap: "8px"
+            }}>
+              {trendingSearches.length > 0 ? (
+                trendingSearches.map((search, index) => (
+                  <Link
+                    key={index}
+                    to={`/fragrances?search=${encodeURIComponent(search)}`}
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "6px",
+                      padding: "8px 12px",
+                      backgroundColor: "#fef3c7",
+                      color: "#92400e",
+                      borderRadius: "20px",
+                      fontSize: "14px",
+                      fontWeight: "500",
+                      textDecoration: "none",
+                      transition: "all 0.2s",
+                      border: "1px solid #fde68a"
+                    }}
+                    onMouseEnter={(e) => {
+                      (e.target as HTMLElement).style.backgroundColor = "#fde68a";
+                      (e.target as HTMLElement).style.transform = "translateY(-1px)";
+                    }}
+                    onMouseLeave={(e) => {
+                      (e.target as HTMLElement).style.backgroundColor = "#fef3c7";
+                      (e.target as HTMLElement).style.transform = "translateY(0)";
+                    }}
+                  >
+                    <Zap className="w-3 h-3" />
+                    {search}
+                  </Link>
+                ))
+              ) : (
+                <div style={{
+                  display: "flex",
+                  flexWrap: "wrap",
+                  gap: "8px"
+                }}>
+                  {['Sauvage', 'Aventus', 'Chanel', 'Tom Ford', 'Versace', 'Dior'].map((search, index) => (
+                    <span
+                      key={index}
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: "6px",
+                        padding: "8px 12px",
+                        backgroundColor: "#f3f4f6",
+                        color: "#6b7280",
+                        borderRadius: "20px",
+                        fontSize: "14px",
+                        fontWeight: "500"
+                      }}
+                    >
+                      <Zap className="w-3 h-3" />
+                      {search}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Recent Searches */}
+          <div style={{
+            ...featureCardStyle,
+            padding: "24px"
+          }}>
+            <div style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "12px",
+              marginBottom: "20px"
+            }}>
+              <Clock className="w-6 h-6 text-blue-500" />
+              <h3 style={{
+                fontSize: "1.5rem",
+                fontWeight: "bold",
+                color: "#1e293b",
+                margin: 0
+              }}>
+                ⏰ Recent Searches
+              </h3>
+            </div>
+            <p style={{
+              color: "#64748b",
+              fontSize: "1rem",
+              marginBottom: "20px",
+              lineHeight: 1.5
+            }}>
+              Continue exploring your recent fragrance discoveries
+            </p>
+            <div style={{
+              display: "flex",
+              flexWrap: "wrap",
+              gap: "8px"
+            }}>
+              {recentSearches.length > 0 ? (
+                recentSearches.map((search, index) => (
+                  <Link
+                    key={index}
+                    to={`/fragrances?search=${encodeURIComponent(search)}`}
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "6px",
+                      padding: "8px 12px",
+                      backgroundColor: "#dbeafe",
+                      color: "#1e40af",
+                      borderRadius: "20px",
+                      fontSize: "14px",
+                      fontWeight: "500",
+                      textDecoration: "none",
+                      transition: "all 0.2s",
+                      border: "1px solid #bfdbfe"
+                    }}
+                    onMouseEnter={(e) => {
+                      (e.target as HTMLElement).style.backgroundColor = "#bfdbfe";
+                      (e.target as HTMLElement).style.transform = "translateY(-1px)";
+                    }}
+                    onMouseLeave={(e) => {
+                      (e.target as HTMLElement).style.backgroundColor = "#dbeafe";
+                      (e.target as HTMLElement).style.transform = "translateY(0)";
+                    }}
+                  >
+                    <Search className="w-3 h-3" />
+                    {search}
+                  </Link>
+                ))
+              ) : (
+                <div style={{
+                  color: "#9ca3af",
+                  fontSize: "14px",
+                  fontStyle: "italic"
+                }}>
+                  No recent searches yet. Start exploring fragrances!
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 

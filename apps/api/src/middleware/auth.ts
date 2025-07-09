@@ -1,15 +1,12 @@
-import { Request, Response, NextFunction } from 'express';
+import { FastifyRequest, FastifyReply } from 'fastify';
 import jwt from 'jsonwebtoken';
 import { prisma } from '@fragrance-battle/database';
-import { createError } from './errorHandler';
 import { User } from '@fragrance-battle/types';
 
-// Extend Request interface to include user
-declare global {
-  namespace Express {
-    interface Request {
-      user?: Omit<User, 'passwordHash'>;
-    }
+// Extend Fastify Request interface to include user
+declare module 'fastify' {
+  interface FastifyRequest {
+    user?: Omit<User, 'passwordHash'>;
   }
 }
 
@@ -21,22 +18,33 @@ export interface JWTPayload {
   exp?: number;
 }
 
+export class AuthError extends Error {
+  statusCode: number;
+  code: string;
+
+  constructor(message: string, statusCode: number, code: string) {
+    super(message);
+    this.statusCode = statusCode;
+    this.code = code;
+    this.name = 'AuthError';
+  }
+}
+
 export const authenticateToken = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
+  request: FastifyRequest,
+  reply: FastifyReply
 ) => {
   try {
-    const authHeader = req.headers.authorization;
+    const authHeader = request.headers.authorization;
     const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
 
     if (!token) {
-      throw createError('Access token required', 401, 'UNAUTHORIZED');
+      throw new AuthError('Access token required', 401, 'UNAUTHORIZED');
     }
 
     const JWT_SECRET = process.env.JWT_SECRET;
     if (!JWT_SECRET) {
-      throw createError('JWT secret not configured', 500, 'CONFIG_ERROR');
+      throw new AuthError('JWT secret not configured', 500, 'CONFIG_ERROR');
     }
 
     // Verify token
@@ -55,39 +63,39 @@ export const authenticateToken = async (
     });
 
     if (!user) {
-      throw createError('User not found', 401, 'UNAUTHORIZED');
+      throw new AuthError('User not found', 401, 'UNAUTHORIZED');
     }
 
     // Attach user to request
-    req.user = user;
-    next();
+    request.user = user;
   } catch (error) {
     if (error instanceof jwt.JsonWebTokenError) {
-      next(createError('Invalid token', 401, 'INVALID_TOKEN'));
+      throw new AuthError('Invalid token', 401, 'INVALID_TOKEN');
     } else if (error instanceof jwt.TokenExpiredError) {
-      next(createError('Token expired', 401, 'TOKEN_EXPIRED'));
+      throw new AuthError('Token expired', 401, 'TOKEN_EXPIRED');
+    } else if (error instanceof AuthError) {
+      throw error;
     } else {
-      next(error);
+      throw new AuthError('Authentication failed', 500, 'AUTH_ERROR');
     }
   }
 };
 
 export const optionalAuth = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
+  request: FastifyRequest,
+  reply: FastifyReply
 ) => {
   try {
-    const authHeader = req.headers.authorization;
+    const authHeader = request.headers.authorization;
     const token = authHeader && authHeader.split(' ')[1];
 
     if (!token) {
-      return next(); // No token provided, continue without user
+      return; // No token provided, continue without user
     }
 
     const JWT_SECRET = process.env.JWT_SECRET;
     if (!JWT_SECRET) {
-      return next(); // No JWT secret configured, continue without user
+      return; // No JWT secret configured, continue without user
     }
 
     const decoded = jwt.verify(token, JWT_SECRET) as JWTPayload;
@@ -104,21 +112,18 @@ export const optionalAuth = async (
     });
 
     if (user) {
-      req.user = user;
+      request.user = user;
     }
-
-    next();
   } catch (error) {
     // Don't fail if optional auth fails, just continue without user
-    next();
+    return;
   }
 };
 
-export const requireAuth = (req: Request, res: Response, next: NextFunction) => {
-  if (!req.user) {
-    return next(createError('Authentication required', 401, 'UNAUTHORIZED'));
+export const requireAuth = (request: FastifyRequest, reply: FastifyReply) => {
+  if (!request.user) {
+    throw new AuthError('Authentication required', 401, 'UNAUTHORIZED');
   }
-  next();
 };
 
 export const generateToken = (user: { id: string; email: string; username: string }): string => {

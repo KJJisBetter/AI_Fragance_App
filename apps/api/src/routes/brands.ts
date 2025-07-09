@@ -2,23 +2,21 @@
  * Brands API Routes
  */
 
-import express, { Request, Response } from 'express';
+import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { prisma } from '@fragrance-battle/database';
 import { optionalAuth } from '../middleware/auth';
-import { asyncHandler, createError } from '../middleware/errorHandler';
+import { createError } from '../middleware/errorHandler';
 import { rateLimiters } from '../middleware/rateLimiter';
 import { log } from '../utils/logger';
 
-const router = express.Router();
-
-/**
- * Get all brands organized alphabetically
- */
-router.get('/',
-  rateLimiters.general,
-  optionalAuth,
-  asyncHandler(async (req: Request, res: Response) => {
-    const { letter } = req.query as any;
+export default async function brandsRoutes(app: FastifyInstance) {
+  /**
+   * Get all brands organized alphabetically
+   */
+  app.get('/', {
+    preHandler: [rateLimiters.general, optionalAuth]
+  }, async (request: FastifyRequest<{ Querystring: any }>, reply: FastifyReply) => {
+    const { letter } = request.query;
 
     try {
       // Get all brands with fragrance counts
@@ -55,7 +53,7 @@ router.get('/',
       // Sort letters
       const sortedLetters = Array.from(letters).sort();
 
-      res.json({
+      reply.send({
         success: true,
         data: {
           brands: brandsByLetter,
@@ -69,18 +67,16 @@ router.get('/',
       log.api.error('GET', '/brands', error as Error);
       throw error;
     }
-  })
-);
+  });
 
-/**
- * Get brand details with fragrances
- */
-router.get('/:brandName',
-  rateLimiters.general,
-  optionalAuth,
-  asyncHandler(async (req: Request, res: Response) => {
-    const { brandName } = req.params;
-    const { page = 1, limit = 20, sortBy = 'name', sortOrder = 'asc' } = req.query as any;
+  /**
+   * Get brand details with fragrances
+   */
+  app.get('/:brandName', {
+    preHandler: [rateLimiters.general, optionalAuth]
+  }, async (request: FastifyRequest<{ Params: any; Querystring: any }>, reply: FastifyReply) => {
+    const { brandName } = request.params;
+    const { page = 1, limit = 20, sortBy = 'name', sortOrder = 'asc' } = request.query;
 
     const offset = (page - 1) * limit;
 
@@ -132,7 +128,7 @@ router.get('/:brandName',
         take: 5
       });
 
-      res.json({
+      reply.send({
         success: true,
         data: {
           brand: {
@@ -172,7 +168,5 @@ router.get('/:brandName',
       log.api.error('GET', `/brands/${brandName}`, error as Error);
       throw error;
     }
-  })
-);
-
-export default router;
+  });
+}

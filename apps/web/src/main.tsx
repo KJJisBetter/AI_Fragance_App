@@ -1,25 +1,19 @@
-import React from 'react'
-import ReactDOM from 'react-dom/client'
+import { createRoot } from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { QueryClientProvider } from '@tanstack/react-query'
 import { Toaster } from 'react-hot-toast'
 
 import App from './App.tsx'
 import './index.css'
+import { api, trpcClient, queryClient } from './lib/trpc'
 
-// Create a client
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: 1,
-      refetchOnWindowFocus: false,
-      staleTime: 5 * 60 * 1000, // 5 minutes
-    },
-  },
-})
+// Get the root element
+const container = document.getElementById('root')!
+const root = createRoot(container)
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
+// React 19 rendering with tRPC + React Query integration
+root.render(
+  <api.Provider client={trpcClient} queryClient={queryClient}>
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <App />
@@ -36,5 +30,5 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
         />
       </BrowserRouter>
     </QueryClientProvider>
-  </React.StrictMode>,
+  </api.Provider>
 )

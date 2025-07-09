@@ -41,6 +41,8 @@ model Fragrance {
   projection         Int?
   prestigeScore      Float?              @default(0)  // Prestige score (community + brand + verification + age + notes)
   popularityScore    Float?              @default(0)  // Sales-based popularity (market share + trends + availability)
+  relevanceScore     Float               @default(0)  // New relevance scoring for better search results
+  lastEnhanced       DateTime?                        // Track when relevance was last calculated
   createdAt          DateTime            @default(now())
   updatedAt          DateTime            @updatedAt
   feedbacks          AICategorFeedback[]
@@ -53,6 +55,7 @@ model Fragrance {
   @@index([communityRating(sort: Desc)])
   @@index([prestigeScore(sort: Desc)])
   @@index([popularityScore(sort: Desc)])
+  @@index([relevanceScore(sort: Desc)])  // New index for relevance scoring
   @@index([aiSeasons], type: Gin)
   @@index([aiOccasions], type: Gin)
   @@index([aiMoods], type: Gin)

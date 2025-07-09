@@ -5,6 +5,7 @@ import { fragrancesApi } from '../lib/api';
 import { Fragrance } from '@fragrance-battle/types';
 import { searchAnalytics, SearchSuggestion } from '../lib/searchAnalytics';
 import { SearchHighlight } from './SearchHighlight';
+import { useSearchStore } from '../stores/searchStore';
 
 interface GlobalSearchProps {
   isOpen: boolean;
@@ -20,14 +21,19 @@ interface SearchResult {
   icon?: React.ReactNode;
 }
 
-const RECENT_SEARCHES_KEY = 'fragrance-app-recent-searches';
-const MAX_RECENT_SEARCHES = 5;
-
 export const GlobalSearch: React.FC<GlobalSearchProps> = ({ isOpen, onClose }) => {
+  console.log('GlobalSearch render - isOpen:', isOpen);
+
   const [query, setQuery] = useState('');
-    const [results, setResults] = useState<SearchResult[]>([]);
+  const [results, setResults] = useState<SearchResult[]>([]);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+
+  // Use individual selectors to avoid infinite loops
+  const recentSearches = useSearchStore((state) => state.recentSearches);
+  const addRecentSearch = useSearchStore((state) => state.addRecentSearch);
+  const updateSearchAnalytics = useSearchStore((state) => state.updateSearchAnalytics);
+
   const [suggestions, setSuggestions] = useState<{
     trending: SearchSuggestion[];
     popular: SearchSuggestion[];
@@ -53,13 +59,21 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({ isOpen, onClose }) =
   const trackAndSaveSearch = useCallback((searchTerm: string, resultCount: number = 0) => {
     if (!searchTerm.trim()) return;
 
+    // Update Zustand store analytics
+    updateSearchAnalytics(searchTerm, resultCount, 'global');
+
+    // Also update legacy analytics
     searchAnalytics.trackSearch(searchTerm, resultCount, 'global');
-  }, []);
+  }, [updateSearchAnalytics]);
 
   // Track search click
   const trackSearchClick = useCallback((searchTerm: string) => {
+    // Add to recent searches in Zustand store
+    addRecentSearch(searchTerm, {}, 0);
+
+    // Also update legacy analytics
     searchAnalytics.trackSearchClick(searchTerm);
-  }, []);
+  }, [addRecentSearch]);
 
   // Get typo suggestions for common fragrance/brand misspellings
   const getTypoSuggestions = useCallback((query: string): string[] => {

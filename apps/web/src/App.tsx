@@ -1,6 +1,5 @@
-import React, { lazy, Suspense } from 'react'
+import { lazy, Suspense } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
-import { AuthProvider } from './contexts/AuthContext'
 import { Layout } from './components/Layout'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { GlobalSearch } from './components/GlobalSearch'
@@ -40,128 +39,128 @@ const PageLoader = () => (
 function App() {
   const { isOpen, closeSearch } = useGlobalSearch();
 
+  console.log('App render - search isOpen:', isOpen);
+
   return (
     <ErrorBoundary level="critical">
-      <AuthProvider>
-        <Routes>
-          {/* Public routes */}
-          <Route path="/login" element={
+      <Routes>
+        {/* Public routes */}
+        <Route path="/login" element={
+          <RouteErrorBoundary>
+            <Suspense fallback={<PageLoader />}>
+              <LoginPage />
+            </Suspense>
+          </RouteErrorBoundary>
+        } />
+        <Route path="/register" element={
+          <RouteErrorBoundary>
+            <Suspense fallback={<PageLoader />}>
+              <RegisterPage />
+            </Suspense>
+          </RouteErrorBoundary>
+        } />
+
+        {/* Protected routes */}
+        <Route
+          path="/"
+          element={
+            <RouteErrorBoundary>
+              <ProtectedRoute>
+                <Layout />
+              </ProtectedRoute>
+            </RouteErrorBoundary>
+          }
+        >
+          <Route index element={
             <RouteErrorBoundary>
               <Suspense fallback={<PageLoader />}>
-                <LoginPage />
+                <HomePage />
               </Suspense>
             </RouteErrorBoundary>
           } />
-          <Route path="/register" element={
+
+          {/* Collections */}
+          <Route path="collections" element={
             <RouteErrorBoundary>
               <Suspense fallback={<PageLoader />}>
-                <RegisterPage />
+                <CollectionsPage />
+              </Suspense>
+            </RouteErrorBoundary>
+          } />
+          <Route path="collections/:id" element={
+            <RouteErrorBoundary>
+              <Suspense fallback={<PageLoader />}>
+                <CollectionDetailPage />
               </Suspense>
             </RouteErrorBoundary>
           } />
 
-          {/* Protected routes */}
-          <Route
-            path="/"
-            element={
-              <RouteErrorBoundary>
-                <ProtectedRoute>
-                  <Layout />
-                </ProtectedRoute>
-              </RouteErrorBoundary>
-            }
-          >
-            <Route index element={
-              <RouteErrorBoundary>
-                <Suspense fallback={<PageLoader />}>
-                  <HomePage />
-                </Suspense>
-              </RouteErrorBoundary>
-            } />
-
-            {/* Collections */}
-            <Route path="collections" element={
-              <RouteErrorBoundary>
-                <Suspense fallback={<PageLoader />}>
-                  <CollectionsPage />
-                </Suspense>
-              </RouteErrorBoundary>
-            } />
-            <Route path="collections/:id" element={
-              <RouteErrorBoundary>
-                <Suspense fallback={<PageLoader />}>
-                  <CollectionDetailPage />
-                </Suspense>
-              </RouteErrorBoundary>
-            } />
-
-            {/* Fragrances */}
-            <Route path="fragrances" element={
-              <RouteErrorBoundary>
-                <Suspense fallback={<PageLoader />}>
-                  <FragrancesPage />
-                </Suspense>
-              </RouteErrorBoundary>
-            } />
-            <Route path="fragrances/:id" element={
-              <RouteErrorBoundary>
-                <Suspense fallback={<PageLoader />}>
-                  <FragranceDetailPage />
-                </Suspense>
-              </RouteErrorBoundary>
-            } />
-
-            {/* Battles */}
-            <Route path="battles" element={
-              <RouteErrorBoundary>
-                <Suspense fallback={<PageLoader />}>
-                  <BattlesPage />
-                </Suspense>
-              </RouteErrorBoundary>
-            } />
-            <Route path="battles/:id" element={
-              <RouteErrorBoundary>
-                <Suspense fallback={<PageLoader />}>
-                  <BattleDetailPage />
-                </Suspense>
-              </RouteErrorBoundary>
-            } />
-
-            {/* AI Features */}
-            <Route path="ai-categorize" element={
-              <RouteErrorBoundary>
-                <Suspense fallback={<PageLoader />}>
-                  <AICategorizePage />
-                </Suspense>
-              </RouteErrorBoundary>
-            } />
-
-            {/* Profile */}
-            <Route path="profile" element={
-              <RouteErrorBoundary>
-                <Suspense fallback={<PageLoader />}>
-                  <ProfilePage />
-                </Suspense>
-              </RouteErrorBoundary>
-            } />
-          </Route>
-
-          {/* Fallback routes */}
-          <Route path="/404" element={
+          {/* Fragrances */}
+          <Route path="fragrances" element={
             <RouteErrorBoundary>
               <Suspense fallback={<PageLoader />}>
-                <NotFoundPage />
+                <FragrancesPage />
               </Suspense>
             </RouteErrorBoundary>
           } />
-          <Route path="*" element={<Navigate to="/404" replace />} />
-        </Routes>
+          <Route path="fragrances/:id" element={
+            <RouteErrorBoundary>
+              <Suspense fallback={<PageLoader />}>
+                <FragranceDetailPage />
+              </Suspense>
+            </RouteErrorBoundary>
+          } />
 
-        {/* Global Search */}
-        <ErrorBoundary level="component">
-          <GlobalSearch isOpen={isOpen} onClose={closeSearch} />
-        </ErrorBoundary>
-      </AuthProvider>
+          {/* Battles */}
+          <Route path="battles" element={
+            <RouteErrorBoundary>
+              <Suspense fallback={<PageLoader />}>
+                <BattlesPage />
+              </Suspense>
+            </RouteErrorBoundary>
+          } />
+          <Route path="battles/:id" element={
+            <RouteErrorBoundary>
+              <Suspense fallback={<PageLoader />}>
+                <BattleDetailPage />
+              </Suspense>
+            </RouteErrorBoundary>
+          } />
+
+          {/* AI Features */}
+          <Route path="ai-categorize" element={
+            <RouteErrorBoundary>
+              <Suspense fallback={<PageLoader />}>
+                <AICategorizePage />
+              </Suspense>
+            </RouteErrorBoundary>
+          } />
+
+          {/* Profile */}
+          <Route path="profile" element={
+            <RouteErrorBoundary>
+              <Suspense fallback={<PageLoader />}>
+                <ProfilePage />
+              </Suspense>
+            </RouteErrorBoundary>
+          } />
+        </Route>
+
+        {/* Fallback routes */}
+        <Route path="/404" element={
+          <RouteErrorBoundary>
+            <Suspense fallback={<PageLoader />}>
+              <NotFoundPage />
+            </Suspense>
+          </RouteErrorBoundary>
+        } />
+        <Route path="*" element={<Navigate to="/404" replace />} />
+      </Routes>
+
+      {/* Global Search */}
+      <ErrorBoundary level="component">
+        <GlobalSearch isOpen={isOpen} onClose={closeSearch} />
+      </ErrorBoundary>
     </ErrorBoundary>
   )
 }

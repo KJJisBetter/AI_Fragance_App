@@ -1,33 +1,42 @@
-import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import { authApi } from "../lib/api";
+import React, { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
+import { useToast } from '@/hooks/use-toast';
+import { useAppStore } from '../stores/appStore';
 
 export const LoginPage = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Use individual selectors to avoid infinite loops
+  const login = useAppStore((state) => state.login);
+  const isLoading = useAppStore((state) => state.isLoading);
+  const setIsLoading = useAppStore((state) => state.setIsLoading);
+
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    setError("");
-    setSuccess("");
+    setIsLoading(true);
+    // setError(""); // This line was removed as per the new_code
+    // setSuccess(""); // This line was removed as per the new_code
 
     try {
       // Call the backend API to login the user
-      const response = await authApi.login({
-        email,
-        password
-      });
+      // const response = await authApi.login({ // This line was removed as per the new_code
+      //   email, // This line was removed as per the new_code
+      //   password // This line was removed as per the new_code
+      // }); // This line was removed as per the new_code
 
-      // Save the token and user info
-      localStorage.setItem('auth_token', response.token);
-      localStorage.setItem('user', JSON.stringify(response.user));
+      // Use Zustand store to handle login
+      // login(response.user, response.token); // This line was removed as per the new_code
 
-      setSuccess(`Welcome back, ${response.user.username}!`);
+      // setSuccess(`Welcome back, ${response.user.username}!`); // This line was removed as per the new_code
 
       // Redirect to home page after 1 second
       setTimeout(() => {
@@ -35,307 +44,120 @@ export const LoginPage = () => {
       }, 1000);
 
     } catch (err: any) {
-      setError(err.message || 'Login failed. Please check your credentials.');
+      // setError(err.message || 'Login failed. Please check your credentials.'); // This line was removed as per the new_code
+      toast({
+        title: err.message || 'Login failed. Please check your credentials.',
+        variant: 'destructive',
+      });
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
   return (
-    <div style={{
-      minHeight: "100vh",
-      backgroundColor: "#f8fafc",
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      justifyContent: "center",
-      padding: "24px"
-    }}>
+    <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6">
       {/* Header */}
-      <div style={{
-        textAlign: "center",
-        marginBottom: "48px"
-      }}>
-        <h1 style={{
-          fontSize: "2.5rem",
-          fontWeight: "bold",
-          color: "#1e293b",
-          margin: "0 0 8px 0",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: "12px"
-        }}>
+      <div className="text-center mb-12">
+        <h1 className="text-4xl font-bold text-foreground mb-2 flex items-center justify-center gap-3">
           🌸 Fragrance Battle AI
         </h1>
-        <p style={{
-          fontSize: "1.1rem",
-          color: "#64748b",
-          margin: "0"
-        }}>
+        <p className="text-lg text-muted-foreground">
           Discover, compare, and battle your favorite fragrances
         </p>
       </div>
 
       {/* Login Form */}
-      <div style={{
-        maxWidth: "400px",
-        width: "100%",
-        backgroundColor: "white",
-        borderRadius: "12px",
-        padding: "32px",
-        boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
-        border: "1px solid rgba(0,0,0,0.05)"
-      }}>
-        <div style={{
-          textAlign: "center",
-          marginBottom: "32px"
-        }}>
-          <h2 style={{
-            fontSize: "1.8rem",
-            fontWeight: "bold",
-            color: "#1e293b",
-            margin: "0 0 8px 0"
-          }}>
-            Welcome Back
-          </h2>
-          <p style={{
-            color: "#64748b",
-            fontSize: "14px",
-            margin: "0"
-          }}>
+      <Card className="w-full max-w-md">
+        <CardHeader className="text-center">
+          <CardTitle className="text-2xl">Welcome Back</CardTitle>
+          <CardDescription>
             Sign in to continue your fragrance journey
-          </p>
-        </div>
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {/* {error && ( // This block was removed as per the new_code
+            <div className="flex items-center gap-2 p-3 bg-destructive/10 border border-destructive/20 rounded-md text-destructive text-sm">
+              <span>⚠️</span>
+              {error}
+            </div>
+          )} */}
 
-        {error && (
-          <div style={{
-            padding: "12px 16px",
-            backgroundColor: "#fef2f2",
-            color: "#dc2626",
-            border: "1px solid #fca5a5",
-            borderRadius: "8px",
-            marginBottom: "20px",
-            fontSize: "14px",
-            display: "flex",
-            alignItems: "center",
-            gap: "8px"
-          }}>
-            <span>⚠️</span>
-            {error}
+          {/* {success && ( // This block was removed as per the new_code
+            <div className="flex items-center gap-2 p-3 bg-green-50 border border-green-200 rounded-md text-green-700 text-sm">
+              <span>✅</span>
+              {success}
+            </div>
+          )} */}
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email" className="text-sm font-medium text-foreground">
+                Email Address
+              </Label>
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                required
+                disabled={isLoading}
+                placeholder="Enter your email"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="password" className="text-sm font-medium text-foreground">
+                Password
+              </Label>
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                required
+                disabled={isLoading}
+                placeholder="Enter your password"
+              />
+            </div>
+
+            <Button
+              type="submit"
+              disabled={isLoading}
+              className="w-full"
+              size="lg"
+            >
+              {isLoading ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  Signing In...
+                </>
+              ) : (
+                <>
+                  🔐 Sign In
+                </>
+              )}
+            </Button>
+          </form>
+
+          {/* Navigation to Register */}
+          <div className="pt-6 border-t border-border text-center">
+            <p className="text-sm text-muted-foreground mb-2">
+              Don't have an account?
+            </p>
+            <Link
+              to="/register"
+              className="inline-flex items-center text-sm font-medium text-primary hover:text-primary/80 transition-colors"
+            >
+              Create a new account →
+            </Link>
           </div>
-        )}
-
-        {success && (
-          <div style={{
-            padding: "12px 16px",
-            backgroundColor: "#f0fdf4",
-            color: "#16a34a",
-            border: "1px solid #bbf7d0",
-            borderRadius: "8px",
-            marginBottom: "20px",
-            fontSize: "14px",
-            display: "flex",
-            alignItems: "center",
-            gap: "8px"
-          }}>
-            <span>✅</span>
-            {success}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit}>
-          <div style={{ marginBottom: "20px" }}>
-            <label style={{
-              display: "block",
-              marginBottom: "8px",
-              fontWeight: "600",
-              color: "#374151",
-              fontSize: "14px"
-            }}>
-              Email Address
-            </label>
-            <input
-              type="email"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              required
-              disabled={loading}
-              placeholder="Enter your email"
-              style={{
-                width: "100%",
-                padding: "12px 16px",
-                border: "2px solid #e5e7eb",
-                borderRadius: "8px",
-                fontSize: "16px",
-                transition: "all 0.2s ease",
-                outline: "none",
-                backgroundColor: loading ? "#f9fafb" : "white"
-              }}
-              onFocus={(e) => {
-                (e.target as HTMLElement).style.borderColor = "#3b82f6";
-                (e.target as HTMLElement).style.boxShadow = "0 0 0 3px rgba(59, 130, 246, 0.1)";
-              }}
-              onBlur={(e) => {
-                (e.target as HTMLElement).style.borderColor = "#e5e7eb";
-                (e.target as HTMLElement).style.boxShadow = "none";
-              }}
-            />
-          </div>
-
-          <div style={{ marginBottom: "24px" }}>
-            <label style={{
-              display: "block",
-              marginBottom: "8px",
-              fontWeight: "600",
-              color: "#374151",
-              fontSize: "14px"
-            }}>
-              Password
-            </label>
-            <input
-              type="password"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              required
-              disabled={loading}
-              placeholder="Enter your password"
-              style={{
-                width: "100%",
-                padding: "12px 16px",
-                border: "2px solid #e5e7eb",
-                borderRadius: "8px",
-                fontSize: "16px",
-                transition: "all 0.2s ease",
-                outline: "none",
-                backgroundColor: loading ? "#f9fafb" : "white"
-              }}
-              onFocus={(e) => {
-                (e.target as HTMLElement).style.borderColor = "#3b82f6";
-                (e.target as HTMLElement).style.boxShadow = "0 0 0 3px rgba(59, 130, 246, 0.1)";
-              }}
-              onBlur={(e) => {
-                (e.target as HTMLElement).style.borderColor = "#e5e7eb";
-                (e.target as HTMLElement).style.boxShadow = "none";
-              }}
-            />
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            style={{
-              width: "100%",
-              padding: "14px 16px",
-              backgroundColor: loading ? "#9ca3af" : "#3b82f6",
-              color: "white",
-              border: "none",
-              borderRadius: "8px",
-              fontSize: "16px",
-              fontWeight: "600",
-              cursor: loading ? "not-allowed" : "pointer",
-              transition: "all 0.2s ease",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "8px"
-            }}
-            onMouseEnter={(e) => {
-              if (!loading) {
-                (e.target as HTMLElement).style.backgroundColor = "#2563eb";
-                (e.target as HTMLElement).style.transform = "translateY(-1px)";
-                (e.target as HTMLElement).style.boxShadow = "0 4px 12px rgba(59, 130, 246, 0.4)";
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (!loading) {
-                (e.target as HTMLElement).style.backgroundColor = "#3b82f6";
-                (e.target as HTMLElement).style.transform = "translateY(0)";
-                (e.target as HTMLElement).style.boxShadow = "none";
-              }
-            }}
-          >
-            {loading ? (
-              <>
-                <div style={{
-                  width: "16px",
-                  height: "16px",
-                  border: "2px solid #ffffff",
-                  borderTop: "2px solid transparent",
-                  borderRadius: "50%",
-                  animation: "spin 1s linear infinite"
-                }}></div>
-                Signing In...
-              </>
-            ) : (
-              <>
-                🔐 Sign In
-              </>
-            )}
-          </button>
-        </form>
-
-        {/* Navigation to Register */}
-        <div style={{
-          marginTop: "24px",
-          paddingTop: "24px",
-          borderTop: "1px solid #e5e7eb",
-          textAlign: "center"
-        }}>
-          <p style={{
-            color: "#6b7280",
-            fontSize: "14px",
-            margin: "0 0 8px 0"
-          }}>
-            Don't have an account?
-          </p>
-          <Link
-            to="/register"
-            style={{
-              color: "#3b82f6",
-              fontSize: "14px",
-              fontWeight: "600",
-              textDecoration: "none",
-              padding: "8px 16px",
-              borderRadius: "6px",
-              transition: "all 0.2s ease",
-              display: "inline-block"
-            }}
-            onMouseEnter={(e) => {
-              (e.target as HTMLElement).style.backgroundColor = "#eff6ff";
-              (e.target as HTMLElement).style.color = "#2563eb";
-            }}
-            onMouseLeave={(e) => {
-              (e.target as HTMLElement).style.backgroundColor = "transparent";
-              (e.target as HTMLElement).style.color = "#3b82f6";
-            }}
-          >
-            Create a new account →
-          </Link>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
       {/* Footer */}
-      <div style={{
-        textAlign: "center",
-        marginTop: "32px",
-        color: "#9ca3af",
-        fontSize: "12px"
-      }}>
-        <p style={{ margin: "0" }}>
-          © 2024 Fragrance Battle AI • Discover your perfect scent
-        </p>
+      <div className="text-center mt-8 text-xs text-muted-foreground">
+        <p>© 2024 Fragrance Battle AI • Discover your perfect scent</p>
       </div>
-
-      {/* Loading Animation */}
-      <style>
-        {`
-          @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-          }
-        `}
-      </style>
     </div>
   );
 };

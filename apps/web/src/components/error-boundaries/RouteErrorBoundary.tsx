@@ -118,18 +118,19 @@ export const RouteErrorBoundary: React.FC<RouteErrorBoundaryProps> = ({
     console.error('Route Error Report:', routeErrorReport);
   };
 
+  // Create the fallback component as a ReactNode
+  const fallbackNode = FallbackComponent ? (
+    <FallbackComponent error={new Error('Route error')} reset={() => window.location.reload()} />
+  ) : (
+    <RouteErrorFallback error={new Error('Route error')} reset={() => window.location.reload()} />
+  );
+
   return (
     <ErrorBoundary
       level="page"
       onError={handleError}
       showErrorDetails={process.env.NODE_ENV === 'development'}
-      fallback={
-        FallbackComponent ? (
-          <FallbackComponent error={new Error('Route error')} reset={() => window.location.reload()} />
-        ) : (
-          <RouteErrorFallback error={new Error('Route error')} reset={() => window.location.reload()} />
-        )
-      }
+      fallback={fallbackNode}
     >
       {children}
     </ErrorBoundary>

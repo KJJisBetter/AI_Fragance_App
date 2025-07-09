@@ -4,7 +4,7 @@
  */
 
 import Bottleneck from 'bottleneck';
-import { Request, Response, NextFunction } from 'express';
+import { FastifyRequest, FastifyReply } from 'fastify';
 import { config } from '../config';
 import { log } from '../utils/logger';
 
@@ -57,16 +57,16 @@ const heavyOperationLimiter = new Bottleneck({
 
 // ===== RATE LIMITING MIDDLEWARE =====
 
-// Create rate limiting middleware
+// Create rate limiting middleware for Fastify
 function createRateLimitMiddleware(limiter: Bottleneck, name: string) {
-  return async (req: Request, res: Response, next: NextFunction) => {
+  return async (request: FastifyRequest, reply: FastifyReply) => {
     // Skip rate limiting entirely in development
     if (config.NODE_ENV === 'development') {
-      return next();
+      return;
     }
 
-    const clientId = req.ip || req.socket.remoteAddress || 'unknown';
-    const userId = req.user?.id || 'anonymous';
+    const clientId = request.ip || request.socket.remoteAddress || 'unknown';
+    const userId = (request as any).user?.id || 'anonymous';
 
     try {
       await limiter.schedule({ id: clientId }, async () => {
@@ -75,17 +75,21 @@ function createRateLimitMiddleware(limiter: Bottleneck, name: string) {
       });
 
       // Add rate limit headers
-      res.set({
+      reply.headers({
         'X-RateLimit-Limit': limiter.reservoir?.toString() || '0',
         'X-RateLimit-Remaining': limiter.reservoir?.toString() || '0',
         'X-RateLimit-Reset': new Date(Date.now() + config.RATE_LIMIT_WINDOW_MS).toISOString()
       });
 
-      next();
     } catch (error) {
-      log.api.error(req.method, req.originalUrl, new Error(`Rate limit exceeded for ${name}`), userId);
+      log.info(`🚦 Rate limit exceeded for ${name}`, {
+        clientId,
+        userId,
+        url: request.url,
+        method: request.method
+      });
 
-      res.status(429).json({
+      reply.status(429).send({
         success: false,
         error: 'Rate limit exceeded',
         message: `Too many requests to ${name}. Please try again later.`,
@@ -111,18 +115,18 @@ export const externalAPI = {
   // Perfumero API calls
   perfumero: {
     search: externalAPILimiter.wrap(async (params: any) => {
-      log.external.request('perfumero', '/search', 'POST');
+      log.info('🌐 External API call', { service: 'perfumero', endpoint: '/search', method: 'POST' });
       // The actual API call will be made by the calling function
       return params;
     }),
 
     getSimilar: externalAPILimiter.wrap(async (pid: string) => {
-      log.external.request('perfumero', `/similar/${pid}`, 'GET');
+      log.info('🌐 External API call', { service: 'perfumero', endpoint: `/similar/${pid}`, method: 'GET' });
       return pid;
     }),
 
     getDetails: externalAPILimiter.wrap(async (pid: string) => {
-      log.external.request('perfumero', `/perfume/${pid}`, 'GET');
+      log.info('🌐 External API call', { service: 'perfumero', endpoint: `/perfume/${pid}`, method: 'GET' });
       return pid;
     })
   },
@@ -130,12 +134,12 @@ export const externalAPI = {
   // OpenAI API calls
   openai: {
     completion: heavyOperationLimiter.wrap(async (prompt: string) => {
-      log.external.request('openai', '/completions', 'POST');
+      log.info('🤖 AI API call', { service: 'openai', endpoint: '/completions', method: 'POST' });
       return prompt;
     }),
 
     embedding: heavyOperationLimiter.wrap(async (text: string) => {
-      log.external.request('openai', '/embeddings', 'POST');
+      log.info('🤖 AI API call', { service: 'openai', endpoint: '/embeddings', method: 'POST' });
       return text;
     })
   }
@@ -191,78 +195,26 @@ class AdaptiveRateLimiter {
     });
 
     this.lastAdjustment = now;
-    log.performance.memory(process.memoryUsage());
-    log.info(`🔄 Rate limit adjusted to ${Math.floor(factor * 100)}% of normal`);
+    log.info(`🔄 Rate limit adjusted to ${Math.floor(factor * 100)}% of normal`, {
+      memoryUsage: process.memoryUsage(),
+      factor
+    });
   }
 
-  getMiddleware(): (req: Request, res: Response, next: NextFunction) => void {
+  getMiddleware(): (request: FastifyRequest, reply: FastifyReply) => Promise<void> {
     return createRateLimitMiddleware(this.limiter, 'adaptive');
   }
 }
 
-// Create adaptive limiter for high-traffic endpoints
-export const adaptiveSearchLimiter = new AdaptiveRateLimiter('search', config.SEARCH_RATE_LIMIT_MAX, 200);
+// ===== PERFORMANCE MONITORING =====
 
-// ===== RATE LIMIT MONITORING =====
+// Create adaptive rate limiter for high-load scenarios
+export const adaptiveRateLimiter = new AdaptiveRateLimiter('adaptive', 100, 100);
 
-// Monitor rate limit usage
-export const rateLimitMonitor = {
-  getStats: () => {
-    return {
-      general: {
-        queued: generalLimiter.queued(),
-        running: generalLimiter.running(),
-        done: generalLimiter.done
-      },
-      search: {
-        queued: searchLimiter.queued(),
-        running: searchLimiter.running(),
-        done: searchLimiter.done
-      },
-      auth: {
-        queued: authLimiter.queued(),
-        running: authLimiter.running(),
-        done: authLimiter.done
-      },
-      external: {
-        queued: externalAPILimiter.queued(),
-        running: externalAPILimiter.running(),
-        done: externalAPILimiter.done
-      }
-    };
-  },
+// Export adaptive middleware
+export const adaptiveMiddleware = adaptiveRateLimiter.getMiddleware();
 
-  // Clear all rate limit queues (emergency use)
-  clearAll: () => {
-    generalLimiter.stop();
-    searchLimiter.stop();
-    authLimiter.stop();
-    externalAPILimiter.stop();
-    heavyOperationLimiter.stop();
-
-    log.warn('🚨 All rate limiters stopped and cleared');
-  }
-};
-
-// ===== LEGACY EXPORTS =====
-
-// Export individual limiters for backward compatibility
-export const generalRateLimiter = rateLimiters.general;
-export const searchRateLimiter = rateLimiters.search;
-export const authRateLimiter = rateLimiters.auth;
-
-// ===== GRACEFUL SHUTDOWN =====
-
-// Graceful shutdown handling
-process.on('SIGTERM', () => {
-  log.info('🔄 Gracefully shutting down rate limiters...');
-  rateLimitMonitor.clearAll();
-});
-
-process.on('SIGINT', () => {
-  log.info('🔄 Gracefully shutting down rate limiters...');
-  rateLimitMonitor.clearAll();
-});
+// ===== INITIALIZATION =====
 
 log.info('🚦 Rate limiting system initialized with Bottleneck', {
   strategies: ['general', 'search', 'auth', 'external', 'heavy', 'adaptive']

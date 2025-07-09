@@ -1,17 +1,12 @@
 /**
  * Modern Fragrance Battle AI API Server
- * Using proper configuration, logging, rate limiting, and search services
+ * Using Fastify for 2x better performance than Express
  */
 
-import express from 'express';
-import cors from 'cors';
-import helmet from 'helmet';
+import Fastify from 'fastify';
 import { connectDatabase } from '@fragrance-battle/database';
-import { config, features, isDevelopment } from './config';
-import { log, requestLogger, errorLogger } from './utils/logger';
-import { rateLimiters, rateLimitMonitor } from './middleware/rateLimiter';
-import { errorHandler } from './middleware/errorHandler';
-import { notFoundHandler } from './middleware/notFoundHandler';
+import { config, features } from './config';
+import { log } from './utils/logger';
 import { searchService } from './services/searchService';
 
 // Import routes
@@ -23,61 +18,34 @@ import aiRoutes from './routes/ai';
 import userRoutes from './routes/users';
 import brandRoutes from './routes/brands';
 
-const app = express();
-
-// ===== SECURITY & PERFORMANCE MIDDLEWARE =====
-app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      styleSrc: ["'self'", "'unsafe-inline'"],
-      scriptSrc: ["'self'"],
-      imgSrc: ["'self'", "data:", "https:"],
-      connectSrc: ["'self'", "https://api.openai.com", config.PERFUMERO_BASE_URL],
-    },
-  },
-  crossOriginEmbedderPolicy: false
-}));
-
-// ===== CORS CONFIGURATION =====
-app.use(cors({
-  origin: features.corsEnabled ? true : [
-    'http://localhost:5173',
-    'http://127.0.0.1:5173',
-    'http://localhost:3000',
-    'http://localhost:3001'
-  ],
-  credentials: true,
-  optionsSuccessStatus: 200
-}));
-
-// ===== REQUEST PROCESSING =====
-app.use(express.json({
-  limit: '10mb',
-  verify: (req, res, buf, encoding) => {
-    // Log large payloads
-    if (buf.length > 1024 * 1024) { // > 1MB
-      log.warn('Large request payload detected', {
-        size: `${Math.round(buf.length / 1024)}KB`,
-        endpoint: req.path
-      });
-    }
+// Create Fastify instance
+const fastify = Fastify({
+  logger: {
+    level: config.LOG_LEVEL,
+    transport: config.NODE_ENV === 'development' ? {
+      target: 'pino-pretty',
+      options: {
+        colorize: true,
+        translateTime: 'HH:MM:ss Z',
+        ignore: 'pid,hostname'
+      }
+    } : undefined
   }
-}));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+});
 
-// ===== LOGGING MIDDLEWARE =====
-app.use(requestLogger);
-
-// ===== GLOBAL RATE LIMITING =====
-app.use('/api', rateLimiters.general);
+// Extend Fastify Request interface to include startTime
+declare module 'fastify' {
+  interface FastifyRequest {
+    startTime?: number;
+  }
+}
 
 // ===== HEALTH CHECK ENDPOINTS =====
-app.get('/health', (req, res) => {
-  const memUsage = process.memoryUsage();
-  const rateLimitStats = rateLimitMonitor.getStats();
 
-  res.json({
+fastify.get('/health', async (request, reply) => {
+  const memUsage = process.memoryUsage();
+
+  return {
     status: 'ok',
     timestamp: new Date().toISOString(),
     version: process.env.npm_package_version || '1.0.0',
@@ -94,17 +62,16 @@ app.get('/health', (req, res) => {
         total: `${Math.round(memUsage.heapTotal / 1024 / 1024)}MB`,
         external: `${Math.round(memUsage.external / 1024 / 1024)}MB`
       },
-      rateLimits: rateLimitStats,
       searchCache: searchService.getCacheStats()
     }
-  });
+  };
 });
 
 // Detailed health check for monitoring
-app.get('/health/detailed', (req, res) => {
+fastify.get('/health/detailed', async (request, reply) => {
   const memUsage = process.memoryUsage();
 
-  res.json({
+  return {
     status: 'ok',
     timestamp: new Date().toISOString(),
     config: {
@@ -118,36 +85,27 @@ app.get('/health/detailed', (req, res) => {
     performance: {
       uptime: process.uptime(),
       memory: memUsage,
-      rateLimits: rateLimitMonitor.getStats(),
-      searchEngine: 'Fuse.js + MeiliSearch',
-      caching: 'node-cache'
+      searchEngine: 'MeiliSearch + Redis',
+      caching: 'Redis'
     }
-  });
+  };
 });
 
-// ===== API ROUTES =====
-app.use('/api/auth', rateLimiters.auth, authRoutes);
-app.use('/api/fragrances', fragranceRoutes); // Rate limiting handled in routes
-app.use('/api/brands', brandRoutes); // Brands directory
-app.use('/api/collections', collectionRoutes);
-app.use('/api/battles', battleRoutes);
-app.use('/api/ai', rateLimiters.heavy, aiRoutes);
-app.use('/api/users', userRoutes);
-
 // ===== API DOCUMENTATION =====
-app.get('/api', (req, res) => {
-  res.json({
+
+fastify.get('/api', async (request, reply) => {
+  return {
     name: 'Fragrance Battle AI API',
     version: process.env.npm_package_version || '1.0.0',
-    description: 'Modern API for fragrance battle AI application',
+    description: 'Modern API for fragrance battle AI application - now with Fastify!',
     environment: config.NODE_ENV,
     features: Object.entries(features)
       .filter(([, enabled]) => enabled)
       .map(([name]) => name),
-    searchEngine: 'Fuse.js + MeiliSearch',
-    rateLimiting: 'Bottleneck',
-    validation: 'Joi',
-    logging: 'Winston',
+    searchEngine: 'MeiliSearch + Redis',
+    framework: 'Fastify',
+    validation: 'Zod',
+    logging: 'Pino',
     endpoints: {
       // Health & monitoring
       health: {
@@ -155,7 +113,7 @@ app.get('/api', (req, res) => {
         'GET /health/detailed': 'Detailed system status'
       },
 
-      // Authentication (rate limited)
+      // Authentication
       auth: {
         'POST /api/auth/register': 'Register a new user',
         'POST /api/auth/login': 'Login user',
@@ -166,14 +124,12 @@ app.get('/api', (req, res) => {
       // Fragrances (intelligent search)
       fragrances: {
         'GET /api/fragrances': 'Get all fragrances with filters',
-        'POST /api/fragrances/search': 'Intelligent search with Fuse.js/MeiliSearch',
+        'POST /api/fragrances/search': 'Intelligent search with MeiliSearch',
         'POST /api/fragrances/autocomplete': 'Smart auto-complete suggestions',
         'GET /api/fragrances/:id': 'Get fragrance by ID',
         'POST /api/fragrances': 'Create new fragrance',
         'PUT /api/fragrances/:id': 'Update fragrance',
-        'DELETE /api/fragrances/:id': 'Delete fragrance',
-        'GET /api/fragrances/analytics/search': 'Search analytics',
-        'POST /api/fragrances/analytics/clear-cache': 'Clear search cache (admin)'
+        'DELETE /api/fragrances/:id': 'Delete fragrance'
       },
 
       // Collections
@@ -182,9 +138,7 @@ app.get('/api', (req, res) => {
         'POST /api/collections': 'Create collection',
         'GET /api/collections/:id': 'Get collection details',
         'PUT /api/collections/:id': 'Update collection',
-        'DELETE /api/collections/:id': 'Delete collection',
-        'POST /api/collections/:id/items': 'Add fragrance to collection',
-        'DELETE /api/collections/:id/items/:itemId': 'Remove from collection'
+        'DELETE /api/collections/:id': 'Delete collection'
       },
 
       // Battles
@@ -193,89 +147,61 @@ app.get('/api', (req, res) => {
         'POST /api/battles': 'Create battle',
         'GET /api/battles/:id': 'Get battle details',
         'PUT /api/battles/:id': 'Update battle',
-        'DELETE /api/battles/:id': 'Delete battle',
-        'POST /api/battles/:id/vote': 'Vote in battle',
-        'POST /api/battles/:id/complete': 'Complete battle'
+        'DELETE /api/battles/:id': 'Delete battle'
       },
 
-      // AI Services (rate limited)
+      // AI Features
       ai: {
-        'POST /api/ai/categorize': 'AI fragrance categorization',
-        'GET /api/ai/categorize/:fragranceId': 'Get AI categories for fragrance',
-        'POST /api/ai/categorize-batch': 'Batch AI categorization',
-        'POST /api/ai/feedback': 'Submit AI feedback',
-        'GET /api/ai/health': 'AI service health'
+        'POST /api/ai/categorize': 'AI categorization of fragrances',
+        'POST /api/ai/recommend': 'AI-powered recommendations',
+        'POST /api/ai/analyze': 'AI analysis of user preferences'
       },
 
-      // User management
+      // Users
       users: {
-        'GET /api/users/analytics': 'User analytics',
-        'GET /api/users/profile': 'User profile',
-        'PUT /api/users/profile': 'Update profile'
+        'GET /api/users/me': 'Get current user profile',
+        'PUT /api/users/me': 'Update user profile',
+        'GET /api/users/:id': 'Get user by ID'
+      },
+
+      // Brands
+      brands: {
+        'GET /api/brands': 'Get all brands',
+        'GET /api/brands/:id': 'Get brand details',
+        'GET /api/brands/search': 'Search brands'
       }
-    },
-    documentation: {
-      search: {
-        intelligence: 'Typo-tolerant, synonym-aware, intelligent ranking',
-        engines: ['Fuse.js', 'MeiliSearch (when available)'],
-        features: ['auto-complete', 'suggestions', 'caching', 'analytics']
-      },
-      rateLimiting: {
-        general: `${config.RATE_LIMIT_MAX_REQUESTS} req/${config.RATE_LIMIT_WINDOW_MS}ms`,
-        search: `${config.SEARCH_RATE_LIMIT_MAX} req/${config.RATE_LIMIT_WINDOW_MS}ms`,
-        auth: '10 req/15min',
-        ai: '20 req/15min'
-      },
-      validation: 'Joi schemas with detailed error messages',
-      logging: 'Structured logging with Winston'
     }
-  });
+  };
 });
 
-// ===== ERROR HANDLING =====
-app.use(notFoundHandler);
-app.use(errorLogger);
-app.use(errorHandler);
-
 // ===== CONFIGURATION VALIDATION =====
+
 const validateConfiguration = () => {
-  const errors: string[] = [];
+  const requiredEnvVars = ['DATABASE_URL', 'JWT_SECRET'];
 
-  if (!config.DATABASE_URL) {
-    errors.push('DATABASE_URL is required');
-  }
-
-  if (!config.JWT_SECRET || config.JWT_SECRET === 'dev-secret-key') {
-    if (config.NODE_ENV === 'production') {
-      errors.push('JWT_SECRET must be set in production');
-    } else {
-      log.warn('⚠️ Using default JWT secret in development');
+  for (const envVar of requiredEnvVars) {
+    if (!process.env[envVar]) {
+      throw new Error(`Required environment variable ${envVar} is not set`);
     }
   }
 
-  if (errors.length > 0) {
-    log.error('❌ Configuration validation failed', { errors });
-    process.exit(1);
+  if (features.openAI && !process.env.OPENAI_API_KEY) {
+    log.warn('⚠️ OpenAI API key not found - AI features will be disabled');
   }
 
-  // Log feature availability
-  if (!features.openAI) {
-    log.warn('⚠️ OpenAI API not configured - AI features disabled');
+  if (features.meilisearch && !process.env.MEILISEARCH_URL) {
+    log.warn('⚠️ MeiliSearch URL not found - search will use fallback');
   }
 
-  if (!features.perfumero) {
-    log.warn('⚠️ Perfumero API not configured - external search disabled');
-  }
-
-  if (!features.meilisearch) {
-    log.info('ℹ️ MeiliSearch not configured - using Fuse.js only');
-  }
+  log.info('✅ Configuration validated successfully');
 };
 
 // ===== SERVER STARTUP =====
+
 const startServer = async () => {
   try {
     // Validate configuration
+    log.info('🔧 Validating configuration...');
     validateConfiguration();
 
     // Connect to database
@@ -287,73 +213,159 @@ const startServer = async () => {
     log.info('🔍 Initializing search service...');
     // Search service initializes automatically in constructor
 
-    // Start HTTP server
-    const server = app.listen(config.PORT, () => {
-      log.info('🚀 Server started successfully', {
-        port: config.PORT,
-        environment: config.NODE_ENV,
-        features: Object.entries(features)
-          .filter(([, enabled]) => enabled)
-          .map(([name]) => name)
+    // Register plugins
+    log.info('🔌 Registering Fastify plugins...');
+
+    // Register CORS plugin
+    await fastify.register(import('@fastify/cors'), {
+      origin: features.corsEnabled ? true : [
+        'http://localhost:5173',
+        'http://127.0.0.1:5173',
+        'http://localhost:3000',
+        'http://localhost:3001'
+      ],
+      credentials: true
+    });
+
+    // Register security plugin
+    await fastify.register(import('@fastify/helmet'), {
+      contentSecurityPolicy: {
+        directives: {
+          defaultSrc: ["'self'"],
+          styleSrc: ["'self'", "'unsafe-inline'"],
+          scriptSrc: ["'self'"],
+          imgSrc: ["'self'", "data:", "https:"],
+          connectSrc: ["'self'", "https://api.openai.com", config.PERFUMERO_BASE_URL],
+        },
+      },
+      crossOriginEmbedderPolicy: false
+    });
+
+    // Register rate limiting plugin
+    await fastify.register(import('@fastify/rate-limit'), {
+      max: config.RATE_LIMIT_MAX_REQUESTS,
+      timeWindow: config.RATE_LIMIT_WINDOW_MS,
+      allowList: config.NODE_ENV === 'development' ? ['127.0.0.1'] : undefined
+    });
+
+    // Add middleware hooks
+    fastify.addHook('onRequest', async (request, reply) => {
+      const start = Date.now();
+      request.startTime = start;
+
+      log.info(`${request.method} ${request.url}`, {
+        ip: request.ip,
+        userAgent: request.headers['user-agent']
+      });
+    });
+
+    fastify.addHook('onResponse', async (request, reply) => {
+      const duration = Date.now() - (request.startTime || 0);
+
+      log.info(`${request.method} ${request.url} - ${reply.statusCode}`, {
+        duration,
+        statusCode: reply.statusCode
       });
 
-      log.info('📖 API documentation available', {
-        url: `http://localhost:${config.PORT}/api`
-      });
-
-      log.info('🏥 Health check available', {
-        url: `http://localhost:${config.PORT}/health`
-      });
-
-      if (features.openAI) {
-        log.info('🤖 AI endpoints available', {
-          url: `http://localhost:${config.PORT}/api/ai/*`
+      // Log slow requests
+      if (duration > 1000) {
+        log.warn('Slow request detected', {
+          method: request.method,
+          url: request.url,
+          duration,
+          threshold: 1000
         });
       }
     });
 
+    fastify.addHook('onError', async (request, reply, error) => {
+      log.error('Request error', {
+        method: request.method,
+        url: request.url,
+        error: error.message,
+        stack: error.stack
+      });
+    });
+
+    log.info('✅ Fastify plugins registered successfully');
+
+    // Register route plugins
+    log.info('🔌 Registering API routes...');
+    await fastify.register(authRoutes, { prefix: '/api/auth' });
+    await fastify.register(fragranceRoutes, { prefix: '/api/fragrances' });
+    await fastify.register(brandRoutes, { prefix: '/api/brands' });
+    await fastify.register(collectionRoutes, { prefix: '/api/collections' });
+    await fastify.register(battleRoutes, { prefix: '/api/battles' });
+    await fastify.register(aiRoutes, { prefix: '/api/ai' });
+    await fastify.register(userRoutes, { prefix: '/api/users' });
+    log.info('✅ API routes registered successfully');
+
+    // Start Fastify server
+    log.info('🚀 Starting Fastify server...');
+    await fastify.listen({
+      port: config.PORT,
+      host: config.NODE_ENV === 'development' ? 'localhost' : '0.0.0.0'
+    });
+
+    log.info('🚀 Fastify server started successfully', {
+      port: config.PORT,
+      environment: config.NODE_ENV,
+      features: Object.entries(features)
+        .filter(([, enabled]) => enabled)
+        .map(([name]) => name)
+    });
+
+    log.info('📖 API documentation available', {
+      url: `http://localhost:${config.PORT}/api`
+    });
+
+    log.info('🏥 Health check available', {
+      url: `http://localhost:${config.PORT}/health`
+    });
+
+    if (features.openAI) {
+      log.info('🤖 AI endpoints available', {
+        url: `http://localhost:${config.PORT}/api/ai/*`
+      });
+    }
+
     // Graceful shutdown handling
-    const gracefulShutdown = (signal: string) => {
+    const gracefulShutdown = async (signal: string) => {
       log.info(`🛑 ${signal} received, shutting down gracefully...`);
 
-      server.close(() => {
-        log.info('✅ HTTP server closed');
-
-        // Clear rate limiters
-        rateLimitMonitor.clearAll();
+      try {
+        await fastify.close();
+        log.info('✅ Fastify server closed');
 
         // Clear search cache
         searchService.clearCache();
 
         log.info('🔄 Cleanup completed');
         process.exit(0);
-      });
-
-      // Force shutdown after 10 seconds
-      setTimeout(() => {
-        log.error('❌ Forced shutdown due to timeout');
+      } catch (error) {
+        log.error('❌ Error during shutdown', {
+          error: error.message,
+          stack: error.stack,
+          name: error.name
+        });
         process.exit(1);
-      }, 10000);
+      }
     };
 
     process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
     process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 
   } catch (error) {
-    log.error('❌ Failed to start server', { error });
+    log.error('❌ Failed to start server', {
+      error: error.message,
+      stack: error.stack,
+      name: error.name,
+      code: error.code
+    });
+    console.error('Raw error object:', error);
     process.exit(1);
   }
 };
 
-// ===== PERFORMANCE MONITORING =====
-if (isDevelopment) {
-  // Log memory usage every 30 seconds in development
-  setInterval(() => {
-    log.performance.memory(process.memoryUsage());
-  }, 30000);
-}
-
 // Start the server
 startServer();
-
-export default app;

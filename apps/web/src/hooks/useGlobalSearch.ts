@@ -4,16 +4,19 @@ export const useGlobalSearch = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   const openSearch = useCallback(() => {
+    console.log('Opening search, current state:', isOpen);
     setIsOpen(true);
-  }, []);
+  }, [isOpen]);
 
   const closeSearch = useCallback(() => {
+    console.log('Closing search, current state:', isOpen);
     setIsOpen(false);
-  }, []);
+  }, [isOpen]);
 
   const toggleSearch = useCallback(() => {
+    console.log('Toggling search, current state:', isOpen);
     setIsOpen(prev => !prev);
-  }, []);
+  }, [isOpen]);
 
   // Handle global keyboard shortcuts
   useEffect(() => {

@@ -3,7 +3,7 @@ import { useSearchParams, Link } from "react-router-dom";
 import { fragrancesApi } from "../lib/api";
 import { Fragrance, FragranceSearchFilters } from "@fragrance-battle/types";
 import { VirtualizedList } from "../components/VirtualizedList";
-import { SmartLoading, FilterSkeleton, PageHeaderSkeleton } from "../components/LoadingStates";
+import { SmartLoading, FilterSkeleton, PageHeaderSkeleton, SearchResultsSkeleton } from "../components/LoadingStates";
 import { FragranceInfiniteScroll, BackToTop } from "../components/InfiniteScroll";
 import { useInfiniteData, useInfiniteScroll } from "../hooks/useInfiniteScroll";
 import { searchAnalytics } from "../lib/searchAnalytics";
@@ -682,10 +682,9 @@ export const FragrancesPage = () => {
       {/* Content */}
       <div className="content-container">
         {isInitialLoading && (
-          <SmartLoading
-            type="page"
-            count={20}
-            message="Loading fragrances..."
+          <SearchResultsSkeleton
+            count={12}
+            isSearching={debouncedSearchQuery.trim().length > 0}
           />
         )}
 

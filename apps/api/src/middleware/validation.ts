@@ -1,108 +1,108 @@
 /**
- * Modern Validation System using Joi
- * Replaces custom validation with battle-tested library
+ * Modern Validation System using Zod
+ * Replaces Joi validation with better TypeScript integration
  */
 
-import Joi from 'joi';
-import { Request, Response, NextFunction } from 'express';
-import { log } from '../utils/logger';
+import { z } from 'zod';
+import { FastifyRequest, FastifyReply } from 'fastify';
+import { createError } from './errorHandler';
 
 // Helper function to validate CUID format
-const cuidSchema = () => Joi.string().pattern(/^c[a-z0-9]{24}$/).message('must be a valid CUID');
+const cuidSchema = () => z.string().regex(/^c[a-z0-9]{24}$/, 'must be a valid CUID');
 
 // ===== VALIDATION SCHEMAS =====
 
 // Fragrance schemas
 export const fragranceSchemas = {
   // Search fragrances
-  search: Joi.object({
-    query: Joi.string().min(1).max(100).optional(),
-    filters: Joi.object({
-      brand: Joi.string().max(50).optional(),
-      season: Joi.string().valid('spring', 'summer', 'fall', 'winter').optional(),
-      occasion: Joi.string().valid('casual', 'formal', 'date', 'work', 'party').optional(),
-      mood: Joi.string().valid('fresh', 'warm', 'mysterious', 'elegant', 'bold').optional(),
-      concentration: Joi.string().valid('parfum', 'edp', 'edt', 'edc', 'cologne').optional(),
-      verified: Joi.boolean().optional(),
-      yearFrom: Joi.number().integer().min(1900).max(2030).optional(),
-      yearTo: Joi.number().integer().min(1900).max(2030).optional()
+  search: z.object({
+    query: z.string().min(1).max(100).optional(),
+    filters: z.object({
+      brand: z.string().max(50).optional(),
+      season: z.enum(['spring', 'summer', 'fall', 'winter']).optional(),
+      occasion: z.enum(['casual', 'formal', 'date', 'work', 'party']).optional(),
+      mood: z.enum(['fresh', 'warm', 'mysterious', 'elegant', 'bold']).optional(),
+      concentration: z.enum(['parfum', 'edp', 'edt', 'edc', 'cologne']).optional(),
+      verified: z.boolean().optional(),
+      yearFrom: z.number().int().min(1900).max(2030).optional(),
+      yearTo: z.number().int().min(1900).max(2030).optional()
     }).optional(),
-    page: Joi.number().integer().min(1).max(1000).default(1),
-    limit: Joi.number().integer().min(1).max(50).default(20),
-    sortBy: Joi.string().valid('name', 'brand', 'year', 'rating', 'popularity', 'relevance').default('relevance'),
-    sortOrder: Joi.string().valid('asc', 'desc').default('desc')
+    page: z.number().int().min(1).max(1000).default(1),
+    limit: z.number().int().min(1).max(50).default(20),
+    sortBy: z.enum(['name', 'brand', 'year', 'rating', 'popularity', 'relevance']).default('relevance'),
+    sortOrder: z.enum(['asc', 'desc']).default('desc')
   }),
 
   // Get fragrance by ID
-  getById: Joi.object({
-    id: cuidSchema().required()
+  getById: z.object({
+    id: cuidSchema()
   }),
 
   // Create fragrance
-  create: Joi.object({
-    name: Joi.string().min(1).max(200).required(),
-    brand: Joi.string().min(1).max(100).required(),
-    year: Joi.number().integer().min(1900).max(2030).optional(),
-    concentration: Joi.string().valid('parfum', 'edp', 'edt', 'edc', 'cologne').optional(),
-    description: Joi.string().max(2000).optional(),
-    notes: Joi.object({
-      top: Joi.array().items(Joi.string().max(50)).max(10).optional(),
-      middle: Joi.array().items(Joi.string().max(50)).max(10).optional(),
-      base: Joi.array().items(Joi.string().max(50)).max(10).optional()
+  create: z.object({
+    name: z.string().min(1).max(200),
+    brand: z.string().min(1).max(100),
+    year: z.number().int().min(1900).max(2030).optional(),
+    concentration: z.enum(['parfum', 'edp', 'edt', 'edc', 'cologne']).optional(),
+    description: z.string().max(2000).optional(),
+    notes: z.object({
+      top: z.array(z.string().max(50)).max(10).optional(),
+      middle: z.array(z.string().max(50)).max(10).optional(),
+      base: z.array(z.string().max(50)).max(10).optional()
     }).optional(),
-    verified: Joi.boolean().default(false)
+    verified: z.boolean().default(false)
   }),
 
   // Update fragrance
-  update: Joi.object({
-    name: Joi.string().min(1).max(200).optional(),
-    brand: Joi.string().min(1).max(100).optional(),
-    year: Joi.number().integer().min(1900).max(2030).optional(),
-    concentration: Joi.string().valid('parfum', 'edp', 'edt', 'edc', 'cologne').optional(),
-    description: Joi.string().max(2000).optional(),
-    notes: Joi.object({
-      top: Joi.array().items(Joi.string().max(50)).max(10).optional(),
-      middle: Joi.array().items(Joi.string().max(50)).max(10).optional(),
-      base: Joi.array().items(Joi.string().max(50)).max(10).optional()
+  update: z.object({
+    name: z.string().min(1).max(200).optional(),
+    brand: z.string().min(1).max(100).optional(),
+    year: z.number().int().min(1900).max(2030).optional(),
+    concentration: z.enum(['parfum', 'edp', 'edt', 'edc', 'cologne']).optional(),
+    description: z.string().max(2000).optional(),
+    notes: z.object({
+      top: z.array(z.string().max(50)).max(10).optional(),
+      middle: z.array(z.string().max(50)).max(10).optional(),
+      base: z.array(z.string().max(50)).max(10).optional()
     }).optional(),
-    verified: Joi.boolean().optional()
+    verified: z.boolean().optional()
   }),
 
   // Auto-complete
-  autocomplete: Joi.object({
-    query: Joi.string().min(2).max(100).required(),
-    limit: Joi.number().integer().min(1).max(20).default(10)
+  autocomplete: z.object({
+    query: z.string().min(2).max(100),
+    limit: z.number().int().min(1).max(20).default(10)
   })
 };
 
 // User schemas
 export const userSchemas = {
   // Register
-  register: Joi.object({
-    email: Joi.string().email().required(),
-    password: Joi.string().min(8).max(128).required(),
-    username: Joi.string().min(2).max(100).required(),
-    preferences: Joi.object({
-      favoriteSeasons: Joi.array().items(Joi.string().valid('spring', 'summer', 'fall', 'winter')).optional(),
-      favoriteOccasions: Joi.array().items(Joi.string().valid('casual', 'formal', 'date', 'work', 'party')).optional(),
-      favoriteMoods: Joi.array().items(Joi.string().valid('fresh', 'warm', 'mysterious', 'elegant', 'bold')).optional()
+  register: z.object({
+    email: z.string().email(),
+    password: z.string().min(8).max(128),
+    username: z.string().min(2).max(100),
+    preferences: z.object({
+      favoriteSeasons: z.array(z.enum(['spring', 'summer', 'fall', 'winter'])).optional(),
+      favoriteOccasions: z.array(z.enum(['casual', 'formal', 'date', 'work', 'party'])).optional(),
+      favoriteMoods: z.array(z.enum(['fresh', 'warm', 'mysterious', 'elegant', 'bold'])).optional()
     }).optional()
   }),
 
   // Login
-  login: Joi.object({
-    email: Joi.string().email().required(),
-    password: Joi.string().min(8).max(128).required()
+  login: z.object({
+    email: z.string().email(),
+    password: z.string().min(8).max(128)
   }),
 
   // Update profile
-  updateProfile: Joi.object({
-    username: Joi.string().min(2).max(100).optional(),
-    bio: Joi.string().max(500).optional(),
-    preferences: Joi.object({
-      favoriteSeasons: Joi.array().items(Joi.string().valid('spring', 'summer', 'fall', 'winter')).optional(),
-      favoriteOccasions: Joi.array().items(Joi.string().valid('casual', 'formal', 'date', 'work', 'party')).optional(),
-      favoriteMoods: Joi.array().items(Joi.string().valid('fresh', 'warm', 'mysterious', 'elegant', 'bold')).optional()
+  updateProfile: z.object({
+    username: z.string().min(2).max(100).optional(),
+    bio: z.string().max(500).optional(),
+    preferences: z.object({
+      favoriteSeasons: z.array(z.enum(['spring', 'summer', 'fall', 'winter'])).optional(),
+      favoriteOccasions: z.array(z.enum(['casual', 'formal', 'date', 'work', 'party'])).optional(),
+      favoriteMoods: z.array(z.enum(['fresh', 'warm', 'mysterious', 'elegant', 'bold'])).optional()
     }).optional()
   })
 };
@@ -110,218 +110,196 @@ export const userSchemas = {
 // Collection schemas
 export const collectionSchemas = {
   // Create collection
-  create: Joi.object({
-    name: Joi.string().min(1).max(100).required(),
-    description: Joi.string().max(500).optional(),
-    isPublic: Joi.boolean().default(true),
-    fragranceIds: Joi.array().items(cuidSchema()).max(100).optional()
+  create: z.object({
+    name: z.string().min(1).max(100),
+    description: z.string().max(500).optional(),
+    isPublic: z.boolean().default(true),
+    fragranceIds: z.array(cuidSchema()).max(100).optional()
   }),
 
   // Update collection
-  update: Joi.object({
-    name: Joi.string().min(1).max(100).optional(),
-    description: Joi.string().max(500).optional(),
-    isPublic: Joi.boolean().optional()
+  update: z.object({
+    name: z.string().min(1).max(100).optional(),
+    description: z.string().max(500).optional(),
+    isPublic: z.boolean().optional()
   }),
 
   // Add fragrance to collection
-  addFragrance: Joi.object({
-    fragranceId: cuidSchema().required(),
-    notes: Joi.string().max(300).optional()
+  addFragrance: z.object({
+    fragranceId: cuidSchema(),
+    notes: z.string().max(300).optional()
   }),
 
   // Get collection by ID
-  getById: Joi.object({
-    id: cuidSchema().required()
+  getById: z.object({
+    id: cuidSchema()
   })
 };
 
 // Battle schemas
 export const battleSchemas = {
   // Create battle
-  create: Joi.object({
-    name: Joi.string().min(1).max(100).required(),
-    description: Joi.string().max(500).optional(),
-    participantIds: Joi.array().items(cuidSchema()).min(2).max(8).required(),
-    isPublic: Joi.boolean().default(true),
-    duration: Joi.number().integer().min(1).max(168).default(24) // hours
+  create: z.object({
+    name: z.string().min(1).max(100),
+    description: z.string().max(500).optional(),
+    participantIds: z.array(cuidSchema()).min(2).max(8),
+    isPublic: z.boolean().default(true),
+    duration: z.number().int().min(1).max(168).default(24) // hours
   }),
 
   // Vote in battle
-  vote: Joi.object({
-    fragranceId: cuidSchema().required(),
-    battleId: cuidSchema().required()
+  vote: z.object({
+    fragranceId: cuidSchema(),
+    battleId: cuidSchema()
   }),
 
   // Get battle by ID
-  getById: Joi.object({
-    id: cuidSchema().required()
+  getById: z.object({
+    id: cuidSchema()
   })
 };
 
 // Query parameter schemas
 export const querySchemas = {
   // Pagination
-  pagination: Joi.object({
-    page: Joi.number().integer().min(1).max(1000).default(1),
-    limit: Joi.number().integer().min(1).max(100).default(20)
+  pagination: z.object({
+    page: z.number().int().min(1).max(1000).default(1),
+    limit: z.number().int().min(1).max(100).default(20)
   }),
 
   // Filtering
-  filters: Joi.object({
-    brand: Joi.string().max(50).optional(),
-    season: Joi.string().valid('spring', 'summer', 'fall', 'winter').optional(),
-    occasion: Joi.string().valid('casual', 'formal', 'date', 'work', 'party').optional(),
-    mood: Joi.string().valid('fresh', 'warm', 'mysterious', 'elegant', 'bold').optional(),
-    concentration: Joi.string().valid('parfum', 'edp', 'edt', 'edc', 'cologne').optional(),
-    verified: Joi.boolean().optional(),
-    yearFrom: Joi.number().integer().min(1900).max(2030).optional(),
-    yearTo: Joi.number().integer().min(1900).max(2030).optional(),
-    sortBy: Joi.string().valid('name', 'brand', 'year', 'rating', 'popularity', 'created').default('name'),
-    sortOrder: Joi.string().valid('asc', 'desc').default('asc')
+  filters: z.object({
+    brand: z.string().max(50).optional(),
+    season: z.enum(['spring', 'summer', 'fall', 'winter']).optional(),
+    occasion: z.enum(['casual', 'formal', 'date', 'work', 'party']).optional(),
+    mood: z.enum(['fresh', 'warm', 'mysterious', 'elegant', 'bold']).optional(),
+    concentration: z.enum(['parfum', 'edp', 'edt', 'edc', 'cologne']).optional(),
+    verified: z.boolean().optional(),
+    yearFrom: z.number().int().min(1900).max(2030).optional(),
+    yearTo: z.number().int().min(1900).max(2030).optional(),
+    sortBy: z.enum(['name', 'brand', 'year', 'rating', 'popularity', 'created']).default('name'),
+    sortOrder: z.enum(['asc', 'desc']).default('asc')
   })
 };
 
 // AI schemas
 export const aiSchemas = {
   // Categorize fragrance
-  categorizeFragrance: Joi.object({
-    name: Joi.string().min(1).max(200).required(),
-    brand: Joi.string().min(1).max(100).required(),
-    topNotes: Joi.array().items(Joi.string().max(50)).max(20).optional(),
-    middleNotes: Joi.array().items(Joi.string().max(50)).max(20).optional(),
-    baseNotes: Joi.array().items(Joi.string().max(50)).max(20).optional(),
-    year: Joi.number().integer().min(1900).max(2030).optional(),
-    concentration: Joi.string().valid('parfum', 'edp', 'edt', 'edc', 'cologne').optional(),
-    description: Joi.string().max(1000).optional()
+  categorizeFragrance: z.object({
+    name: z.string().min(1).max(200),
+    brand: z.string().min(1).max(100),
+    topNotes: z.array(z.string().max(50)).max(20).optional(),
+    middleNotes: z.array(z.string().max(50)).max(20).optional(),
+    baseNotes: z.array(z.string().max(50)).max(20).optional(),
+    year: z.number().int().min(1900).max(2030).optional(),
+    concentration: z.enum(['parfum', 'edp', 'edt', 'edc', 'cologne']).optional(),
+    description: z.string().max(1000).optional()
   }),
 
   // AI feedback
-  aiFeedback: Joi.object({
-    fragranceId: cuidSchema().required(),
-    aiSuggestion: Joi.object({
-      seasons: Joi.array().items(Joi.string().valid('spring', 'summer', 'fall', 'winter')).optional(),
-      occasions: Joi.array().items(Joi.string().valid('casual', 'formal', 'date', 'work', 'party')).optional(),
-      moods: Joi.array().items(Joi.string().valid('fresh', 'warm', 'mysterious', 'elegant', 'bold')).optional()
-    }).required(),
-    userCorrection: Joi.object({
-      seasons: Joi.array().items(Joi.string().valid('spring', 'summer', 'fall', 'winter')).optional(),
-      occasions: Joi.array().items(Joi.string().valid('casual', 'formal', 'date', 'work', 'party')).optional(),
-      moods: Joi.array().items(Joi.string().valid('fresh', 'warm', 'mysterious', 'elegant', 'bold')).optional()
-    }).required(),
-    feedbackType: Joi.string().valid('season', 'occasion', 'mood', 'general').required(),
-    comments: Joi.string().max(500).optional()
+  aiFeedback: z.object({
+    fragranceId: cuidSchema(),
+    aiSuggestion: z.record(z.any()),
+    userCorrection: z.record(z.any()),
+    feedbackType: z.enum(['season', 'occasion', 'mood', 'notes', 'description'])
   })
 };
 
-// Parameter schemas
+// Parameter schemas for URL params
 export const paramSchemas = {
-  // ID parameter
-  id: Joi.object({
-    id: cuidSchema().required()
+  // Fragrance ID parameter
+  fragranceId: z.object({
+    fragranceId: cuidSchema()
   }),
 
-  // Fragrance ID parameter
-  fragranceId: Joi.object({
-    fragranceId: cuidSchema().required()
+  // User ID parameter
+  userId: z.object({
+    userId: cuidSchema()
+  }),
+
+  // Collection ID parameter
+  collectionId: z.object({
+    id: cuidSchema()
+  }),
+
+  // Battle ID parameter
+  battleId: z.object({
+    id: cuidSchema()
+  }),
+
+  // Brand ID parameter
+  brandId: z.object({
+    id: cuidSchema()
+  }),
+
+  // Generic ID parameter
+  id: z.object({
+    id: cuidSchema()
   })
 };
 
 // ===== VALIDATION MIDDLEWARE =====
 
 // Validate request body
-export const validateBody = (schema: Joi.Schema) => {
-  return (req: Request, res: Response, next: NextFunction) => {
-    const { error, value } = schema.validate(req.body, {
-      abortEarly: false,
-      stripUnknown: true,
-      errors: {
-        wrap: {
-          label: ''
-        }
+export const validateBody = (schema: z.ZodSchema) => {
+  return async (request: FastifyRequest, reply: FastifyReply) => {
+    try {
+      const result = schema.parse(request.body);
+      request.body = result;
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        throw createError('Request validation failed', 400, 'VALIDATION_ERROR', {
+          issues: error.issues.map(issue => ({
+            field: issue.path.join('.'),
+            message: issue.message,
+            code: issue.code
+          }))
+        });
       }
-    });
-
-    if (error) {
-      log.api.error(req.method, req.originalUrl, new Error(`Validation failed: ${error.message}`), req.user?.id);
-
-      return res.status(400).json({
-        success: false,
-        error: 'Validation failed',
-        details: error.details.map(detail => ({
-          field: detail.path.join('.'),
-          message: detail.message,
-          value: detail.context?.value
-        }))
-      });
+      throw error;
     }
-
-    req.body = value;
-    next();
   };
 };
 
 // Validate query parameters
-export const validateQuery = (schema: Joi.Schema) => {
-  return (req: Request, res: Response, next: NextFunction) => {
-    const { error, value } = schema.validate(req.query, {
-      abortEarly: false,
-      stripUnknown: true,
-      errors: {
-        wrap: {
-          label: ''
-        }
+export const validateQuery = (schema: z.ZodSchema) => {
+  return async (request: FastifyRequest, reply: FastifyReply) => {
+    try {
+      const result = schema.parse(request.query);
+      request.query = result;
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        throw createError('Query validation failed', 400, 'VALIDATION_ERROR', {
+          issues: error.issues.map(issue => ({
+            field: issue.path.join('.'),
+            message: issue.message,
+            code: issue.code
+          }))
+        });
       }
-    });
-
-    if (error) {
-      log.api.error(req.method, req.originalUrl, new Error(`Query validation failed: ${error.message}`), req.user?.id);
-
-      return res.status(400).json({
-        success: false,
-        error: 'Query validation failed',
-        details: error.details.map(detail => ({
-          field: detail.path.join('.'),
-          message: detail.message,
-          value: detail.context?.value
-        }))
-      });
+      throw error;
     }
-
-    req.query = value;
-    next();
   };
 };
 
-// Validate URL parameters
-export const validateParams = (schema: Joi.Schema) => {
-  return (req: Request, res: Response, next: NextFunction) => {
-    const { error, value } = schema.validate(req.params, {
-      abortEarly: false,
-      stripUnknown: true,
-      errors: {
-        wrap: {
-          label: ''
-        }
+// Validate route parameters
+export const validateParams = (schema: z.ZodSchema) => {
+  return async (request: FastifyRequest, reply: FastifyReply) => {
+    try {
+      const result = schema.parse(request.params);
+      request.params = result;
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        throw createError('Parameter validation failed', 400, 'VALIDATION_ERROR', {
+          issues: error.issues.map(issue => ({
+            field: issue.path.join('.'),
+            message: issue.message,
+            code: issue.code
+          }))
+        });
       }
-    });
-
-    if (error) {
-      log.api.error(req.method, req.originalUrl, new Error(`Params validation failed: ${error.message}`), req.user?.id);
-
-      return res.status(400).json({
-        success: false,
-        error: 'Parameter validation failed',
-        details: error.details.map(detail => ({
-          field: detail.path.join('.'),
-          message: detail.message,
-          value: detail.context?.value
-        }))
-      });
+      throw error;
     }
-
-    req.params = value;
-    next();
   };
 };
 
@@ -332,32 +310,8 @@ export const validate = {
   params: validateParams
 };
 
-// Legacy export for backward compatibility
-export { fragranceSchemas as schemas };
-
-// Common validation helpers
-export const validationHelpers = {
-  // Check if UUID is valid
-  isValidUUID: (uuid: string): boolean => {
-    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-    return uuidRegex.test(uuid);
-  },
-
-  // Sanitize search query
-  sanitizeQuery: (query: string): string => {
-    return query
-      .trim()
-      .replace(/[<>]/g, '') // Remove potentially dangerous characters
-      .substring(0, 100); // Limit length
-  },
-
-  // Validate file upload
-  validateFileUpload: (file: any): boolean => {
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
-    const maxSize = 5 * 1024 * 1024; // 5MB
-
-    return allowedTypes.includes(file.mimetype) && file.size <= maxSize;
-  }
-};
-
-log.info('✅ Validation system initialized with Joi');
+// Export types for frontend
+export type FragranceSearchInput = z.infer<typeof fragranceSchemas.search>;
+export type FragranceCreateInput = z.infer<typeof fragranceSchemas.create>;
+export type UserRegisterInput = z.infer<typeof userSchemas.register>;
+export type UserLoginInput = z.infer<typeof userSchemas.login>;

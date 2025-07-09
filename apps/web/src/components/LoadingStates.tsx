@@ -320,3 +320,68 @@ export const ProgressiveLoading: React.FC<{
     </div>
   );
 };
+
+// Search Results Skeleton
+export const SearchResultsSkeleton: React.FC<{ count?: number; isSearching?: boolean }> = ({
+  count = 6,
+  isSearching = false
+}) => {
+  return (
+    <div className="search-results-skeleton">
+      {/* Search Results Header Skeleton */}
+      <div className="results-header-skeleton">
+        <div className="skeleton-line" style={{ width: '200px', height: '20px', marginBottom: '8px' }}></div>
+        <div className="skeleton-line" style={{ width: '300px', height: '16px' }}></div>
+      </div>
+
+      {/* Search Results Grid Skeleton */}
+      <div className="fragrances-grid">
+        {Array.from({ length: count }).map((_, index) => (
+          <div key={index} className="fragrance-card skeleton-card">
+            {/* Card Header */}
+            <div className="fragrance-header">
+              <div className="fragrance-title-row">
+                <div className="skeleton-line" style={{ width: '80%', height: '20px', marginBottom: '4px' }}></div>
+                <div className="skeleton-line" style={{ width: '40px', height: '16px' }}></div>
+              </div>
+              <div className="skeleton-line" style={{ width: '60%', height: '16px' }}></div>
+            </div>
+
+            {/* Card Details */}
+            <div className="fragrance-details">
+              <div className="fragrance-meta">
+                <div className="skeleton-line" style={{ width: '50px', height: '20px', borderRadius: '12px' }}></div>
+                <div className="skeleton-line" style={{ width: '70px', height: '20px', borderRadius: '12px' }}></div>
+              </div>
+              <div className="skeleton-line" style={{ width: '100px', height: '16px', marginBottom: '8px' }}></div>
+            </div>
+
+            {/* Notes Skeleton */}
+            <div className="fragrance-notes">
+              {['Top Notes', 'Heart Notes', 'Base Notes'].map((noteType, noteIndex) => (
+                <div key={noteIndex} className="notes-section">
+                  <div className="skeleton-line" style={{ width: '80px', height: '14px', marginBottom: '4px' }}></div>
+                  <div className="skeleton-line" style={{ width: '90%', height: '12px' }}></div>
+                </div>
+              ))}
+            </div>
+
+            {/* Categories Skeleton */}
+            <div className="ai-categories">
+              <div className="skeleton-line" style={{ width: '60px', height: '20px', borderRadius: '12px' }}></div>
+              <div className="skeleton-line" style={{ width: '80px', height: '20px', borderRadius: '12px' }}></div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Search Status */}
+      {isSearching && (
+        <div className="search-status">
+          <div className="skeleton-spinner"></div>
+          <span>Searching fragrances...</span>
+        </div>
+      )}
+    </div>
+  );
+};

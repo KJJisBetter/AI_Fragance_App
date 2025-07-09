@@ -21,6 +21,46 @@ services:
       timeout: 5s
       retries: 5
 
+  redis:
+    image: redis:7-alpine
+    container_name: fragrance-battle-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Optional: API service (can be used for production deployment)
+  # For development, use `npm run dev` instead
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    container_name: fragrance-battle-api
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - DATABASE_URL=postgresql://fragranceuser:fragrancepass123@postgres:5432/fragrance_battle_ai
+      - REDIS_URL=redis://redis:6379
+      - JWT_SECRET=your-jwt-secret-here
+      - OPENAI_API_KEY=your-openai-api-key-here
+    ports:
+      - "3001:3001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    profiles:
+      - production
+
   pgadmin:
     image: dpage/pgadmin4:latest
     container_name: fragrance-battle-pgadmin
@@ -41,6 +81,8 @@ volumes:
   postgres_data:
     driver: local
   pgadmin_data:
+    driver: local
+  redis_data:
     driver: local
 
 networks:

@@ -44,6 +44,12 @@ export interface Config {
   MEILISEARCH_URL: string;
   MEILISEARCH_API_KEY?: string;
 
+  // Redis
+  REDIS_HOST: string;
+  REDIS_PORT: number;
+  REDIS_PASSWORD?: string;
+  REDIS_DB: number;
+
   // Logging
   LOG_LEVEL: 'error' | 'warn' | 'info' | 'debug';
   LOG_FORMAT: 'json' | 'simple';
@@ -89,6 +95,12 @@ function parseConfig(): Config {
     MEILISEARCH_URL: process.env.MEILISEARCH_URL || 'http://localhost:7700',
     MEILISEARCH_API_KEY: process.env.MEILISEARCH_API_KEY,
 
+    // Redis
+    REDIS_HOST: process.env.REDIS_HOST || 'localhost',
+    REDIS_PORT: parseInt(process.env.REDIS_PORT || '6379', 10),
+    REDIS_PASSWORD: process.env.REDIS_PASSWORD,
+    REDIS_DB: parseInt(process.env.REDIS_DB || '0', 10),
+
     // Logging
     LOG_LEVEL: (process.env.LOG_LEVEL as Config['LOG_LEVEL']) || (isDevelopment ? 'debug' : 'info'),
     LOG_FORMAT: (process.env.LOG_FORMAT as Config['LOG_FORMAT']) || (isDevelopment ? 'simple' : 'json'),
@@ -117,6 +129,10 @@ function validateConfig(config: Config): void {
     errors.push('PORT must be between 1 and 65535');
   }
 
+  if (config.REDIS_PORT < 1 || config.REDIS_PORT > 65535) {
+    errors.push('REDIS_PORT must be between 1 and 65535');
+  }
+
   if (errors.length > 0) {
     throw new Error(`Configuration validation failed:\n${errors.join('\n')}`);
   }
@@ -136,6 +152,7 @@ export const features = {
   openAI: !!config.OPENAI_API_KEY,
   perfumero: !!config.PERFUMERO_API_KEY,
   meilisearch: !!config.MEILISEARCH_URL,
+  redis: !!config.REDIS_HOST,
   developmentMode: isDevelopment,
   corsEnabled: config.DEV_ENABLE_CORS
 };

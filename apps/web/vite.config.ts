@@ -4,7 +4,18 @@ import path from 'path'
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react({
+      babel: {
+        plugins: [
+          // Enable React 19 Compiler for automatic optimizations
+          ['babel-plugin-react-compiler', {
+            compilationMode: 'annotation', // Start with annotation mode for safety
+          }],
+        ],
+      },
+    }),
+  ],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
