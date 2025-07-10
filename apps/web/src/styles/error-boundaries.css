@@ -160,7 +160,7 @@
   font-size: 0.875rem;
   color: #7f1d1d;
   margin-bottom: 8px;
-  font-family: 'Monaco', 'Consolas', monospace;
+  font-family: "Monaco", "Consolas", monospace;
 }
 
 .route-error-boundary__technical {

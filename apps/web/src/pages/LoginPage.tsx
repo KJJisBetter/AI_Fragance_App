@@ -1,28 +1,29 @@
-import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Label } from '@/components/ui/label';
-import { useToast } from '@/hooks/use-toast';
-import { useAppStore } from '../stores/appStore';
+import type React from 'react'
+import { useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { useToast } from '@/hooks/use-toast'
+import { useAppStore } from '../stores/appStore'
 
 export const LoginPage = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   // Use individual selectors to avoid infinite loops
-  const login = useAppStore((state) => state.login);
-  const isLoading = useAppStore((state) => state.isLoading);
-  const setIsLoading = useAppStore((state) => state.setIsLoading);
+  const login = useAppStore(state => state.login)
+  const isLoading = useAppStore(state => state.isLoading)
+  const setIsLoading = useAppStore(state => state.setIsLoading)
 
-  const navigate = useNavigate();
-  const { toast } = useToast();
+  const navigate = useNavigate()
+  const { toast } = useToast()
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
+    e.preventDefault()
+    setIsLoading(true)
     // setError(""); // This line was removed as per the new_code
     // setSuccess(""); // This line was removed as per the new_code
 
@@ -40,19 +41,18 @@ export const LoginPage = () => {
 
       // Redirect to home page after 1 second
       setTimeout(() => {
-        navigate('/');
-      }, 1000);
-
+        navigate('/')
+      }, 1000)
     } catch (err: any) {
       // setError(err.message || 'Login failed. Please check your credentials.'); // This line was removed as per the new_code
       toast({
         title: err.message || 'Login failed. Please check your credentials.',
         variant: 'destructive',
-      });
+      })
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  };
+  }
 
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6">
@@ -70,9 +70,7 @@ export const LoginPage = () => {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl">Welcome Back</CardTitle>
-          <CardDescription>
-            Sign in to continue your fragrance journey
-          </CardDescription>
+          <CardDescription>Sign in to continue your fragrance journey</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           {/* {error && ( // This block was removed as per the new_code
@@ -120,30 +118,21 @@ export const LoginPage = () => {
               />
             </div>
 
-            <Button
-              type="submit"
-              disabled={isLoading}
-              className="w-full"
-              size="lg"
-            >
+            <Button type="submit" disabled={isLoading} className="w-full" size="lg">
               {isLoading ? (
                 <>
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                   Signing In...
                 </>
               ) : (
-                <>
-                  🔐 Sign In
-                </>
+                <>🔐 Sign In</>
               )}
             </Button>
           </form>
 
           {/* Navigation to Register */}
           <div className="pt-6 border-t border-border text-center">
-            <p className="text-sm text-muted-foreground mb-2">
-              Don't have an account?
-            </p>
+            <p className="text-sm text-muted-foreground mb-2">Don't have an account?</p>
             <Link
               to="/register"
               className="inline-flex items-center text-sm font-medium text-primary hover:text-primary/80 transition-colors"
@@ -159,5 +148,5 @@ export const LoginPage = () => {
         <p>© 2024 Fragrance Battle AI • Discover your perfect scent</p>
       </div>
     </div>
-  );
-};
+  )
+}

@@ -30,15 +30,16 @@
   "dependencies": {
     "@prisma/client": "^5.10.2",
     "bcryptjs": "^2.4.3",
-    "csv-parser": "^3.0.0"
+    "csv-parser": "^3.0.0",
+    "dotenv": "^16.6.1"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
     "@types/node": "^20.11.24",
     "prisma": "^5.10.2",
+    "rimraf": "^5.0.5",
     "tsx": "^4.7.1",
-    "typescript": "^5.4.2",
-    "rimraf": "^5.0.5"
+    "typescript": "^5.4.2"
   },
   "exports": {
     ".": {

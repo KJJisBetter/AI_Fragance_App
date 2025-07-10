@@ -1,12 +1,12 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 
 interface VirtualizedListProps<T> {
-  items: T[];
-  itemHeight: number;
-  containerHeight: number;
-  renderItem: (item: T, index: number) => React.ReactNode;
-  overscan?: number;
-  className?: string;
+  items: T[]
+  itemHeight: number
+  containerHeight: number
+  renderItem: (item: T, index: number) => React.ReactNode
+  overscan?: number
+  className?: string
 }
 
 export function VirtualizedList<T>({
@@ -15,55 +15,58 @@ export function VirtualizedList<T>({
   containerHeight,
   renderItem,
   overscan = 5,
-  className = ''
+  className = '',
 }: VirtualizedListProps<T>) {
-  const [scrollTop, setScrollTop] = useState(0);
-  const scrollElementRef = useRef<HTMLDivElement>(null);
+  const [scrollTop, setScrollTop] = useState(0)
+  const scrollElementRef = useRef<HTMLDivElement>(null)
 
   // Calculate visible range
-  const startIndex = Math.max(0, Math.floor(scrollTop / itemHeight) - overscan);
+  const startIndex = Math.max(0, Math.floor(scrollTop / itemHeight) - overscan)
   const endIndex = Math.min(
     items.length - 1,
     Math.floor((scrollTop + containerHeight) / itemHeight) + overscan
-  );
+  )
 
-  const visibleItems = items.slice(startIndex, endIndex + 1);
+  const visibleItems = items.slice(startIndex, endIndex + 1)
 
   // Total height of all items
-  const totalHeight = items.length * itemHeight;
+  const totalHeight = items.length * itemHeight
 
   // Offset for visible items
-  const offsetY = startIndex * itemHeight;
+  const offsetY = startIndex * itemHeight
 
   // Handle scroll events
   const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
-    setScrollTop(e.currentTarget.scrollTop);
-  }, []);
+    setScrollTop(e.currentTarget.scrollTop)
+  }, [])
 
   // Scroll to a specific index
-  const scrollToIndex = useCallback((index: number, align: 'start' | 'center' | 'end' = 'start') => {
-    if (!scrollElementRef.current) return;
+  const scrollToIndex = useCallback(
+    (index: number, align: 'start' | 'center' | 'end' = 'start') => {
+      if (!scrollElementRef.current) return
 
-    let scrollTo: number;
-    switch (align) {
-      case 'start':
-        scrollTo = index * itemHeight;
-        break;
-      case 'center':
-        scrollTo = index * itemHeight - containerHeight / 2 + itemHeight / 2;
-        break;
-      case 'end':
-        scrollTo = index * itemHeight - containerHeight + itemHeight;
-        break;
-      default:
-        scrollTo = index * itemHeight;
-    }
+      let scrollTo: number
+      switch (align) {
+        case 'start':
+          scrollTo = index * itemHeight
+          break
+        case 'center':
+          scrollTo = index * itemHeight - containerHeight / 2 + itemHeight / 2
+          break
+        case 'end':
+          scrollTo = index * itemHeight - containerHeight + itemHeight
+          break
+        default:
+          scrollTo = index * itemHeight
+      }
 
-    scrollElementRef.current.scrollTo({
-      top: Math.max(0, Math.min(scrollTo, totalHeight - containerHeight)),
-      behavior: 'smooth'
-    });
-  }, [itemHeight, containerHeight, totalHeight]);
+      scrollElementRef.current.scrollTo({
+        top: Math.max(0, Math.min(scrollTo, totalHeight - containerHeight)),
+        behavior: 'smooth',
+      })
+    },
+    [itemHeight, containerHeight, totalHeight]
+  )
 
   return (
     <div
@@ -94,7 +97,7 @@ export function VirtualizedList<T>({
         </div>
       </div>
     </div>
-  );
+  )
 }
 
 // Hook for managing virtual scrolling state
@@ -102,56 +105,59 @@ export function useVirtualScroll<T>({
   items,
   itemHeight,
   containerHeight,
-  overscan = 5
+  overscan = 5,
 }: {
-  items: T[];
-  itemHeight: number;
-  containerHeight: number;
-  overscan?: number;
+  items: T[]
+  itemHeight: number
+  containerHeight: number
+  overscan?: number
 }) {
-  const [scrollTop, setScrollTop] = useState(0);
-  const scrollElementRef = useRef<HTMLDivElement>(null);
+  const [scrollTop, setScrollTop] = useState(0)
+  const scrollElementRef = useRef<HTMLDivElement>(null)
 
   // Calculate visible range
-  const startIndex = Math.max(0, Math.floor(scrollTop / itemHeight) - overscan);
+  const startIndex = Math.max(0, Math.floor(scrollTop / itemHeight) - overscan)
   const endIndex = Math.min(
     items.length - 1,
     Math.floor((scrollTop + containerHeight) / itemHeight) + overscan
-  );
+  )
 
-  const visibleItems = items.slice(startIndex, endIndex + 1);
-  const totalHeight = items.length * itemHeight;
-  const offsetY = startIndex * itemHeight;
+  const visibleItems = items.slice(startIndex, endIndex + 1)
+  const totalHeight = items.length * itemHeight
+  const offsetY = startIndex * itemHeight
 
   // Handle scroll events
   const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
-    setScrollTop(e.currentTarget.scrollTop);
-  }, []);
+    setScrollTop(e.currentTarget.scrollTop)
+  }, [])
 
   // Scroll to a specific index
-  const scrollToIndex = useCallback((index: number, align: 'start' | 'center' | 'end' = 'start') => {
-    if (!scrollElementRef.current) return;
+  const scrollToIndex = useCallback(
+    (index: number, align: 'start' | 'center' | 'end' = 'start') => {
+      if (!scrollElementRef.current) return
 
-    let scrollTo: number;
-    switch (align) {
-      case 'start':
-        scrollTo = index * itemHeight;
-        break;
-      case 'center':
-        scrollTo = index * itemHeight - containerHeight / 2 + itemHeight / 2;
-        break;
-      case 'end':
-        scrollTo = index * itemHeight - containerHeight + itemHeight;
-        break;
-      default:
-        scrollTo = index * itemHeight;
-    }
+      let scrollTo: number
+      switch (align) {
+        case 'start':
+          scrollTo = index * itemHeight
+          break
+        case 'center':
+          scrollTo = index * itemHeight - containerHeight / 2 + itemHeight / 2
+          break
+        case 'end':
+          scrollTo = index * itemHeight - containerHeight + itemHeight
+          break
+        default:
+          scrollTo = index * itemHeight
+      }
 
-    scrollElementRef.current.scrollTo({
-      top: Math.max(0, Math.min(scrollTo, totalHeight - containerHeight)),
-      behavior: 'smooth'
-    });
-  }, [itemHeight, containerHeight, totalHeight]);
+      scrollElementRef.current.scrollTo({
+        top: Math.max(0, Math.min(scrollTo, totalHeight - containerHeight)),
+        behavior: 'smooth',
+      })
+    },
+    [itemHeight, containerHeight, totalHeight]
+  )
 
   return {
     scrollElementRef,
@@ -161,24 +167,21 @@ export function useVirtualScroll<T>({
     offsetY,
     startIndex,
     endIndex,
-    scrollToIndex
-  };
+    scrollToIndex,
+  }
 }
 
 // Performance optimized list item component
 export const VirtualizedListItem = React.memo<{
-  children: React.ReactNode;
-  height: number;
-  className?: string;
+  children: React.ReactNode
+  height: number
+  className?: string
 }>(({ children, height, className = '' }) => {
   return (
-    <div
-      className={`${className} flex items-center`}
-      style={{ height }}
-    >
+    <div className={`${className} flex items-center`} style={{ height }}>
       {children}
     </div>
-  );
-});
+  )
+})
 
-VirtualizedListItem.displayName = 'VirtualizedListItem';
+VirtualizedListItem.displayName = 'VirtualizedListItem'

@@ -116,7 +116,7 @@
   padding: 12px;
   border-radius: 4px;
   overflow-x: auto;
-  font-family: 'Monaco', 'Consolas', monospace;
+  font-family: "Monaco", "Consolas", monospace;
   font-size: 0.8rem;
   line-height: 1.4;
   max-height: 200px;
@@ -188,7 +188,7 @@
   font-size: 0.75rem;
   color: var(--color-text-muted);
   margin-top: 20px;
-  font-family: 'Monaco', 'Consolas', monospace;
+  font-family: "Monaco", "Consolas", monospace;
   opacity: 0.7;
 }
 
@@ -243,8 +243,14 @@
 
 /* Animation */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .error-boundary__container {
@@ -303,7 +309,7 @@
 }
 
 .error-boundary__button--loading::after {
-  content: '';
+  content: "";
   position: absolute;
   top: 50%;
   left: 50%;
@@ -317,6 +323,10 @@
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }

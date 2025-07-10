@@ -1,18 +1,18 @@
-import axios, { AxiosError, AxiosResponse } from 'axios'
-import {
+import type {
+  AddToCollectionRequest,
+  AICategorFeedbackRequest,
+  AICategorizationRequest,
   APIResponse,
+  AuthResponse,
+  CreateBattleRequest,
+  CreateCollectionRequest,
+  CreateFragranceRequest,
+  FragranceSearchRequest,
   LoginRequest,
   RegisterRequest,
-  AuthResponse,
-  FragranceSearchRequest,
-  CreateFragranceRequest,
-  CreateCollectionRequest,
-  AddToCollectionRequest,
-  CreateBattleRequest,
   VoteBattleRequest,
-  AICategorizationRequest,
-  AICategorFeedbackRequest
 } from '@fragrance-battle/types'
+import axios, { type AxiosError, type AxiosResponse } from 'axios'
 
 // Create axios instance
 const api = axios.create({
@@ -26,19 +26,19 @@ const api = axios.create({
 // Debug logging
 console.log('🔧 API Configuration:', {
   baseURL: import.meta.env.VITE_API_URL || '/api',
-  environment: import.meta.env.MODE
+  environment: import.meta.env.MODE,
 })
 
 // Request interceptor to add auth token
 api.interceptors.request.use(
-  (config) => {
+  config => {
     const token = localStorage.getItem('auth_token')
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }
     return config
   },
-  (error) => {
+  error => {
     return Promise.reject(error)
   }
 )
@@ -101,7 +101,7 @@ export const authApi = {
   changePassword: async (data: { currentPassword: string; newPassword: string }) => {
     const response = await api.put<APIResponse<{ message: string }>>('/auth/change-password', data)
     return handleApiResponse(response)
-  }
+  },
 }
 
 // Fragrances API
@@ -143,7 +143,7 @@ export const fragrancesApi = {
 
   getRandom: async (count?: number) => {
     const response = await api.get('/fragrances/random/discover', {
-      params: { count }
+      params: { count },
     })
     return handleApiResponse(response)
   },
@@ -155,10 +155,10 @@ export const fragrancesApi = {
 
   searchBrands: async (query: string, limit?: number) => {
     const response = await api.get('/fragrances/brands/search', {
-      params: { q: query, limit }
+      params: { q: query, limit },
     })
     return handleApiResponse(response)
-  }
+  },
 }
 
 // Collections API
@@ -193,7 +193,11 @@ export const collectionsApi = {
     return handleApiResponse(response)
   },
 
-  updateItem: async (collectionId: string, itemId: string, data: Partial<AddToCollectionRequest>) => {
+  updateItem: async (
+    collectionId: string,
+    itemId: string,
+    data: Partial<AddToCollectionRequest>
+  ) => {
     const response = await api.put(`/collections/${collectionId}/items/${itemId}`, data)
     return handleApiResponse(response)
   },
@@ -201,7 +205,7 @@ export const collectionsApi = {
   removeItem: async (collectionId: string, itemId: string) => {
     const response = await api.delete(`/collections/${collectionId}/items/${itemId}`)
     return handleApiResponse(response)
-  }
+  },
 }
 
 // Battles API
@@ -234,7 +238,7 @@ export const battlesApi = {
   vote: async (battleId: string, data: VoteBattleRequest) => {
     const response = await api.post(`/battles/${battleId}/vote`, data)
     return handleApiResponse(response)
-  }
+  },
 }
 
 // AI API
@@ -262,7 +266,7 @@ export const aiApi = {
   batchCategorize: async (fragranceIds: string[]) => {
     const response = await api.post('/ai/categorize-batch', { fragranceIds })
     return handleApiResponse(response)
-  }
+  },
 }
 
 // Users API
@@ -285,7 +289,7 @@ export const usersApi = {
   getFavorites: async (params?: Record<string, any>) => {
     const response = await api.get('/users/favorites', { params })
     return handleApiResponse(response)
-  }
+  },
 }
 
 export default api

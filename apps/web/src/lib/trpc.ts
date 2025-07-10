@@ -1,7 +1,6 @@
-import { createTRPCReact } from '@trpc/react-query'
-import { createTRPCQueryUtils } from '@trpc/react-query'
-import { httpBatchLink } from '@trpc/client'
 import { QueryClient } from '@tanstack/react-query'
+import { httpBatchLink } from '@trpc/client'
+import { createTRPCQueryUtils, createTRPCReact } from '@trpc/react-query'
 import type { AppRouter } from '../../../api/src/trpc/router'
 
 // Create the main tRPC React client
@@ -41,7 +40,7 @@ export const queryClient = new QueryClient({
     queries: {
       // React 19 compatible settings
       staleTime: 5 * 60 * 1000, // 5 minutes
-      gcTime: 10 * 60 * 1000,   // 10 minutes (renamed from cacheTime)
+      gcTime: 10 * 60 * 1000, // 10 minutes (renamed from cacheTime)
       retry: 1,
       refetchOnWindowFocus: false,
       refetchOnReconnect: true,

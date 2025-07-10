@@ -33,8 +33,12 @@
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 /* Skeleton loader variants */
@@ -245,7 +249,7 @@
 }
 
 .page-loader--progress::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
@@ -256,8 +260,12 @@
 }
 
 @keyframes progress {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(100%); }
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
 }
 
 /* Smooth transitions */

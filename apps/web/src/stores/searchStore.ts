@@ -129,7 +129,7 @@ const defaultFilters: FragranceFilters = {
   relevanceScore: [0, 100],
   notes: [],
   sortBy: 'relevance',
-  sortOrder: 'desc'
+  sortOrder: 'desc',
 }
 
 // Default preferences
@@ -143,7 +143,7 @@ const defaultPreferences: SearchPreferences = {
   saveSearchHistory: true,
   enableVoiceSearch: false,
   defaultSortBy: 'relevance',
-  defaultSortOrder: 'desc'
+  defaultSortOrder: 'desc',
 }
 
 // Create the search store
@@ -195,11 +195,11 @@ export const useSearchStore = create<SearchState>()(
         },
 
         updateFilter: (key: keyof FragranceFilters, value: any) => {
-          set((state) => ({
+          set(state => ({
             filters: {
               ...state.filters,
-              [key]: value
-            }
+              [key]: value,
+            },
           }))
         },
 
@@ -212,7 +212,11 @@ export const useSearchStore = create<SearchState>()(
         },
 
         // Recent searches
-        addRecentSearch: (query: string, filters: Partial<FragranceFilters>, resultsCount: number) => {
+        addRecentSearch: (
+          query: string,
+          filters: Partial<FragranceFilters>,
+          resultsCount: number
+        ) => {
           const { preferences, recentSearches } = get()
 
           if (!preferences.saveSearchHistory) return
@@ -222,23 +226,27 @@ export const useSearchStore = create<SearchState>()(
             query,
             filters,
             timestamp: new Date(),
-            resultsCount
+            resultsCount,
           }
 
           // Remove duplicate if exists
-          const filteredSearches = recentSearches.filter(search =>
-            search.query !== query || JSON.stringify(search.filters) !== JSON.stringify(filters)
+          const filteredSearches = recentSearches.filter(
+            search =>
+              search.query !== query || JSON.stringify(search.filters) !== JSON.stringify(filters)
           )
 
           // Add new search to beginning and limit to max
-          const updatedSearches = [newSearch, ...filteredSearches].slice(0, preferences.maxRecentSearches)
+          const updatedSearches = [newSearch, ...filteredSearches].slice(
+            0,
+            preferences.maxRecentSearches
+          )
 
           set({ recentSearches: updatedSearches })
         },
 
         removeRecentSearch: (id: string) => {
-          set((state) => ({
-            recentSearches: state.recentSearches.filter(search => search.id !== id)
+          set(state => ({
+            recentSearches: state.recentSearches.filter(search => search.id !== id),
           }))
         },
 
@@ -263,17 +271,17 @@ export const useSearchStore = create<SearchState>()(
           set({
             query: suggestion.text,
             showSuggestions: false,
-            selectedSuggestionIndex: -1
+            selectedSuggestionIndex: -1,
           })
         },
 
         // Search preferences
         updatePreferences: (newPreferences: Partial<SearchPreferences>) => {
-          set((state) => ({
+          set(state => ({
             preferences: {
               ...state.preferences,
-              ...newPreferences
-            }
+              ...newPreferences,
+            },
           }))
         },
 
@@ -292,8 +300,8 @@ export const useSearchStore = create<SearchState>()(
 
         // Search analytics
         incrementSearchCount: () => {
-          set((state) => ({
-            searchCount: state.searchCount + 1
+          set(state => ({
+            searchCount: state.searchCount + 1,
           }))
         },
 
@@ -303,8 +311,8 @@ export const useSearchStore = create<SearchState>()(
 
         updateSearchAnalytics: (query: string, resultCount: number, source: string) => {
           // Increment search count
-          set((state) => ({
-            searchCount: state.searchCount + 1
+          set(state => ({
+            searchCount: state.searchCount + 1,
           }))
 
           // Log analytics data (in a real app, this would be sent to analytics service)
@@ -314,7 +322,7 @@ export const useSearchStore = create<SearchState>()(
             source,
             timestamp: new Date().toISOString(),
             userAgent: navigator.userAgent,
-            url: window.location.href
+            url: window.location.href,
           })
 
           // Update last search time
@@ -331,7 +339,7 @@ export const useSearchStore = create<SearchState>()(
 
           set({
             isSearching: true,
-            lastSearchTime: new Date()
+            lastSearchTime: new Date(),
           })
 
           // Add to recent searches (will be called after search completes)
@@ -361,7 +369,7 @@ export const useSearchStore = create<SearchState>()(
               id: `popular-${search}`,
               text: search,
               type: 'fragrance' as const,
-              count: 0
+              count: 0,
             }))
 
           return [...filteredSuggestions, ...popularSuggestions].slice(0, 10)
@@ -373,7 +381,7 @@ export const useSearchStore = create<SearchState>()(
             recentSearches,
             preferences,
             searchCount,
-            exportedAt: new Date().toISOString()
+            exportedAt: new Date().toISOString(),
           }
         },
 
@@ -384,17 +392,17 @@ export const useSearchStore = create<SearchState>()(
             set({
               recentSearches: recentSearches || [],
               preferences: { ...defaultPreferences, ...preferences },
-              searchCount: searchCount || 0
+              searchCount: searchCount || 0,
             })
           } catch (error) {
             console.error('Failed to import search data:', error)
           }
-        }
+        },
       }),
       {
         name: 'search-store',
         // Only persist certain keys
-        partialize: (state) => ({
+        partialize: state => ({
           recentSearches: state.recentSearches,
           preferences: state.preferences,
           popularSearches: state.popularSearches,
@@ -409,60 +417,67 @@ export const useSearchStore = create<SearchState>()(
 )
 
 // Selector hooks for performance
-export const useSearchQuery = () => useSearchStore((state) => ({
-  query: state.query,
-  setQuery: state.setQuery,
-  isSearching: state.isSearching,
-  setIsSearching: state.setIsSearching,
-}))
+export const useSearchQuery = () =>
+  useSearchStore(state => ({
+    query: state.query,
+    setQuery: state.setQuery,
+    isSearching: state.isSearching,
+    setIsSearching: state.setIsSearching,
+  }))
 
-export const useSearchFilters = () => useSearchStore((state) => ({
-  filters: state.filters,
-  setFilters: state.setFilters,
-  updateFilter: state.updateFilter,
-  clearFilters: state.clearFilters,
-}))
+export const useSearchFilters = () =>
+  useSearchStore(state => ({
+    filters: state.filters,
+    setFilters: state.setFilters,
+    updateFilter: state.updateFilter,
+    clearFilters: state.clearFilters,
+  }))
 
-export const useSearchSuggestions = () => useSearchStore((state) => ({
-  suggestions: state.suggestions,
-  showSuggestions: state.showSuggestions,
-  selectedSuggestionIndex: state.selectedSuggestionIndex,
-  setSuggestions: state.setSuggestions,
-  setShowSuggestions: state.setShowSuggestions,
-  setSelectedSuggestionIndex: state.setSelectedSuggestionIndex,
-  selectSuggestion: state.selectSuggestion,
-  getFilteredSuggestions: state.getFilteredSuggestions,
-}))
+export const useSearchSuggestions = () =>
+  useSearchStore(state => ({
+    suggestions: state.suggestions,
+    showSuggestions: state.showSuggestions,
+    selectedSuggestionIndex: state.selectedSuggestionIndex,
+    setSuggestions: state.setSuggestions,
+    setShowSuggestions: state.setShowSuggestions,
+    setSelectedSuggestionIndex: state.setSelectedSuggestionIndex,
+    selectSuggestion: state.selectSuggestion,
+    getFilteredSuggestions: state.getFilteredSuggestions,
+  }))
 
-export const useSearchHistory = () => useSearchStore((state) => ({
-  recentSearches: state.recentSearches,
-  addRecentSearch: state.addRecentSearch,
-  removeRecentSearch: state.removeRecentSearch,
-  clearRecentSearches: state.clearRecentSearches,
-  getSearchHistory: state.getSearchHistory,
-}))
+export const useSearchHistory = () =>
+  useSearchStore(state => ({
+    recentSearches: state.recentSearches,
+    addRecentSearch: state.addRecentSearch,
+    removeRecentSearch: state.removeRecentSearch,
+    clearRecentSearches: state.clearRecentSearches,
+    getSearchHistory: state.getSearchHistory,
+  }))
 
-export const useSearchPreferences = () => useSearchStore((state) => ({
-  preferences: state.preferences,
-  updatePreferences: state.updatePreferences,
-  resetPreferences: state.resetPreferences,
-}))
+export const useSearchPreferences = () =>
+  useSearchStore(state => ({
+    preferences: state.preferences,
+    updatePreferences: state.updatePreferences,
+    resetPreferences: state.resetPreferences,
+  }))
 
-export const useSearchAnalytics = () => useSearchStore((state) => ({
-  searchCount: state.searchCount,
-  lastSearchResults: state.lastSearchResults,
-  lastSearchTime: state.lastSearchTime,
-  incrementSearchCount: state.incrementSearchCount,
-  setLastSearchResults: state.setLastSearchResults,
-  updateSearchAnalytics: state.updateSearchAnalytics,
-}))
+export const useSearchAnalytics = () =>
+  useSearchStore(state => ({
+    searchCount: state.searchCount,
+    lastSearchResults: state.lastSearchResults,
+    lastSearchTime: state.lastSearchTime,
+    incrementSearchCount: state.incrementSearchCount,
+    setLastSearchResults: state.setLastSearchResults,
+    updateSearchAnalytics: state.updateSearchAnalytics,
+  }))
 
-export const usePopularContent = () => useSearchStore((state) => ({
-  popularSearches: state.popularSearches,
-  trendingFragrances: state.trendingFragrances,
-  setPopularSearches: state.setPopularSearches,
-  setTrendingFragrances: state.setTrendingFragrances,
-}))
+export const usePopularContent = () =>
+  useSearchStore(state => ({
+    popularSearches: state.popularSearches,
+    trendingFragrances: state.trendingFragrances,
+    setPopularSearches: state.setPopularSearches,
+    setTrendingFragrances: state.setTrendingFragrances,
+  }))
 
 // Export the store for external access
 export default useSearchStore

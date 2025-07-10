@@ -1,18 +1,18 @@
-import React from 'react';
+import type React from 'react'
 
 interface SkipLinksProps {
   links?: Array<{
-    href: string;
-    label: string;
-  }>;
+    href: string
+    label: string
+  }>
 }
 
 const defaultLinks = [
   { href: '#main-content', label: 'Skip to main content' },
   { href: '#navigation', label: 'Skip to navigation' },
   { href: '#search', label: 'Skip to search' },
-  { href: '#footer', label: 'Skip to footer' }
-];
+  { href: '#footer', label: 'Skip to footer' },
+]
 
 export const SkipLinks: React.FC<SkipLinksProps> = ({ links = defaultLinks }) => {
   return (
@@ -22,12 +22,12 @@ export const SkipLinks: React.FC<SkipLinksProps> = ({ links = defaultLinks }) =>
           key={index}
           href={link.href}
           className="skip-links__link"
-          onClick={(e) => {
-            e.preventDefault();
-            const target = document.querySelector(link.href);
+          onClick={e => {
+            e.preventDefault()
+            const target = document.querySelector(link.href)
             if (target) {
-              target.focus();
-              target.scrollIntoView({ behavior: 'smooth' });
+              target.focus()
+              target.scrollIntoView({ behavior: 'smooth' })
             }
           }}
         >
@@ -35,7 +35,7 @@ export const SkipLinks: React.FC<SkipLinksProps> = ({ links = defaultLinks }) =>
         </a>
       ))}
     </div>
-  );
-};
+  )
+}
 
-export default SkipLinks;
+export default SkipLinks
