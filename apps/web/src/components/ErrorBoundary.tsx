@@ -1,56 +1,57 @@
-import React, { Component, ReactNode } from 'react';
-import { AlertTriangle, RefreshCw, Home, Bug } from 'lucide-react';
+import { AlertTriangle, Bug, Home, RefreshCw } from 'lucide-react'
+import type React from 'react'
+import { Component, type ReactNode } from 'react'
 
 interface Props {
-  children: ReactNode;
-  fallback?: ReactNode;
-  onError?: (error: Error, errorInfo: React.ErrorInfo) => void;
-  level?: 'page' | 'component' | 'critical';
-  showErrorDetails?: boolean;
+  children: ReactNode
+  fallback?: ReactNode
+  onError?: (error: Error, errorInfo: React.ErrorInfo) => void
+  level?: 'page' | 'component' | 'critical'
+  showErrorDetails?: boolean
 }
 
 interface State {
-  hasError: boolean;
-  error: Error | null;
-  errorInfo: React.ErrorInfo | null;
-  errorId: string | null;
+  hasError: boolean
+  error: Error | null
+  errorInfo: React.ErrorInfo | null
+  errorId: string | null
 }
 
 export class ErrorBoundary extends Component<Props, State> {
-  private retryCount = 0;
-  private maxRetries = 3;
+  private retryCount = 0
+  private maxRetries = 3
 
   constructor(props: Props) {
-    super(props);
+    super(props)
     this.state = {
       hasError: false,
       error: null,
       errorInfo: null,
-      errorId: null
-    };
+      errorId: null,
+    }
   }
 
   static getDerivedStateFromError(error: Error): Partial<State> {
     return {
       hasError: true,
       error,
-      errorId: `error_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-    };
+      errorId: `error_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+    }
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    this.setState({ errorInfo });
+    this.setState({ errorInfo })
 
     // Log error to console and external service
-    console.error('Error Boundary caught an error:', error);
-    console.error('Error Info:', errorInfo);
+    console.error('Error Boundary caught an error:', error)
+    console.error('Error Info:', errorInfo)
 
     // Call custom error handler if provided
-    this.props.onError?.(error, errorInfo);
+    this.props.onError?.(error, errorInfo)
 
     // In production, send to error tracking service
     if (process.env.NODE_ENV === 'production') {
-      this.logErrorToService(error, errorInfo);
+      this.logErrorToService(error, errorInfo)
     }
   }
 
@@ -65,41 +66,41 @@ export class ErrorBoundary extends Component<Props, State> {
         timestamp: new Date().toISOString(),
         userAgent: navigator.userAgent,
         url: window.location.href,
-        level: this.props.level || 'component'
-      };
+        level: this.props.level || 'component',
+      }
 
       // In a real app, send to your error tracking service
-      console.log('Error Report:', errorReport);
+      console.log('Error Report:', errorReport)
 
       // Example: fetch('/api/errors', { method: 'POST', body: JSON.stringify(errorReport) })
     } catch (loggingError) {
-      console.error('Failed to log error:', loggingError);
+      console.error('Failed to log error:', loggingError)
     }
-  };
+  }
 
   private handleRetry = () => {
     if (this.retryCount < this.maxRetries) {
-      this.retryCount++;
+      this.retryCount++
       this.setState({
         hasError: false,
         error: null,
         errorInfo: null,
-        errorId: null
-      });
+        errorId: null,
+      })
     }
-  };
+  }
 
   private handleReload = () => {
-    window.location.reload();
-  };
+    window.location.reload()
+  }
 
   private handleGoHome = () => {
-    window.location.href = '/';
-  };
+    window.location.href = '/'
+  }
 
   private handleReportBug = () => {
-    const { error, errorId } = this.state;
-    const subject = encodeURIComponent(`Bug Report - Error ID: ${errorId}`);
+    const { error, errorId } = this.state
+    const subject = encodeURIComponent(`Bug Report - Error ID: ${errorId}`)
     const body = encodeURIComponent(`
 Error Details:
 - Error ID: ${errorId}
@@ -120,21 +121,21 @@ Actual behavior:
 
 Additional context:
 
-`);
+`)
 
-    window.open(`mailto:support@fragrancebattle.com?subject=${subject}&body=${body}`);
-  };
+    window.open(`mailto:support@fragrancebattle.com?subject=${subject}&body=${body}`)
+  }
 
   render() {
     if (this.state.hasError) {
       // Use custom fallback if provided
       if (this.props.fallback) {
-        return this.props.fallback;
+        return this.props.fallback
       }
 
-      const { level = 'component', showErrorDetails = false } = this.props;
-      const { error, errorId } = this.state;
-      const canRetry = this.retryCount < this.maxRetries;
+      const { level = 'component', showErrorDetails = false } = this.props
+      const { error, errorId } = this.state
+      const canRetry = this.retryCount < this.maxRetries
 
       return (
         <div className={`error-boundary ${level}`}>
@@ -148,26 +149,28 @@ Additional context:
                 {level === 'critical'
                   ? 'Application Error'
                   : level === 'page'
-                  ? 'Page Error'
-                  : 'Something went wrong'
-                }
+                    ? 'Page Error'
+                    : 'Something went wrong'}
               </h2>
 
               <p className="error-boundary__message">
                 {level === 'critical'
                   ? 'The application encountered a critical error and needs to be reloaded.'
                   : level === 'page'
-                  ? 'This page encountered an error. You can try refreshing or go back to the home page.'
-                  : 'This component failed to load. You can try again or continue using the rest of the app.'
-                }
+                    ? 'This page encountered an error. You can try refreshing or go back to the home page.'
+                    : 'This component failed to load. You can try again or continue using the rest of the app.'}
               </p>
 
               {showErrorDetails && error && (
                 <details className="error-boundary__details">
                   <summary>Technical Details</summary>
                   <div className="error-boundary__technical">
-                    <p><strong>Error ID:</strong> {errorId}</p>
-                    <p><strong>Message:</strong> {error.message}</p>
+                    <p>
+                      <strong>Error ID:</strong> {errorId}
+                    </p>
+                    <p>
+                      <strong>Message:</strong> {error.message}
+                    </p>
                     {error.stack && (
                       <div>
                         <strong>Stack Trace:</strong>
@@ -218,18 +221,14 @@ Additional context:
                 </button>
               </div>
 
-              {errorId && (
-                <p className="error-boundary__error-id">
-                  Error ID: {errorId}
-                </p>
-              )}
+              {errorId && <p className="error-boundary__error-id">Error ID: {errorId}</p>}
             </div>
           </div>
         </div>
-      );
+      )
     }
 
-    return this.props.children;
+    return this.props.children
   }
 }
 
@@ -242,10 +241,10 @@ export const withErrorBoundary = <P extends object>(
     <ErrorBoundary {...errorBoundaryProps}>
       <Component {...props} />
     </ErrorBoundary>
-  );
+  )
 
-  WrappedComponent.displayName = `withErrorBoundary(${Component.displayName || Component.name})`;
-  return WrappedComponent;
-};
+  WrappedComponent.displayName = `withErrorBoundary(${Component.displayName || Component.name})`
+  return WrappedComponent
+}
 
-export default ErrorBoundary;
+export default ErrorBoundary

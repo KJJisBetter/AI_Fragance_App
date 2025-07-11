@@ -1,1 +1,1 @@
-export const AICategorizePage = () => <div>AI Categorize Page (placeholder)</div>;
+export const AICategorizePage = () => <div>AI Categorize Page (placeholder)</div>

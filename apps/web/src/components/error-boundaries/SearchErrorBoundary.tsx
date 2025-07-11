@@ -1,17 +1,17 @@
-import React from 'react';
-import { Search, RefreshCw, AlertCircle } from 'lucide-react';
-import ErrorBoundary from '../ErrorBoundary';
+import { AlertCircle, RefreshCw, Search } from 'lucide-react'
+import type React from 'react'
+import ErrorBoundary from '../ErrorBoundary'
 
 interface SearchErrorBoundaryProps {
-  children: React.ReactNode;
-  onSearchReset?: () => void;
-  searchQuery?: string;
+  children: React.ReactNode
+  onSearchReset?: () => void
+  searchQuery?: string
 }
 
 const SearchErrorFallback: React.FC<{
-  onSearchReset?: () => void;
-  searchQuery?: string;
-  onRetry?: () => void;
+  onSearchReset?: () => void
+  searchQuery?: string
+  onRetry?: () => void
 }> = ({ onSearchReset, searchQuery, onRetry }) => {
   return (
     <div className="search-error-boundary">
@@ -21,15 +21,12 @@ const SearchErrorFallback: React.FC<{
         </div>
 
         <div className="search-error-boundary__content">
-          <h3 className="search-error-boundary__title">
-            Search Error
-          </h3>
+          <h3 className="search-error-boundary__title">Search Error</h3>
 
           <p className="search-error-boundary__message">
             {searchQuery
               ? `Unable to search for "${searchQuery}". This might be due to a network issue or an invalid search query.`
-              : 'The search functionality encountered an error. Please try again.'
-            }
+              : 'The search functionality encountered an error. Please try again.'}
           </p>
 
           <div className="search-error-boundary__suggestions">
@@ -66,38 +63,33 @@ const SearchErrorFallback: React.FC<{
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
 export const SearchErrorBoundary: React.FC<SearchErrorBoundaryProps> = ({
   children,
   onSearchReset,
-  searchQuery
+  searchQuery,
 }) => {
   const handleError = (error: Error, errorInfo: React.ErrorInfo) => {
-    console.error('Search Error:', error);
-    console.error('Search Query:', searchQuery);
+    console.error('Search Error:', error)
+    console.error('Search Query:', searchQuery)
 
     // Log search-specific error details
     if (searchQuery) {
-      console.error('Failed Search Query:', searchQuery);
+      console.error('Failed Search Query:', searchQuery)
     }
-  };
+  }
 
   return (
     <ErrorBoundary
       level="component"
       onError={handleError}
-      fallback={
-        <SearchErrorFallback
-          onSearchReset={onSearchReset}
-          searchQuery={searchQuery}
-        />
-      }
+      fallback={<SearchErrorFallback onSearchReset={onSearchReset} searchQuery={searchQuery} />}
     >
       {children}
     </ErrorBoundary>
-  );
-};
+  )
+}
 
-export default SearchErrorBoundary;
+export default SearchErrorBoundary

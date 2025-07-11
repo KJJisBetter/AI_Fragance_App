@@ -1,12 +1,12 @@
-import React from 'react';
+import type React from 'react'
 
 // Base skeleton component
 interface SkeletonProps {
-  className?: string;
-  width?: string | number;
-  height?: string | number;
-  rounded?: boolean;
-  animate?: boolean;
+  className?: string
+  width?: string | number
+  height?: string | number
+  rounded?: boolean
+  animate?: boolean
 }
 
 export const Skeleton: React.FC<SkeletonProps> = ({
@@ -14,7 +14,7 @@ export const Skeleton: React.FC<SkeletonProps> = ({
   width = '100%',
   height = '1rem',
   rounded = false,
-  animate = true
+  animate = true,
 }) => {
   return (
     <div
@@ -23,8 +23,8 @@ export const Skeleton: React.FC<SkeletonProps> = ({
       } ${className}`}
       style={{ width, height }}
     />
-  );
-};
+  )
+}
 
 // Search loading skeleton
 export const SearchSkeleton: React.FC = () => {
@@ -42,8 +42,8 @@ export const SearchSkeleton: React.FC = () => {
         </div>
       ))}
     </div>
-  );
-};
+  )
+}
 
 // Fragrance card skeleton
 export const FragranceCardSkeleton: React.FC = () => {
@@ -92,8 +92,8 @@ export const FragranceCardSkeleton: React.FC = () => {
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
 // Fragrance grid skeleton
 export const FragranceGridSkeleton: React.FC<{ count?: number }> = ({ count = 12 }) => {
@@ -103,8 +103,8 @@ export const FragranceGridSkeleton: React.FC<{ count?: number }> = ({ count = 12
         <FragranceCardSkeleton key={index} />
       ))}
     </div>
-  );
-};
+  )
+}
 
 // Battle card skeleton
 export const BattleCardSkeleton: React.FC = () => {
@@ -141,8 +141,8 @@ export const BattleCardSkeleton: React.FC = () => {
         <Skeleton height={36} width={80} rounded />
       </div>
     </div>
-  );
-};
+  )
+}
 
 // Filter skeleton
 export const FilterSkeleton: React.FC = () => {
@@ -155,8 +155,8 @@ export const FilterSkeleton: React.FC = () => {
         </div>
       ))}
     </div>
-  );
-};
+  )
+}
 
 // Page header skeleton
 export const PageHeaderSkeleton: React.FC = () => {
@@ -174,8 +174,8 @@ export const PageHeaderSkeleton: React.FC = () => {
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
 // Collection detail skeleton
 export const CollectionDetailSkeleton: React.FC = () => {
@@ -208,13 +208,13 @@ export const CollectionDetailSkeleton: React.FC = () => {
         <FragranceGridSkeleton count={6} />
       </div>
     </div>
-  );
-};
+  )
+}
 
 // Error boundary loading state
 export const ErrorBoundaryFallback: React.FC<{
-  error?: Error;
-  resetError?: () => void;
+  error?: Error
+  resetError?: () => void
 }> = ({ error, resetError }) => {
   return (
     <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4 text-center">
@@ -232,21 +232,17 @@ export const ErrorBoundaryFallback: React.FC<{
         </button>
       )}
     </div>
-  );
-};
+  )
+}
 
 // Smart loading component that shows different states
 interface SmartLoadingProps {
-  type: 'page' | 'grid' | 'search' | 'card' | 'filter' | 'collection';
-  count?: number;
-  message?: string;
+  type: 'page' | 'grid' | 'search' | 'card' | 'filter' | 'collection'
+  count?: number
+  message?: string
 }
 
-export const SmartLoading: React.FC<SmartLoadingProps> = ({
-  type,
-  count = 6,
-  message
-}) => {
+export const SmartLoading: React.FC<SmartLoadingProps> = ({ type, count = 6, message }) => {
   const renderLoading = () => {
     switch (type) {
       case 'page':
@@ -256,21 +252,21 @@ export const SmartLoading: React.FC<SmartLoadingProps> = ({
             <FilterSkeleton />
             <FragranceGridSkeleton count={count} />
           </div>
-        );
+        )
       case 'grid':
-        return <FragranceGridSkeleton count={count} />;
+        return <FragranceGridSkeleton count={count} />
       case 'search':
-        return <SearchSkeleton />;
+        return <SearchSkeleton />
       case 'card':
-        return <FragranceCardSkeleton />;
+        return <FragranceCardSkeleton />
       case 'filter':
-        return <FilterSkeleton />;
+        return <FilterSkeleton />
       case 'collection':
-        return <CollectionDetailSkeleton />;
+        return <CollectionDetailSkeleton />
       default:
-        return <FragranceGridSkeleton count={count} />;
+        return <FragranceGridSkeleton count={count} />
     }
-  };
+  }
 
   return (
     <div className="space-y-4">
@@ -284,14 +280,14 @@ export const SmartLoading: React.FC<SmartLoadingProps> = ({
       )}
       {renderLoading()}
     </div>
-  );
-};
+  )
+}
 
 // Progressive loading component for infinite scroll
 export const ProgressiveLoading: React.FC<{
-  hasMore: boolean;
-  loading: boolean;
-  onLoadMore?: () => void;
+  hasMore: boolean
+  loading: boolean
+  onLoadMore?: () => void
 }> = ({ hasMore, loading, onLoadMore }) => {
   return (
     <div className="text-center py-8">
@@ -318,19 +314,22 @@ export const ProgressiveLoading: React.FC<{
         <p className="text-gray-500">No more items to load</p>
       )}
     </div>
-  );
-};
+  )
+}
 
 // Search Results Skeleton
 export const SearchResultsSkeleton: React.FC<{ count?: number; isSearching?: boolean }> = ({
   count = 6,
-  isSearching = false
+  isSearching = false,
 }) => {
   return (
     <div className="search-results-skeleton">
       {/* Search Results Header Skeleton */}
       <div className="results-header-skeleton">
-        <div className="skeleton-line" style={{ width: '200px', height: '20px', marginBottom: '8px' }}></div>
+        <div
+          className="skeleton-line"
+          style={{ width: '200px', height: '20px', marginBottom: '8px' }}
+        ></div>
         <div className="skeleton-line" style={{ width: '300px', height: '16px' }}></div>
       </div>
 
@@ -341,7 +340,10 @@ export const SearchResultsSkeleton: React.FC<{ count?: number; isSearching?: boo
             {/* Card Header */}
             <div className="fragrance-header">
               <div className="fragrance-title-row">
-                <div className="skeleton-line" style={{ width: '80%', height: '20px', marginBottom: '4px' }}></div>
+                <div
+                  className="skeleton-line"
+                  style={{ width: '80%', height: '20px', marginBottom: '4px' }}
+                ></div>
                 <div className="skeleton-line" style={{ width: '40px', height: '16px' }}></div>
               </div>
               <div className="skeleton-line" style={{ width: '60%', height: '16px' }}></div>
@@ -350,17 +352,29 @@ export const SearchResultsSkeleton: React.FC<{ count?: number; isSearching?: boo
             {/* Card Details */}
             <div className="fragrance-details">
               <div className="fragrance-meta">
-                <div className="skeleton-line" style={{ width: '50px', height: '20px', borderRadius: '12px' }}></div>
-                <div className="skeleton-line" style={{ width: '70px', height: '20px', borderRadius: '12px' }}></div>
+                <div
+                  className="skeleton-line"
+                  style={{ width: '50px', height: '20px', borderRadius: '12px' }}
+                ></div>
+                <div
+                  className="skeleton-line"
+                  style={{ width: '70px', height: '20px', borderRadius: '12px' }}
+                ></div>
               </div>
-              <div className="skeleton-line" style={{ width: '100px', height: '16px', marginBottom: '8px' }}></div>
+              <div
+                className="skeleton-line"
+                style={{ width: '100px', height: '16px', marginBottom: '8px' }}
+              ></div>
             </div>
 
             {/* Notes Skeleton */}
             <div className="fragrance-notes">
               {['Top Notes', 'Heart Notes', 'Base Notes'].map((noteType, noteIndex) => (
                 <div key={noteIndex} className="notes-section">
-                  <div className="skeleton-line" style={{ width: '80px', height: '14px', marginBottom: '4px' }}></div>
+                  <div
+                    className="skeleton-line"
+                    style={{ width: '80px', height: '14px', marginBottom: '4px' }}
+                  ></div>
                   <div className="skeleton-line" style={{ width: '90%', height: '12px' }}></div>
                 </div>
               ))}
@@ -368,8 +382,14 @@ export const SearchResultsSkeleton: React.FC<{ count?: number; isSearching?: boo
 
             {/* Categories Skeleton */}
             <div className="ai-categories">
-              <div className="skeleton-line" style={{ width: '60px', height: '20px', borderRadius: '12px' }}></div>
-              <div className="skeleton-line" style={{ width: '80px', height: '20px', borderRadius: '12px' }}></div>
+              <div
+                className="skeleton-line"
+                style={{ width: '60px', height: '20px', borderRadius: '12px' }}
+              ></div>
+              <div
+                className="skeleton-line"
+                style={{ width: '80px', height: '20px', borderRadius: '12px' }}
+              ></div>
             </div>
           </div>
         ))}
@@ -383,5 +403,5 @@ export const SearchResultsSkeleton: React.FC<{ count?: number; isSearching?: boo
         </div>
       )}
     </div>
-  );
-};
+  )
+}

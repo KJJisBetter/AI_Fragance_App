@@ -1,21 +1,21 @@
-import React from 'react';
-import { useInfiniteScroll } from '../hooks/useInfiniteScroll';
-import { Loader, AlertCircle, ArrowUp } from 'lucide-react';
+import { AlertCircle, ArrowUp, Loader } from 'lucide-react'
+import React from 'react'
+import { useInfiniteScroll } from '../hooks/useInfiniteScroll'
 
 interface InfiniteScrollProps {
-  hasMore: boolean;
-  isLoading: boolean;
-  onLoadMore: () => void;
-  error?: string | null;
-  children?: React.ReactNode;
-  className?: string;
-  threshold?: number;
-  rootMargin?: string;
-  loadingComponent?: React.ReactNode;
-  errorComponent?: React.ReactNode;
-  endMessage?: React.ReactNode;
-  showBackToTop?: boolean;
-  onBackToTop?: () => void;
+  hasMore: boolean
+  isLoading: boolean
+  onLoadMore: () => void
+  error?: string | null
+  children?: React.ReactNode
+  className?: string
+  threshold?: number
+  rootMargin?: string
+  loadingComponent?: React.ReactNode
+  errorComponent?: React.ReactNode
+  endMessage?: React.ReactNode
+  showBackToTop?: boolean
+  onBackToTop?: () => void
 }
 
 export const InfiniteScroll: React.FC<InfiniteScrollProps> = ({
@@ -31,23 +31,23 @@ export const InfiniteScroll: React.FC<InfiniteScrollProps> = ({
   errorComponent,
   endMessage,
   showBackToTop = true,
-  onBackToTop
+  onBackToTop,
 }) => {
   const { loadingRef, isVisible } = useInfiniteScroll({
     hasMore,
     isLoading,
     threshold,
     rootMargin,
-    onLoadMore
-  });
+    onLoadMore,
+  })
 
   const handleBackToTop = () => {
     if (onBackToTop) {
-      onBackToTop();
+      onBackToTop()
     } else {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      window.scrollTo({ top: 0, behavior: 'smooth' })
     }
-  };
+  }
 
   return (
     <div className={`infinite-scroll-container ${className}`}>
@@ -59,17 +59,16 @@ export const InfiniteScroll: React.FC<InfiniteScrollProps> = ({
           ref={loadingRef}
           className="infinite-scroll-sentinel py-8 flex justify-center items-center"
         >
-          {isLoading && (
-            loadingComponent || (
+          {isLoading &&
+            (loadingComponent || (
               <div className="flex items-center space-x-2 text-gray-500">
                 <Loader className="w-5 h-5 animate-spin" />
                 <span>Loading more fragrances...</span>
               </div>
-            )
-          )}
+            ))}
 
-          {error && (
-            errorComponent || (
+          {error &&
+            (errorComponent || (
               <div className="flex items-center space-x-2 text-red-500">
                 <AlertCircle className="w-5 h-5" />
                 <span>Failed to load more: {error}</span>
@@ -80,8 +79,7 @@ export const InfiniteScroll: React.FC<InfiniteScrollProps> = ({
                   Retry
                 </button>
               </div>
-            )
-          )}
+            ))}
         </div>
       )}
 
@@ -108,22 +106,22 @@ export const InfiniteScroll: React.FC<InfiniteScrollProps> = ({
         </div>
       )}
     </div>
-  );
-};
+  )
+}
 
 // Specialized infinite scroll for fragrance grids
 interface FragranceInfiniteScrollProps {
-  fragrances: any[];
-  hasMore: boolean;
-  isLoading: boolean;
-  isInitialLoading: boolean;
-  error?: string | null;
-  onLoadMore: () => void;
-  totalCount: number;
-  renderFragrance: (fragrance: any, index: number) => React.ReactNode;
-  className?: string;
-  gridClassName?: string;
-  emptyStateComponent?: React.ReactNode;
+  fragrances: any[]
+  hasMore: boolean
+  isLoading: boolean
+  isInitialLoading: boolean
+  error?: string | null
+  onLoadMore: () => void
+  totalCount: number
+  renderFragrance: (fragrance: any, index: number) => React.ReactNode
+  className?: string
+  gridClassName?: string
+  emptyStateComponent?: React.ReactNode
 }
 
 export const FragranceInfiniteScroll: React.FC<FragranceInfiniteScrollProps> = ({
@@ -137,7 +135,7 @@ export const FragranceInfiniteScroll: React.FC<FragranceInfiniteScrollProps> = (
   renderFragrance,
   className = '',
   gridClassName = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6',
-  emptyStateComponent
+  emptyStateComponent,
 }) => {
   // Show empty state for initial load with no results
   if (!isInitialLoading && fragrances.length === 0) {
@@ -149,7 +147,7 @@ export const FragranceInfiniteScroll: React.FC<FragranceInfiniteScrollProps> = (
           </div>
         )}
       </div>
-    );
+    )
   }
 
   return (
@@ -175,9 +173,7 @@ export const FragranceInfiniteScroll: React.FC<FragranceInfiniteScrollProps> = (
         endMessage={
           <div className="text-center text-gray-500">
             <p className="mb-2">🎉 All fragrances loaded!</p>
-            <p className="text-sm">
-              You've viewed all {totalCount} fragrances in this collection
-            </p>
+            <p className="text-sm">You've viewed all {totalCount} fragrances in this collection</p>
           </div>
         }
       >
@@ -191,50 +187,47 @@ export const FragranceInfiniteScroll: React.FC<FragranceInfiniteScrollProps> = (
         </div>
       </InfiniteScroll>
     </div>
-  );
-};
+  )
+}
 
 // Hook for scroll position tracking
 export const useScrollPosition = () => {
-  const [scrollY, setScrollY] = React.useState(0);
-  const [isScrolled, setIsScrolled] = React.useState(false);
+  const [scrollY, setScrollY] = React.useState(0)
+  const [isScrolled, setIsScrolled] = React.useState(false)
 
   React.useEffect(() => {
     const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-      setScrollY(currentScrollY);
-      setIsScrolled(currentScrollY > 100);
-    };
+      const currentScrollY = window.scrollY
+      setScrollY(currentScrollY)
+      setIsScrolled(currentScrollY > 100)
+    }
 
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
 
-  return { scrollY, isScrolled };
-};
+  return { scrollY, isScrolled }
+}
 
 // Floating back to top button
 interface BackToTopProps {
-  showThreshold?: number;
-  className?: string;
+  showThreshold?: number
+  className?: string
 }
 
-export const BackToTop: React.FC<BackToTopProps> = ({
-  showThreshold = 300,
-  className = ''
-}) => {
-  const { scrollY } = useScrollPosition();
-  const [isVisible, setIsVisible] = React.useState(false);
+export const BackToTop: React.FC<BackToTopProps> = ({ showThreshold = 300, className = '' }) => {
+  const { scrollY } = useScrollPosition()
+  const [isVisible, setIsVisible] = React.useState(false)
 
   React.useEffect(() => {
-    setIsVisible(scrollY > showThreshold);
-  }, [scrollY, showThreshold]);
+    setIsVisible(scrollY > showThreshold)
+  }, [scrollY, showThreshold])
 
   const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
 
-  if (!isVisible) return null;
+  if (!isVisible) return null
 
   return (
     <button
@@ -244,5 +237,5 @@ export const BackToTop: React.FC<BackToTopProps> = ({
     >
       <ArrowUp className="w-5 h-5" />
     </button>
-  );
-};
+  )
+}

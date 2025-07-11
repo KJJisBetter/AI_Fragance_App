@@ -1,11 +1,11 @@
-import { createRoot } from 'react-dom/client'
-import { BrowserRouter } from 'react-router-dom'
 import { QueryClientProvider } from '@tanstack/react-query'
+import { createRoot } from 'react-dom/client'
 import { Toaster } from 'react-hot-toast'
+import { BrowserRouter } from 'react-router-dom'
 
 import App from './App.tsx'
 import './index.css'
-import { api, trpcClient, queryClient } from './lib/trpc'
+import { api, queryClient, trpcClient } from './lib/trpc'
 
 // Get the root element
 const container = document.getElementById('root')!

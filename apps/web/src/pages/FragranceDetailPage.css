@@ -1,8 +1,12 @@
 /* FragranceDetailPage Styles */
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .fragrance-detail-container {
@@ -22,8 +26,8 @@
   background-color: white;
   border-radius: 12px;
   padding: 32px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-  border: 1px solid rgba(0,0,0,0.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 .note-pyramid-level {
@@ -85,7 +89,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0,0,0,0.5);
+  background-color: rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -243,10 +247,18 @@
 }
 
 /* Performance Rating Colors */
-.performance-excellent { background-color: #22c55e; }
-.performance-good { background-color: #3b82f6; }
-.performance-moderate { background-color: #f59e0b; }
-.performance-poor { background-color: #ef4444; }
+.performance-excellent {
+  background-color: #22c55e;
+}
+.performance-good {
+  background-color: #3b82f6;
+}
+.performance-moderate {
+  background-color: #f59e0b;
+}
+.performance-poor {
+  background-color: #ef4444;
+}
 
 /* Category Badge Colors */
 .category-season {
@@ -312,7 +324,7 @@
 
 /* Hover Effects */
 .fragrance-detail-card:hover {
-  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
 }
 
 .note-badge:hover {

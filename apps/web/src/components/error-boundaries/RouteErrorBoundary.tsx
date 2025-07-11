@@ -1,31 +1,31 @@
-import React from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { Home, ArrowLeft, RefreshCw, AlertTriangle } from 'lucide-react';
-import ErrorBoundary from '../ErrorBoundary';
+import { AlertTriangle, ArrowLeft, Home, RefreshCw } from 'lucide-react'
+import type React from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
+import ErrorBoundary from '../ErrorBoundary'
 
 interface RouteErrorBoundaryProps {
-  children: React.ReactNode;
-  fallbackComponent?: React.ComponentType<{ error: Error; reset: () => void }>;
+  children: React.ReactNode
+  fallbackComponent?: React.ComponentType<{ error: Error; reset: () => void }>
 }
 
 const RouteErrorFallback: React.FC<{
-  error: Error;
-  reset: () => void;
+  error: Error
+  reset: () => void
 }> = ({ error, reset }) => {
-  const navigate = useNavigate();
-  const location = useLocation();
+  const navigate = useNavigate()
+  const location = useLocation()
 
   const handleGoBack = () => {
-    navigate(-1);
-  };
+    navigate(-1)
+  }
 
   const handleGoHome = () => {
-    navigate('/');
-  };
+    navigate('/')
+  }
 
   const handleReload = () => {
-    window.location.reload();
-  };
+    window.location.reload()
+  }
 
   return (
     <div className="route-error-boundary">
@@ -35,9 +35,7 @@ const RouteErrorFallback: React.FC<{
         </div>
 
         <div className="route-error-boundary__content">
-          <h1 className="route-error-boundary__title">
-            Page Error
-          </h1>
+          <h1 className="route-error-boundary__title">Page Error</h1>
 
           <p className="route-error-boundary__message">
             This page encountered an error and couldn't be loaded properly.
@@ -91,19 +89,19 @@ const RouteErrorFallback: React.FC<{
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
 export const RouteErrorBoundary: React.FC<RouteErrorBoundaryProps> = ({
   children,
-  fallbackComponent: FallbackComponent
+  fallbackComponent: FallbackComponent,
 }) => {
-  const location = useLocation();
+  const location = useLocation()
 
   const handleError = (error: Error, errorInfo: React.ErrorInfo) => {
-    console.error('Route Error:', error);
-    console.error('Route Path:', location.pathname);
-    console.error('Error Info:', errorInfo);
+    console.error('Route Error:', error)
+    console.error('Route Path:', location.pathname)
+    console.error('Error Info:', errorInfo)
 
     // Log route-specific error details
     const routeErrorReport = {
@@ -112,18 +110,18 @@ export const RouteErrorBoundary: React.FC<RouteErrorBoundaryProps> = ({
       path: location.pathname,
       search: location.search,
       timestamp: new Date().toISOString(),
-      componentStack: errorInfo.componentStack
-    };
+      componentStack: errorInfo.componentStack,
+    }
 
-    console.error('Route Error Report:', routeErrorReport);
-  };
+    console.error('Route Error Report:', routeErrorReport)
+  }
 
   // Create the fallback component as a ReactNode
   const fallbackNode = FallbackComponent ? (
     <FallbackComponent error={new Error('Route error')} reset={() => window.location.reload()} />
   ) : (
     <RouteErrorFallback error={new Error('Route error')} reset={() => window.location.reload()} />
-  );
+  )
 
   return (
     <ErrorBoundary
@@ -134,7 +132,7 @@ export const RouteErrorBoundary: React.FC<RouteErrorBoundaryProps> = ({
     >
       {children}
     </ErrorBoundary>
-  );
-};
+  )
+}
 
-export default RouteErrorBoundary;
+export default RouteErrorBoundary

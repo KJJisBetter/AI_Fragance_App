@@ -1,8 +1,12 @@
 /* FragrancesPage.css - Optimized styles to prevent re-renders */
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .fragrances-page {
@@ -11,10 +15,9 @@
 }
 
 .fragrances-header {
-  background-color: white;
-  padding: 32px;
-  border-bottom: 1px solid #e2e8f0;
-  margin-bottom: 32px;
+  background-color: transparent;
+  padding: 0 16px 12px;
+  margin-bottom: 16px;
 }
 
 .fragrances-header-container {
@@ -146,7 +149,7 @@
   background-color: white;
   border: 1px solid #e2e8f0;
   border-radius: 6px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   z-index: 1000;
   max-height: 200px;
   overflow-y: auto;
@@ -281,9 +284,9 @@
   background: white;
   border-radius: 12px;
   padding: 20px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   transition: all 0.3s ease;
-  border: 1px solid rgba(0,0,0,0.05);
+  border: 1px solid rgba(0, 0, 0, 0.05);
   cursor: pointer;
   text-decoration: none;
   color: inherit;
@@ -291,7 +294,7 @@
 
 .fragrance-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
 }
 
 .fragrance-header {
@@ -324,7 +327,7 @@
 
 .fragrance-brand {
   font-size: 1rem;
-  color: #64748b;
+  color: #334155; /* slate-700 */
   margin: 0;
   font-weight: 500;
 }
@@ -394,7 +397,7 @@
 .notes-title {
   font-size: 12px;
   font-weight: 600;
-  color: #64748b;
+  color: #475569; /* slate-600 */
   margin: 0 0 4px 0;
   text-transform: uppercase;
 }

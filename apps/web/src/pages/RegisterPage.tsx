@@ -1,30 +1,31 @@
-import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Label } from '@/components/ui/label';
-import { useToast } from '@/hooks/use-toast';
-import { useAppStore } from '../stores/appStore';
+import type React from 'react'
+import { useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { useToast } from '@/hooks/use-toast'
+import { useAppStore } from '../stores/appStore'
 
 export const RegisterPage = () => {
-  const [username, setUsername] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [username, setUsername] = useState('')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   // Use individual selectors to avoid infinite loops
-  const login = useAppStore((state) => state.login);
-  const isLoading = useAppStore((state) => state.isLoading);
-  const setIsLoading = useAppStore((state) => state.setIsLoading);
+  const login = useAppStore(state => state.login)
+  const isLoading = useAppStore(state => state.isLoading)
+  const setIsLoading = useAppStore(state => state.setIsLoading)
 
-  const navigate = useNavigate();
-  const { toast } = useToast();
+  const navigate = useNavigate()
+  const { toast } = useToast()
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
+    e.preventDefault()
+    setIsLoading(true)
     // setError(""); // This line was removed as per the new_code
     // setSuccess(""); // This line was removed as per the new_code
 
@@ -43,19 +44,18 @@ export const RegisterPage = () => {
 
       // Redirect to home page after 2 seconds
       setTimeout(() => {
-        navigate('/');
-      }, 2000);
-
+        navigate('/')
+      }, 2000)
     } catch (err: any) {
       // setError(err.message || 'Registration failed. Please try again.'); // This line was removed as per the new_code
       toast({
         title: err.message || 'Registration failed. Please try again.',
         variant: 'destructive',
-      });
+      })
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  };
+  }
 
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6">
@@ -73,9 +73,7 @@ export const RegisterPage = () => {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl">Create Account</CardTitle>
-          <CardDescription>
-            Join the fragrance community and start your journey
-          </CardDescription>
+          <CardDescription>Join the fragrance community and start your journey</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           {/* error && ( // This block was removed as per the new_code
@@ -94,9 +92,7 @@ export const RegisterPage = () => {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="username">
-                Username
-              </Label>
+              <Label htmlFor="username">Username</Label>
               <Input
                 id="username"
                 type="text"
@@ -109,9 +105,7 @@ export const RegisterPage = () => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="email">
-                Email Address
-              </Label>
+              <Label htmlFor="email">Email Address</Label>
               <Input
                 id="email"
                 type="email"
@@ -124,9 +118,7 @@ export const RegisterPage = () => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password">
-                Password
-              </Label>
+              <Label htmlFor="password">Password</Label>
               <Input
                 id="password"
                 type="password"
@@ -138,30 +130,21 @@ export const RegisterPage = () => {
               />
             </div>
 
-            <Button
-              type="submit"
-              disabled={isLoading}
-              className="w-full"
-              size="lg"
-            >
+            <Button type="submit" disabled={isLoading} className="w-full" size="lg">
               {isLoading ? (
                 <>
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                   Creating Account...
                 </>
               ) : (
-                <>
-                  ✨ Create Account
-                </>
+                <>✨ Create Account</>
               )}
             </Button>
           </form>
 
           {/* Navigation to Login */}
           <div className="pt-6 border-t border-border text-center">
-            <p className="text-sm text-muted-foreground mb-2">
-              Already have an account?
-            </p>
+            <p className="text-sm text-muted-foreground mb-2">Already have an account?</p>
             <Link
               to="/login"
               className="inline-flex items-center text-sm font-medium text-primary hover:text-primary/80 transition-colors"
@@ -177,5 +160,5 @@ export const RegisterPage = () => {
         <p>© 2024 Fragrance Battle AI • Discover your perfect scent</p>
       </div>
     </div>
-  );
-};
+  )
+}

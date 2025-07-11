@@ -1,32 +1,32 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from 'react'
 
 // Screen Reader Announcer Component
 interface ScreenReaderAnnouncerProps {
-  message: string;
-  priority?: 'polite' | 'assertive';
-  clearOnUnmount?: boolean;
+  message: string
+  priority?: 'polite' | 'assertive'
+  clearOnUnmount?: boolean
 }
 
 export const ScreenReaderAnnouncer: React.FC<ScreenReaderAnnouncerProps> = ({
   message,
   priority = 'polite',
-  clearOnUnmount = true
+  clearOnUnmount = true,
 }) => {
-  const announcerRef = useRef<HTMLDivElement>(null);
+  const announcerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     if (announcerRef.current) {
-      announcerRef.current.textContent = message;
+      announcerRef.current.textContent = message
     }
-  }, [message]);
+  }, [message])
 
   useEffect(() => {
     return () => {
       if (clearOnUnmount && announcerRef.current) {
-        announcerRef.current.textContent = '';
+        announcerRef.current.textContent = ''
       }
-    };
-  }, [clearOnUnmount]);
+    }
+  }, [clearOnUnmount])
 
   return (
     <div
@@ -36,32 +36,32 @@ export const ScreenReaderAnnouncer: React.FC<ScreenReaderAnnouncerProps> = ({
       aria-atomic="true"
       role="status"
     />
-  );
-};
+  )
+}
 
 // Focus Management Hook
 export const useFocusManagement = () => {
-  const focusRef = useRef<HTMLElement | null>(null);
+  const focusRef = useRef<HTMLElement | null>(null)
 
   const setFocus = (element: HTMLElement | null) => {
     if (element) {
-      element.focus();
-      focusRef.current = element;
+      element.focus()
+      focusRef.current = element
     }
-  };
+  }
 
   const restoreFocus = () => {
     if (focusRef.current) {
-      focusRef.current.focus();
+      focusRef.current.focus()
     }
-  };
+  }
 
   const saveFocus = () => {
-    focusRef.current = document.activeElement as HTMLElement;
-  };
+    focusRef.current = document.activeElement as HTMLElement
+  }
 
-  return { setFocus, restoreFocus, saveFocus };
-};
+  return { setFocus, restoreFocus, saveFocus }
+}
 
 // Keyboard Navigation Hook
 export const useKeyboardNavigation = (
@@ -73,100 +73,96 @@ export const useKeyboardNavigation = (
     switch (event.key) {
       case 'Enter':
       case ' ':
-        event.preventDefault();
-        onEnter?.();
-        break;
+        event.preventDefault()
+        onEnter?.()
+        break
       case 'Escape':
-        event.preventDefault();
-        onEscape?.();
-        break;
+        event.preventDefault()
+        onEscape?.()
+        break
       case 'ArrowUp':
-        event.preventDefault();
-        onArrowKeys?.('up');
-        break;
+        event.preventDefault()
+        onArrowKeys?.('up')
+        break
       case 'ArrowDown':
-        event.preventDefault();
-        onArrowKeys?.('down');
-        break;
+        event.preventDefault()
+        onArrowKeys?.('down')
+        break
       case 'ArrowLeft':
-        event.preventDefault();
-        onArrowKeys?.('left');
-        break;
+        event.preventDefault()
+        onArrowKeys?.('left')
+        break
       case 'ArrowRight':
-        event.preventDefault();
-        onArrowKeys?.('right');
-        break;
+        event.preventDefault()
+        onArrowKeys?.('right')
+        break
     }
-  };
+  }
 
-  return { handleKeyDown };
-};
+  return { handleKeyDown }
+}
 
 // Focus Trap Component
 interface FocusTrapProps {
-  children: React.ReactNode;
-  active?: boolean;
-  onEscape?: () => void;
+  children: React.ReactNode
+  active?: boolean
+  onEscape?: () => void
 }
 
-export const FocusTrap: React.FC<FocusTrapProps> = ({
-  children,
-  active = true,
-  onEscape
-}) => {
-  const trapRef = useRef<HTMLDivElement>(null);
+export const FocusTrap: React.FC<FocusTrapProps> = ({ children, active = true, onEscape }) => {
+  const trapRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    if (!active) return;
+    if (!active) return
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
-        onEscape?.();
-        return;
+        onEscape?.()
+        return
       }
 
       if (event.key === 'Tab') {
         const focusableElements = trapRef.current?.querySelectorAll(
           'a[href], button, textarea, input[type="text"], input[type="radio"], input[type="checkbox"], select'
-        );
+        )
 
-        if (!focusableElements?.length) return;
+        if (!focusableElements?.length) return
 
-        const firstElement = focusableElements[0] as HTMLElement;
-        const lastElement = focusableElements[focusableElements.length - 1] as HTMLElement;
+        const firstElement = focusableElements[0] as HTMLElement
+        const lastElement = focusableElements[focusableElements.length - 1] as HTMLElement
 
         if (event.shiftKey) {
           if (document.activeElement === firstElement) {
-            event.preventDefault();
-            lastElement.focus();
+            event.preventDefault()
+            lastElement.focus()
           }
         } else {
           if (document.activeElement === lastElement) {
-            event.preventDefault();
-            firstElement.focus();
+            event.preventDefault()
+            firstElement.focus()
           }
         }
       }
-    };
+    }
 
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [active, onEscape]);
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [active, onEscape])
 
   return (
     <div ref={trapRef} className="focus-trap">
       {children}
     </div>
-  );
-};
+  )
+}
 
 // Accessible Button Component
 interface AccessibleButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  children: React.ReactNode;
-  variant?: 'primary' | 'secondary' | 'ghost';
-  size?: 'small' | 'medium' | 'large';
-  isLoading?: boolean;
-  loadingText?: string;
+  children: React.ReactNode
+  variant?: 'primary' | 'secondary' | 'ghost'
+  size?: 'small' | 'medium' | 'large'
+  isLoading?: boolean
+  loadingText?: string
 }
 
 export const AccessibleButton: React.FC<AccessibleButtonProps> = ({
@@ -184,8 +180,10 @@ export const AccessibleButton: React.FC<AccessibleButtonProps> = ({
     `accessible-button--${variant}`,
     `accessible-button--${size}`,
     isLoading && 'accessible-button--loading',
-    className
-  ].filter(Boolean).join(' ');
+    className,
+  ]
+    .filter(Boolean)
+    .join(' ')
 
   return (
     <button
@@ -207,17 +205,17 @@ export const AccessibleButton: React.FC<AccessibleButtonProps> = ({
         children
       )}
     </button>
-  );
-};
+  )
+}
 
 // Accessible Form Field Component
 interface AccessibleFormFieldProps {
-  label: string;
-  id: string;
-  error?: string;
-  helpText?: string;
-  required?: boolean;
-  children: React.ReactNode;
+  label: string
+  id: string
+  error?: string
+  helpText?: string
+  required?: boolean
+  children: React.ReactNode
 }
 
 export const AccessibleFormField: React.FC<AccessibleFormFieldProps> = ({
@@ -226,17 +224,14 @@ export const AccessibleFormField: React.FC<AccessibleFormFieldProps> = ({
   error,
   helpText,
   required = false,
-  children
+  children,
 }) => {
-  const helpId = `${id}-help`;
-  const errorId = `${id}-error`;
+  const helpId = `${id}-help`
+  const errorId = `${id}-error`
 
   return (
     <div className="accessible-form-field">
-      <label
-        htmlFor={id}
-        className="accessible-form-field__label"
-      >
+      <label htmlFor={id} className="accessible-form-field__label">
         {label}
         {required && (
           <span className="accessible-form-field__required" aria-label="required">
@@ -248,46 +243,36 @@ export const AccessibleFormField: React.FC<AccessibleFormFieldProps> = ({
       <div className="accessible-form-field__input-wrapper">
         {React.cloneElement(children as React.ReactElement, {
           id,
-          'aria-describedby': [
-            helpText ? helpId : null,
-            error ? errorId : null
-          ].filter(Boolean).join(' ') || undefined,
+          'aria-describedby':
+            [helpText ? helpId : null, error ? errorId : null].filter(Boolean).join(' ') ||
+            undefined,
           'aria-invalid': error ? 'true' : 'false',
-          'aria-required': required
+          'aria-required': required,
         })}
       </div>
 
       {helpText && (
-        <div
-          id={helpId}
-          className="accessible-form-field__help"
-          role="note"
-        >
+        <div id={helpId} className="accessible-form-field__help" role="note">
           {helpText}
         </div>
       )}
 
       {error && (
-        <div
-          id={errorId}
-          className="accessible-form-field__error"
-          role="alert"
-          aria-live="polite"
-        >
+        <div id={errorId} className="accessible-form-field__error" role="alert" aria-live="polite">
           {error}
         </div>
       )}
     </div>
-  );
-};
+  )
+}
 
 // Accessible Modal Component
 interface AccessibleModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  title: string;
-  children: React.ReactNode;
-  className?: string;
+  isOpen: boolean
+  onClose: () => void
+  title: string
+  children: React.ReactNode
+  className?: string
 }
 
 export const AccessibleModal: React.FC<AccessibleModalProps> = ({
@@ -295,42 +280,42 @@ export const AccessibleModal: React.FC<AccessibleModalProps> = ({
   onClose,
   title,
   children,
-  className = ''
+  className = '',
 }) => {
-  const modalRef = useRef<HTMLDivElement>(null);
-  const { saveFocus, restoreFocus } = useFocusManagement();
+  const modalRef = useRef<HTMLDivElement>(null)
+  const { saveFocus, restoreFocus } = useFocusManagement()
 
   useEffect(() => {
     if (isOpen) {
-      saveFocus();
+      saveFocus()
       // Focus the modal after a brief delay to ensure it's rendered
       setTimeout(() => {
-        modalRef.current?.focus();
-      }, 100);
+        modalRef.current?.focus()
+      }, 100)
     } else {
-      restoreFocus();
+      restoreFocus()
     }
-  }, [isOpen, saveFocus, restoreFocus]);
+  }, [isOpen, saveFocus, restoreFocus])
 
   useEffect(() => {
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
-        onClose();
+        onClose()
       }
-    };
+    }
 
     if (isOpen) {
-      document.addEventListener('keydown', handleEscape);
-      document.body.style.overflow = 'hidden';
+      document.addEventListener('keydown', handleEscape)
+      document.body.style.overflow = 'hidden'
     }
 
     return () => {
-      document.removeEventListener('keydown', handleEscape);
-      document.body.style.overflow = 'unset';
-    };
-  }, [isOpen, onClose]);
+      document.removeEventListener('keydown', handleEscape)
+      document.body.style.overflow = 'unset'
+    }
+  }, [isOpen, onClose])
 
-  if (!isOpen) return null;
+  if (!isOpen) return null
 
   return (
     <div
@@ -344,58 +329,55 @@ export const AccessibleModal: React.FC<AccessibleModalProps> = ({
         <div
           ref={modalRef}
           className={`accessible-modal ${className}`}
-          onClick={(e) => e.stopPropagation()}
+          onClick={e => e.stopPropagation()}
           tabIndex={-1}
         >
           <div className="accessible-modal__header">
             <h2 id="modal-title" className="accessible-modal__title">
               {title}
             </h2>
-            <button
-              onClick={onClose}
-              className="accessible-modal__close"
-              aria-label="Close modal"
-            >
+            <button onClick={onClose} className="accessible-modal__close" aria-label="Close modal">
               ×
             </button>
           </div>
-          <div className="accessible-modal__content">
-            {children}
-          </div>
+          <div className="accessible-modal__content">{children}</div>
         </div>
       </FocusTrap>
     </div>
-  );
-};
+  )
+}
 
 // Utility Functions
-export const announceToScreenReader = (message: string, priority: 'polite' | 'assertive' = 'polite') => {
-  const announcer = document.createElement('div');
-  announcer.setAttribute('aria-live', priority);
-  announcer.setAttribute('aria-atomic', 'true');
-  announcer.className = 'sr-only';
-  announcer.textContent = message;
+export const announceToScreenReader = (
+  message: string,
+  priority: 'polite' | 'assertive' = 'polite'
+) => {
+  const announcer = document.createElement('div')
+  announcer.setAttribute('aria-live', priority)
+  announcer.setAttribute('aria-atomic', 'true')
+  announcer.className = 'sr-only'
+  announcer.textContent = message
 
-  document.body.appendChild(announcer);
+  document.body.appendChild(announcer)
 
   setTimeout(() => {
-    document.body.removeChild(announcer);
-  }, 1000);
-};
+    document.body.removeChild(announcer)
+  }, 1000)
+}
 
 export const focusElement = (selector: string) => {
-  const element = document.querySelector(selector) as HTMLElement;
+  const element = document.querySelector(selector) as HTMLElement
   if (element) {
-    element.focus();
+    element.focus()
   }
-};
+}
 
 export const addFocusStyles = (element: HTMLElement) => {
-  element.style.outline = '2px solid #3b82f6';
-  element.style.outlineOffset = '2px';
-};
+  element.style.outline = '2px solid #3b82f6'
+  element.style.outlineOffset = '2px'
+}
 
 export const removeFocusStyles = (element: HTMLElement) => {
-  element.style.outline = '';
-  element.style.outlineOffset = '';
-};
+  element.style.outline = ''
+  element.style.outlineOffset = ''
+}

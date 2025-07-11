@@ -1,6 +1,6 @@
+import type { User } from '@fragrance-battle/types'
 import { create } from 'zustand'
 import { devtools, persist } from 'zustand/middleware'
-import { User } from '@fragrance-battle/types'
 
 // Theme types
 type Theme = 'light' | 'dark' | 'system'
@@ -103,7 +103,7 @@ const loadUserData = (): UserState => {
           user,
           isAuthenticated: true,
           isLoading: false,
-          token
+          token,
         }
       } catch (error) {
         // Clear invalid data
@@ -117,7 +117,7 @@ const loadUserData = (): UserState => {
     user: null,
     isAuthenticated: false,
     isLoading: false,
-    token: null
+    token: null,
   }
 }
 
@@ -168,7 +168,7 @@ export const useAppStore = create<AppState>()(
           },
 
           // User actions
-          setUser: (user) => {
+          setUser: user => {
             const isAuthenticated = !!user
 
             if (user) {
@@ -180,7 +180,7 @@ export const useAppStore = create<AppState>()(
             set({ user, isAuthenticated })
           },
 
-          setToken: (token) => {
+          setToken: token => {
             if (token) {
               localStorage.setItem('auth_token', token)
             } else {
@@ -190,7 +190,7 @@ export const useAppStore = create<AppState>()(
             set({ token })
           },
 
-          setIsLoading: (isLoading) => {
+          setIsLoading: isLoading => {
             set({ isLoading })
           },
 
@@ -202,7 +202,7 @@ export const useAppStore = create<AppState>()(
               user,
               token,
               isAuthenticated: true,
-              isLoading: false
+              isLoading: false,
             })
           },
 
@@ -214,11 +214,11 @@ export const useAppStore = create<AppState>()(
               user: null,
               token: null,
               isAuthenticated: false,
-              isLoading: false
+              isLoading: false,
             })
           },
 
-          updateUser: (updates) => {
+          updateUser: updates => {
             const { user } = get()
             if (user) {
               const updatedUser = { ...user, ...updates }
@@ -229,31 +229,28 @@ export const useAppStore = create<AppState>()(
 
           // UI actions
           toggleSidebar: () => {
-            set((state) => ({ sidebarOpen: !state.sidebarOpen }))
+            set(state => ({ sidebarOpen: !state.sidebarOpen }))
           },
 
-          setSidebarOpen: (sidebarOpen) => {
+          setSidebarOpen: sidebarOpen => {
             set({ sidebarOpen })
           },
 
-          setSearchBarFocused: (searchBarFocused) => {
+          setSearchBarFocused: searchBarFocused => {
             set({ searchBarFocused })
           },
 
-          setShowMobileMenu: (showMobileMenu) => {
+          setShowMobileMenu: showMobileMenu => {
             set({ showMobileMenu })
           },
 
           // Notification actions
-          addNotification: (notification) => {
+          addNotification: notification => {
             const id = Date.now().toString() + Math.random().toString(36).substr(2, 9)
             const timestamp = new Date()
 
-            set((state) => ({
-              notifications: [
-                ...state.notifications,
-                { ...notification, id, timestamp }
-              ]
+            set(state => ({
+              notifications: [...state.notifications, { ...notification, id, timestamp }],
             }))
 
             // Auto-remove notification after 5 seconds
@@ -262,21 +259,21 @@ export const useAppStore = create<AppState>()(
             }, 5000)
           },
 
-          removeNotification: (id) => {
-            set((state) => ({
-              notifications: state.notifications.filter(n => n.id !== id)
+          removeNotification: id => {
+            set(state => ({
+              notifications: state.notifications.filter(n => n.id !== id),
             }))
           },
 
           clearNotifications: () => {
             set({ notifications: [] })
-          }
+          },
         }
       },
       {
         name: 'app-store',
         // Only persist certain keys
-        partialize: (state) => ({
+        partialize: state => ({
           theme: state.theme,
           sidebarOpen: state.sidebarOpen,
           // Don't persist user data here - it's handled separately
@@ -305,42 +302,46 @@ if (typeof window !== 'undefined') {
 }
 
 // Selector hooks for performance
-export const useTheme = () => useAppStore((state) => ({
-  theme: state.theme,
-  isDarkMode: state.isDarkMode,
-  setTheme: state.setTheme,
-  toggleTheme: state.toggleTheme,
-}))
+export const useTheme = () =>
+  useAppStore(state => ({
+    theme: state.theme,
+    isDarkMode: state.isDarkMode,
+    setTheme: state.setTheme,
+    toggleTheme: state.toggleTheme,
+  }))
 
-export const useUser = () => useAppStore((state) => ({
-  user: state.user,
-  isAuthenticated: state.isAuthenticated,
-  isLoading: state.isLoading,
-  token: state.token,
-  setUser: state.setUser,
-  setToken: state.setToken,
-  setIsLoading: state.setIsLoading,
-  login: state.login,
-  logout: state.logout,
-  updateUser: state.updateUser,
-}))
+export const useUser = () =>
+  useAppStore(state => ({
+    user: state.user,
+    isAuthenticated: state.isAuthenticated,
+    isLoading: state.isLoading,
+    token: state.token,
+    setUser: state.setUser,
+    setToken: state.setToken,
+    setIsLoading: state.setIsLoading,
+    login: state.login,
+    logout: state.logout,
+    updateUser: state.updateUser,
+  }))
 
-export const useUI = () => useAppStore((state) => ({
-  sidebarOpen: state.sidebarOpen,
-  searchBarFocused: state.searchBarFocused,
-  showMobileMenu: state.showMobileMenu,
-  toggleSidebar: state.toggleSidebar,
-  setSidebarOpen: state.setSidebarOpen,
-  setSearchBarFocused: state.setSearchBarFocused,
-  setShowMobileMenu: state.setShowMobileMenu,
-}))
+export const useUI = () =>
+  useAppStore(state => ({
+    sidebarOpen: state.sidebarOpen,
+    searchBarFocused: state.searchBarFocused,
+    showMobileMenu: state.showMobileMenu,
+    toggleSidebar: state.toggleSidebar,
+    setSidebarOpen: state.setSidebarOpen,
+    setSearchBarFocused: state.setSearchBarFocused,
+    setShowMobileMenu: state.setShowMobileMenu,
+  }))
 
-export const useNotifications = () => useAppStore((state) => ({
-  notifications: state.notifications,
-  addNotification: state.addNotification,
-  removeNotification: state.removeNotification,
-  clearNotifications: state.clearNotifications,
-}))
+export const useNotifications = () =>
+  useAppStore(state => ({
+    notifications: state.notifications,
+    addNotification: state.addNotification,
+    removeNotification: state.removeNotification,
+    clearNotifications: state.clearNotifications,
+  }))
 
 // Export the store for external access
 export default useAppStore
