@@ -17,6 +17,8 @@ model User {
   feedbacks    AICategorFeedback[]
   battles      Battle[]
   collections  Collection[]
+  reviews      Review[]
+  userCollections UserCollection[]
 
   @@map("users")
 }
@@ -43,11 +45,35 @@ model Fragrance {
   popularityScore    Float?              @default(0)  // Sales-based popularity (market share + trends + availability)
   relevanceScore     Float               @default(0)  // New relevance scoring for better search results
   lastEnhanced       DateTime?                        // Track when relevance was last calculated
+
+  // Market Intelligence Fields
+  marketPriority     Float?              @default(0)  // 0.0-1.0 priority based on brand tiers
+  trending           Boolean             @default(false) // Based on 2025 market data
+  targetDemographic  String?             // gen_z, budget_conscious, niche_enthusiast, mainstream
+  viralScore         Float?              @default(0)  // TikTok/social media virality
+
+  // API Integration Fields
+  externalId         String?             @unique      // Perfumero API ID
+  perfumeroPid       String?             // Legacy field, can be migrated
+  dataSource         String?             @default("manual") // manual, perfumero_api, perfumero_api_promoted, api_only
+  populatedAt        DateTime?           // When populated from API
+  promotedAt         DateTime?           // When promoted from API to database
+  promotionReason    String?             // tier1_brand, high_rating, popular, trending, quality_profile
+  isApiOnly          Boolean             @default(false) // Flag for cold storage items
+
+  // Data Quality Fields
+  dataQuality        Float?              @default(0)  // 0.0-1.0 quality score
+  hasRedundantName   Boolean             @default(false) // e.g., "Oscar Oscar de la Renta"
+  hasYearInName      Boolean             @default(false) // e.g., "Sauvage 2015"
+  hasConcentrationInName Boolean         @default(false) // e.g., "Bleu de Chanel EDT"
+
   createdAt          DateTime            @default(now())
   updatedAt          DateTime            @updatedAt
   feedbacks          AICategorFeedback[]
   battleItems        BattleItem[]
   collections        CollectionItem[]
+  reviews            Review[]             // Add relationship for engagement tracking
+  userCollections    UserCollection[]     // Add relationship for collection tracking
 
   // Performance indexes for search operations
   @@index([name])
@@ -56,6 +82,11 @@ model Fragrance {
   @@index([prestigeScore(sort: Desc)])
   @@index([popularityScore(sort: Desc)])
   @@index([relevanceScore(sort: Desc)])  // New index for relevance scoring
+  @@index([marketPriority(sort: Desc)])  // New index for market priority
+  @@index([trending])                    // New index for trending fragrances
+  @@index([targetDemographic])           // New index for demographic targeting
+  @@index([dataSource])                  // New index for data source filtering
+  @@index([externalId])                  // New index for API lookups
   @@index([aiSeasons], type: Gin)
   @@index([aiOccasions], type: Gin)
   @@index([aiMoods], type: Gin)
@@ -175,4 +206,55 @@ enum PriceRange {
   RANGE_300_500
   OVER_500
   UNKNOWN
+}
+
+model ArchivedFragrance {
+  id             String   @id @default(cuid())
+  originalId     String
+  name           String
+  brand          String
+  year           Int?
+  concentration  String?
+  topNotes       String[]
+  middleNotes    String[]
+  baseNotes      String[]
+  archivedAt     DateTime @default(now())
+  reason         String   // quality_and_market_purge_2025, duplicate, low_quality, etc.
+  recoverable    Boolean  @default(false)
+  metadata       Json?    // Store any additional data for recovery
+
+  @@index([originalId])
+  @@index([name])
+  @@index([brand])
+  @@index([archivedAt])
+  @@index([reason])
+  @@map("archived_fragrances")
+}
+
+model Review {
+  id          String    @id @default(cuid())
+  userId      String
+  fragranceId String
+  rating      Float
+  content     String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fragrance   Fragrance @relation(fields: [fragranceId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, fragranceId])
+  @@map("reviews")
+}
+
+model UserCollection {
+  id          String    @id @default(cuid())
+  userId      String
+  fragranceId String
+  type        String    // owned, wishlist, tested, etc.
+  createdAt   DateTime  @default(now())
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fragrance   Fragrance @relation(fields: [fragranceId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, fragranceId, type])
+  @@map("user_collections")
 }

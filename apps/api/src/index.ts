@@ -17,6 +17,7 @@ import battleRoutes from './routes/battles';
 import aiRoutes from './routes/ai';
 import userRoutes from './routes/users';
 import brandRoutes from './routes/brands';
+import adminRoutes from './routes/admin';
 
 // Create Fastify instance
 const fastify = Fastify({
@@ -169,6 +170,14 @@ fastify.get('/api', async (request, reply) => {
         'GET /api/brands': 'Get all brands',
         'GET /api/brands/:id': 'Get brand details',
         'GET /api/brands/search': 'Search brands'
+      },
+
+      // Admin (Protected)
+      admin: {
+        'GET /api/admin/population-stats': 'Get database population statistics',
+        'GET /api/admin/market-coverage': 'Get market coverage report',
+        'GET /api/admin/data-quality': 'Get data quality metrics',
+        'POST /api/admin/purge/dry-run': 'Simulate database purge (dry run)'
       }
     }
   };
@@ -298,6 +307,7 @@ const startServer = async () => {
     await fastify.register(battleRoutes, { prefix: '/api/battles' });
     await fastify.register(aiRoutes, { prefix: '/api/ai' });
     await fastify.register(userRoutes, { prefix: '/api/users' });
+    await fastify.register(adminRoutes, { prefix: '/api/admin' });
     log.info('✅ API routes registered successfully');
 
     // Start Fastify server
