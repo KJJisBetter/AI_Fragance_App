@@ -10,61 +10,62 @@ import { formatFragrance } from '../utils/formatting';
 import { rateLimiters } from '../middleware/rateLimiter';
 import { validateBody, validateQuery, validateParams, fragranceSchemas } from '../middleware/validation';
 import { searchService } from '../services/searchService';
+import { organicPopulationService } from '../services/organic-population-service';
 import { config } from '../config';
 import { log } from '../utils/logger';
 
 export default async function fragrancesRoutes(app: FastifyInstance) {
   /**
-   * Search fragrances
+   * Search fragrances with smart API population
    */
   app.post('/search', {
     preHandler: [rateLimiters.search, optionalAuth, validateBody(fragranceSchemas.search)]
-  }, async (request: FastifyRequest<{ Body: any }>, reply: FastifyReply) => {
-    const { query, filters = {}, page = 1, limit = 20, sortBy = 'relevance', sortOrder = 'desc' } = request.body;
+  },
+    async (request: FastifyRequest, reply: FastifyReply) => {
+      const { query, filters, page, limit, sortBy, sortOrder } = request.body as any;
+      const userId = (request as any).userId;
 
-    try {
-      const searchResponse = await searchService.search(query || '', {
-        limit: Math.min(limit, config.SEARCH_RESULTS_LIMIT),
-        offset: (page - 1) * limit,
-        forceRefresh: false
-      });
+      try {
+        // Use organic population service for market-intelligent search
+        const results = await organicPopulationService.searchWithOrganicPopulation(
+          query || '',
+          filters
+        );
 
-      const fragrances = searchResponse.results.map(result => ({
-        id: result.id,
-        name: result.name,
-        brand: result.brand,
-        year: result.year,
-        concentration: result.concentration,
-        communityRating: result.communityRating,
-        popularityScore: result.popularityScore,
-        verified: result.verified,
-        searchScore: result.score,
-        matchType: result.matchType,
-        source: result.source
-      }));
+        // Apply pagination
+        const startIndex = (page - 1) * limit;
+        const endIndex = startIndex + limit;
+        const paginatedResults = results.slice(startIndex, endIndex);
 
-      reply.send({
-        success: true,
-        data: {
-          fragrances,
-          total: fragrances.length,
-          page,
-          limit,
-          totalPages: Math.ceil(fragrances.length / limit),
-          searchMeta: {
-            query: query || '',
-            duration: searchResponse.duration,
-            source: searchResponse.source,
-            suggestions: searchResponse.suggestions,
-            ...searchResponse.metadata
-          }
+        // Track search for analytics
+        if (userId) {
+          await searchService.trackUserSearch(userId, query, filters);
         }
-      });
-    } catch (error) {
-      log.search.error(query || 'browse', error as Error);
-      throw error;
+
+        return reply.send({
+          success: true,
+          results: paginatedResults,
+          pagination: {
+            page,
+            limit,
+            total: results.length,
+            hasMore: endIndex < results.length
+          },
+          source: results.length > 0 ? 'hybrid' : 'not_found',
+          populatedFromAPI: results.some(r => r.isApiOnly),
+          marketIntelligence: {
+            tier1Results: results.filter(r => (r.marketPriority || 0) >= 0.9).length,
+            trendingResults: results.filter(r => r.trending).length,
+            targetDemographics: [...new Set(results.map(r => r.targetDemographic).filter(Boolean))]
+          }
+        });
+
+      } catch (error: any) {
+        log.error('Search error:', error);
+        throw createError(500, 'Search failed', { error: error.message });
+      }
     }
-  });
+  );
 
   /**
    * Get all fragrances

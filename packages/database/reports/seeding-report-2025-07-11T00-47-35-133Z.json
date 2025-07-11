@@ -1,0 +1,128 @@
+{
+  "timestamp": "2025-07-11T00:47:35.133Z",
+  "config": {
+    "maxApiRequests": 25,
+    "priorityBrands": [
+      "Versace",
+      "Chanel",
+      "Dior",
+      "Tom Ford",
+      "Creed",
+      "Maison Margiela",
+      "Le Labo",
+      "Byredo"
+    ],
+    "dryRun": false,
+    "focusAreas": [
+      "missing_notes",
+      "popular_brands",
+      "low_ratings"
+    ]
+  },
+  "plan": {
+    "estimatedRequests": 25,
+    "phases": [
+      {
+        "name": "Priority Brand Seeding",
+        "description": "Seed fragrances from high-priority brands",
+        "targets": [
+          {
+            "type": "brand",
+            "query": "Creed",
+            "priority": 1,
+            "expectedResults": 15
+          }
+        ]
+      },
+      {
+        "name": "Missing Notes Enhancement",
+        "description": "Add notes to fragrances that lack them",
+        "targets": [
+          {
+            "type": "enrich",
+            "query": "Eau Capitale Diptyque 2020 Parfum Solide Diptyque",
+            "priority": 2,
+            "expectedResults": 1
+          },
+          {
+            "type": "enrich",
+            "query": "Do Son Édition Limitée 2022 Diptyque 2022 Eau de Parfum Diptyque",
+            "priority": 2,
+            "expectedResults": 1
+          },
+          {
+            "type": "enrich",
+            "query": "Sycomore Chanel 2022 Parfum Chanel",
+            "priority": 2,
+            "expectedResults": 1
+          },
+          {
+            "type": "enrich",
+            "query": "Comète 2024 Chanel",
+            "priority": 2,
+            "expectedResults": 1
+          },
+          {
+            "type": "enrich",
+            "query": "Oud Wood Parfum 2024 Tom Ford",
+            "priority": 2,
+            "expectedResults": 1
+          },
+          {
+            "type": "enrich",
+            "query": "Ombré Leather Parfum 2021 Tom Ford",
+            "priority": 2,
+            "expectedResults": 1
+          },
+          {
+            "type": "enrich",
+            "query": "Black Orchid Parfum 2020 Tom Ford",
+            "priority": 2,
+            "expectedResults": 1
+          }
+        ]
+      },
+      {
+        "name": "Missing Ratings Enhancement",
+        "description": "Add ratings to fragrances that lack them",
+        "targets": [
+          {
+            "type": "enrich",
+            "query": "Zukhruf Junaid Perfumes",
+            "priority": 3,
+            "expectedResults": 1
+          },
+          {
+            "type": "enrich",
+            "query": "Zizan Ormonde Jayne Parfum Ormonde Jayne",
+            "priority": 3,
+            "expectedResults": 1
+          },
+          {
+            "type": "enrich",
+            "query": "Zen Shiseido / 資生堂 2007 Eau de Parfum Shiseido / 資生堂",
+            "priority": 3,
+            "expectedResults": 1
+          }
+        ]
+      }
+    ]
+  },
+  "stats": {
+    "totalApiRequests": 11,
+    "fragrancesEnriched": 0,
+    "fragrancesCreated": 0,
+    "brandsCovered": 1,
+    "notesAdded": 0,
+    "ratingsAdded": 0,
+    "errors": []
+  },
+  "apiUsage": {
+    "used": 14,
+    "remaining": 9986,
+    "percentage": 0.13999999999999999,
+    "resetDate": "2025-08-01T04:00:00.000Z",
+    "dailyUsage": 14,
+    "hourlyUsage": 14
+  }
+}

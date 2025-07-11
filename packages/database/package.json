@@ -25,13 +25,28 @@
     "db:cleanup-dry": "tsx src/cleanup-fragrances.ts --dry-run",
     "db:normalize": "tsx src/normalize-concentrations.ts",
     "db:deduplicate": "node deduplicate.js",
+    "db:analyze": "tsx src/analyze-database.ts",
+    "db:strategic-cleanup": "tsx src/strategic-cleanup.ts",
+    "db:strategic-cleanup-dry": "tsx src/strategic-cleanup.ts --dry-run",
+    "db:seed-intelligent": "tsx src/intelligent-seeding.ts",
+    "db:seed-intelligent-dry": "tsx src/intelligent-seeding.ts --dry-run",
+    "db:seed-basic": "tsx src/intelligent-seeding.ts --max-requests=25",
+    "db:seed-conservative": "tsx src/intelligent-seeding.ts --max-requests=500",
+    "db:seed-aggressive": "tsx src/intelligent-seeding.ts --max-requests=2000",
+    "db:seed-simple": "tsx src/simple-seeding.ts",
+    "db:test-api": "tsx src/test-api.ts",
+    "db:test-quick": "tsx src/quick-api-test.ts",
+    "db:debug-api": "tsx src/debug-api-response.ts",
+    "db:debug-raw": "tsx src/debug-raw-api.ts",
+    "db:audit-bad-data": "tsx src/audit-bad-data.ts",
     "db:studio": "prisma studio"
   },
   "dependencies": {
     "@prisma/client": "^5.10.2",
     "bcryptjs": "^2.4.3",
     "csv-parser": "^3.0.0",
-    "dotenv": "^16.6.1"
+    "dotenv": "^16.6.1",
+    "axios": "^1.6.0"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",

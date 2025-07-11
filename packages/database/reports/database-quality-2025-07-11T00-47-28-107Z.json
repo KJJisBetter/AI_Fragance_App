@@ -1,0 +1,819 @@
+{
+  "totalFragrances": 30593,
+  "brandRedundancy": {
+    "count": 100,
+    "percentage": 0.3268721602981074,
+    "examples": [
+      {
+        "id": "cmcuy0vso0a2114eroz4lfe4m",
+        "name": "Breathe in Paris 100BON 1946 Perfume Oil",
+        "brand": "100BON",
+        "redundancyType": "brand_middle"
+      },
+      {
+        "id": "cmcuy0vso0a2214er92qdxrwn",
+        "name": "Breathe in Paris 100BON Brume Concentrée",
+        "brand": "100BON",
+        "redundancyType": "brand_middle"
+      },
+      {
+        "id": "cmcuy0vwm0c1214ergllav70l",
+        "name": "Chaconne 2 Note Perfume",
+        "brand": "2 Note",
+        "redundancyType": "brand_middle"
+      },
+      {
+        "id": "cmcuy0wsc0lg114er4frx0lt5",
+        "name": "Fresh Cut Fade 345 Soap Co. 2006 Solid Cologne",
+        "brand": "345 Soap Co.",
+        "redundancyType": "brand_middle"
+      },
+      {
+        "id": "cmcuy105b12g914erjf814tcl",
+        "name": "Rhumpkin 345 Soap Co. 2001 Eau de Parfum",
+        "brand": "345 Soap Co.",
+        "redundancyType": "brand_middle"
+      },
+      {
+        "id": "cmcuy105i12mb14er27oglucz",
+        "name": "Rugged Mountain 345 Soap Co. Eau de Parfum",
+        "brand": "345 Soap Co.",
+        "redundancyType": "brand_middle"
+      },
+      {
+        "id": "cmcuy0vw60bvm14erv5nfz6mj",
+        "name": "Centrepiece 4160 Tuesdays 1994 Eau de Parfum",
+        "brand": "4160 Tuesdays",
+        "redundancyType": "brand_middle"
+      },
+      {
+        "id": "cmcuy0vw60bvn14errcgfqgw5",
+        "name": "Centrepiece 4160 Tuesdays Parfum",
+        "brand": "4160 Tuesdays",
+        "redundancyType": "brand_middle"
+      },
+      {
+        "id": "cmcuy0yv10svk14erq95m87p3",
+        "name": "Lemon Sherbet Mrs Gloss 4160 Tuesdays 1975 Eau de Toilette",
+        "brand": "4160 Tuesdays",
+        "redundancyType": "brand_middle"
+      },
+      {
+        "id": "cmcuy0zd10wm614ernk7kip2g",
+        "name": "Mrs Gloss's Lemon Sherbet 4160 Tuesdays Eau de Parfum",
+        "brand": "4160 Tuesdays",
+        "redundancyType": "brand_middle"
+      },
+      {
+        "id": "cmcuy10bl154y14ervs00jkjk",
+        "name": "Tart's Knicker Drawer 4160 Tuesdays Eau de Parfum",
+        "brand": "4160 Tuesdays",
+        "redundancyType": "brand_middle"
+      },
+      {
+        "id": "cmcuy10d3160414erggnu7lhu",
+        "name": "The Sexiest Scent on the Planet 4160 Tuesdays Extrait",
+        "brand": "4160 Tuesdays",
+        "redundancyType": "brand_middle"
+      },
+      {
+        "id": "cmcuy10da163s14erc8sqgr0l",
+        "name": "The Waft from the Loft 4160 Tuesdays 2001 Eau de Parfum",
+        "brand": "4160 Tuesdays",
+        "redundancyType": "brand_middle"
+      },
+      {
+        "id": "cmcuy0uvr00p814ergk0auoic",
+        "name": "4711 x Hanna Artist Edition 2023 2007",
+        "brand": "4711",
+        "redundancyType": "brand_prefix"
+      },
+      {
+        "id": "cmcuy0uxk024t14errt2ig08m",
+        "name": "Acqua Colonia Lime & Nutmeg 4711 Body Spray",
+        "brand": "4711",
+        "redundancyType": "brand_middle"
+      },
+      {
+        "id": "cmcuy0uxk024y14er7htitqae",
+        "name": "Acqua Colonia Lime & Nutmeg 4711 Eau de Cologne",
+        "brand": "4711",
+        "redundancyType": "brand_middle"
+      },
+      {
+        "id": "cmcuy0uxl025614erglvhmxr8",
+        "name": "Acqua Colonia Mandarine & Cardamom 4711 2006 Eau de Cologne",
+        "brand": "4711",
+        "redundancyType": "brand_middle"
+      },
+      {
+        "id": "cmcuy0uxm025t14erd4kxduha",
+        "name": "Acqua Colonia Pink Pepper & Grapefruit 4711 Body Spray",
+        "brand": "4711",
+        "redundancyType": "brand_middle"
+      },
+      {
+        "id": "cmcuy0uxm025w14er5ap9rqv3",
+        "name": "Acqua Colonia Pink Pepper & Grapefruit 4711 Eau de Cologne",
+        "brand": "4711",
+        "redundancyType": "brand_middle"
+      },
+      {
+        "id": "cmcuy0uxn026w14er58s21wac",
+        "name": "Acqua Colonia White Peach & Coriander 4711 Eau de Cologne",
+        "brand": "4711",
+        "redundancyType": "brand_middle"
+      },
+      {
+        "id": "cmcuy0vu50ay214erevbjlov5",
+        "name": "Carat 4711 2007 Parfum",
+        "brand": "4711",
+        "redundancyType": "brand_middle"
+      },
+      {
+        "id": "cmcuy0vu50ay914ert63klonm",
+        "name": "Carat 4711 Eau de Parfum",
+        "brand": "4711",
+        "redundancyType": "brand_middle"
+      },
+      {
+        "id": "cmcuy0wlh0hu114er5t74fokh",
+        "name": "Echt Kölnisch Wasser 4711 Eau de Cologne",
+        "brand": "4711",
+        "redundancyType": "brand_middle"
+      },
+      {
+        "id": "cmcuy0yak0pvy14erzho7bz3r",
+        "name": "Jacaranda 4711 Parfum",
+        "brand": "4711",
+        "redundancyType": "brand_middle"
+      },
+      {
+        "id": "cmcuy106q13qe14erjrt0xzo8",
+        "name": "Shahi 4711 2006 Eau de Toilette",
+        "brand": "4711",
+        "redundancyType": "brand_middle"
+      },
+      {
+        "id": "cmcuy106q13qk14erbpnsyi9b",
+        "name": "Shahi 4711 Eau de Cologne",
+        "brand": "4711",
+        "redundancyType": "brand_middle"
+      },
+      {
+        "id": "cmcuy107j14bo14ervgdduczb",
+        "name": "Sir - Champaca 4711 1998 After Shave Lotion",
+        "brand": "4711",
+        "redundancyType": "brand_middle"
+      },
+      {
+        "id": "cmcuy107j14bp14er9r0lc0yj",
+        "name": "Sir - Champaca 4711 2002 Eau de Cologne",
+        "brand": "4711",
+        "redundancyType": "brand_middle"
+      },
+      {
+        "id": "cmcuy107j14br14er9v3x1e2o",
+        "name": "Sir - Irisch Moos 4711 2015 Eau de Toilette",
+        "brand": "4711",
+        "redundancyType": "brand_middle"
+      },
+      {
+        "id": "cmcuy107j14bu14erhzhner3v",
+        "name": "Sir 4711 2007 Eau de Cologne",
+        "brand": "4711",
+        "redundancyType": "brand_middle"
+      },
+      {
+        "id": "cmcuy107k14bw14erqc9rdxpb",
+        "name": "Sir 4711 Rasierwasser",
+        "brand": "4711",
+        "redundancyType": "brand_middle"
+      },
+      {
+        "id": "cmcuy109014rf14eri8oa1qll",
+        "name": "Sparkling Island 4711 Body Splash",
+        "brand": "4711",
+        "redundancyType": "brand_middle"
+      },
+      {
+        "id": "cmcuy0vtc0ae514erc7dy4zb6",
+        "name": "Cacao Lussuria A & E - Ariana & Evans 2006 Eau de Parfum",
+        "brand": "A & E - Ariana & Evans",
+        "redundancyType": "brand_middle"
+      },
+      {
+        "id": "cmcuy0vxd0cdq14er0kzqh2uc",
+        "name": "Chasing the Dragon A & E - Ariana & Evans Eau de Parfum",
+        "brand": "A & E - Ariana & Evans",
+        "redundancyType": "brand_middle"
+      },
+      {
+        "id": "cmcuy0w2g0dth14er3z5v7tjh",
+        "name": "Club Baccara A & E - Ariana & Evans Eau de Parfum",
+        "brand": "A & E - Ariana & Evans",
+        "redundancyType": "brand_middle"
+      },
+      {
+        "id": "cmcuy0zkc0xw714er7i5ze5y4",
+        "name": "No A Beautiful Life 2006",
+        "brand": "A Beautiful Life",
+        "redundancyType": "brand_middle"
+      },
+      {
+        "id": "cmcuy0vj507dz14er2ck243oz",
+        "name": "Baraka ADN Paris Eau de Parfum",
+        "brand": "ADN Paris",
+        "redundancyType": "brand_middle"
+      },
+      {
+        "id": "cmcuy0vsa09sm14erp0zzb2yi",
+        "name": "Boussa ADN Paris Eau de Parfum",
+        "brand": "ADN Paris",
+        "redundancyType": "brand_middle"
+      },
+      {
+        "id": "cmcuy0y3k0oxg14er4mifj0ve",
+        "name": "Ily ADN Paris 2010",
+        "brand": "ADN Paris",
+        "redundancyType": "brand_middle"
+      },
+      {
+        "id": "cmcuy0ztc0z5x14eromy45wpz",
+        "name": "Oud Aaron Terence Hughes 2019",
+        "brand": "Aaron Terence Hughes",
+        "redundancyType": "brand_middle"
+      },
+      {
+        "id": "cmcuy0ztc0z5y14ert8bi2joh",
+        "name": "Oud Aaron Terence Hughes 2020",
+        "brand": "Aaron Terence Hughes",
+        "redundancyType": "brand_middle"
+      },
+      {
+        "id": "cmcuy0yfw0qht14erfsb35ac4",
+        "name": "Joo Abaco 1984",
+        "brand": "Abaco",
+        "redundancyType": "brand_middle"
+      },
+      {
+        "id": "cmcuy0ztc0z5z14er3tnln5cl",
+        "name": "Oud Abaco",
+        "brand": "Abaco",
+        "redundancyType": "brand_suffix"
+      },
+      {
+        "id": "cmcuy0vy80con14er8rppszcm",
+        "name": "Chinotto Dark Abaton Eau de Parfum",
+        "brand": "Abaton",
+        "redundancyType": "brand_middle"
+      },
+      {
+        "id": "cmcuy0vy80coq14errj4yucaq",
+        "name": "Chinotto Gourmand Abaton Eau de Parfum",
+        "brand": "Abaton",
+        "redundancyType": "brand_middle"
+      },
+      {
+        "id": "cmcuy101i11m514erlx2l2dow",
+        "name": "R1 Abdul Rashid / عبد الرشيد 2008",
+        "brand": "Abdul Rashid / عبد الرشيد",
+        "redundancyType": "brand_middle"
+      },
+      {
+        "id": "cmcuy0uyv038414ernpi9r7sk",
+        "name": "Al Qurashi Blend Abdul Samad Al Qurashi / عبدالصمد القرشي Parfum",
+        "brand": "Abdul Samad Al Qurashi / عبدالصمد القرشي",
+        "redundancyType": "brand_middle"
+      },
+      {
+        "id": "cmcuy0uym02zw14ertmijufz9",
+        "name": "Al'Hayat Abdul Samad Al Qurashi / عبدالصمد القرشي Eau de Parfum",
+        "brand": "Abdul Samad Al Qurashi / عبدالصمد القرشي",
+        "redundancyType": "brand_middle"
+      },
+      {
+        "id": "cmcuy0uym02zx14erdojc8rgc",
+        "name": "Al'Hayat Blend Abdul Samad Al Qurashi / عبدالصمد القرشي Perfume Oil",
+        "brand": "Abdul Samad Al Qurashi / عبدالصمد القرشي",
+        "redundancyType": "brand_middle"
+      },
+      {
+        "id": "cmcuy0v0w03ud14erzbb44kna",
+        "name": "Amber Collection - Amber Touch Abdul Samad Al Qurashi / عبدالصمد القرشي 2020 Eau de Parfum",
+        "brand": "Abdul Samad Al Qurashi / عبدالصمد القرشي",
+        "redundancyType": "brand_middle"
+      },
+      {
+        "id": "cmcuy0v0w03ue14erbrblffi6",
+        "name": "Amber Collection - Amber Touch Abdul Samad Al Qurashi / عبدالصمد القرشي 2020 Perfume Oil",
+        "brand": "Abdul Samad Al Qurashi / عبدالصمد القرشي",
+        "redundancyType": "brand_middle"
+      },
+      {
+        "id": "cmcuy0vrf09an14erhrqsy4g0",
+        "name": "Blue Kenam Aqua Abdul Samad Al Qurashi / عبدالصمد القرشي Eau de Cologne",
+        "brand": "Abdul Samad Al Qurashi / عبدالصمد القرشي",
+        "redundancyType": "brand_middle"
+      },
+      {
+        "id": "cmcuy0vrf09ao14ermchv2vs5",
+        "name": "Blue Kenam Aqua Abdul Samad Al Qurashi / عبدالصمد القرشي Eau de Parfum",
+        "brand": "Abdul Samad Al Qurashi / عبدالصمد القرشي",
+        "redundancyType": "brand_middle"
+      },
+      {
+        "id": "cmcuy0vrg09ap14errkhtj0fk",
+        "name": "Blue Kenam Aqua Abdul Samad Al Qurashi / عبدالصمد القرشي Perfume Oil",
+        "brand": "Abdul Samad Al Qurashi / عبدالصمد القرشي",
+        "redundancyType": "brand_middle"
+      },
+      {
+        "id": "cmcuy0vrg09aq14er8pa9r24k",
+        "name": "Blue Kenam Musk Abdul Samad Al Qurashi / عبدالصمد القرشي Eau de Cologne",
+        "brand": "Abdul Samad Al Qurashi / عبدالصمد القرشي",
+        "redundancyType": "brand_middle"
+      },
+      {
+        "id": "cmcuy0vrg09ar14erq4ook1w5",
+        "name": "Blue Kenam Musk Abdul Samad Al Qurashi / عبدالصمد القرشي Perfume Oil",
+        "brand": "Abdul Samad Al Qurashi / عبدالصمد القرشي",
+        "redundancyType": "brand_middle"
+      },
+      {
+        "id": "cmcuy0vrg09as14erb4n7znag",
+        "name": "Blue Kenam Vanilla Abdul Samad Al Qurashi / عبدالصمد القرشي Eau de Cologne",
+        "brand": "Abdul Samad Al Qurashi / عبدالصمد القرشي",
+        "redundancyType": "brand_middle"
+      },
+      {
+        "id": "cmcuy0vrg09at14erx9zjry1g",
+        "name": "Blue Kenam Vanilla Abdul Samad Al Qurashi / عبدالصمد القرشي Eau de Parfum",
+        "brand": "Abdul Samad Al Qurashi / عبدالصمد القرشي",
+        "redundancyType": "brand_middle"
+      },
+      {
+        "id": "cmcuy0vrg09au14er28egpygf",
+        "name": "Blue Kenam Vanilla Abdul Samad Al Qurashi / عبدالصمد القرشي Perfume Oil",
+        "brand": "Abdul Samad Al Qurashi / عبدالصمد القرشي",
+        "redundancyType": "brand_middle"
+      },
+      {
+        "id": "cmcuy0vsd09v814ercazhtsf3",
+        "name": "BlueKenam Abdul Samad Al Qurashi / عبدالصمد القرشي Extrait de Parfum",
+        "brand": "Abdul Samad Al Qurashi / عبدالصمد القرشي",
+        "redundancyType": "brand_middle"
+      },
+      {
+        "id": "cmcuy0vsd09va14err2mv3vcp",
+        "name": "BlueKenam Le Parfum Abdul Samad Al Qurashi / عبدالصمد القرشي Eau de Cologne",
+        "brand": "Abdul Samad Al Qurashi / عبدالصمد القرشي",
+        "redundancyType": "brand_middle"
+      },
+      {
+        "id": "cmcuy0vsd09ve14er91d10pdw",
+        "name": "BlueKenam Quintessence Abdul Samad Al Qurashi / عبدالصمد القرشي Perfume Oil",
+        "brand": "Abdul Samad Al Qurashi / عبدالصمد القرشي",
+        "redundancyType": "brand_middle"
+      },
+      {
+        "id": "cmcuy0vvu0bqq14erpyd7u2m3",
+        "name": "Candy Body Oud Abdul Samad Al Qurashi / عبدالصمد القرشي Eau de Parfum",
+        "brand": "Abdul Samad Al Qurashi / عبدالصمد القرشي",
+        "redundancyType": "brand_middle"
+      },
+      {
+        "id": "cmcuy0w7z0epi14ergrx84oby",
+        "name": "Crassna Aoud Abdul Samad Al Qurashi / عبدالصمد القرشي Perfume Oil",
+        "brand": "Abdul Samad Al Qurashi / عبدالصمد القرشي",
+        "redundancyType": "brand_middle"
+      },
+      {
+        "id": "cmcuy0w7z0epj14ero4o9wgmw",
+        "name": "Crassna Oud Abdul Samad Al Qurashi / عبدالصمد القرشي Extrait de Parfum",
+        "brand": "Abdul Samad Al Qurashi / عبدالصمد القرشي",
+        "redundancyType": "brand_middle"
+      },
+      {
+        "id": "cmcuy0wcp0g3014erozpi00sj",
+        "name": "Desert Rose Blend Abdul Samad Al Qurashi / عبدالصمد القرشي Eau de Parfum",
+        "brand": "Abdul Samad Al Qurashi / عبدالصمد القرشي",
+        "redundancyType": "brand_middle"
+      },
+      {
+        "id": "cmcuy0wcp0g3114ert6dev129",
+        "name": "Desert Rose Blend Abdul Samad Al Qurashi / عبدالصمد القرشي Perfume Oil",
+        "brand": "Abdul Samad Al Qurashi / عبدالصمد القرشي",
+        "redundancyType": "brand_middle"
+      },
+      {
+        "id": "cmcuy0wgl0gyb14ersiujy3po",
+        "name": "Dreamy Musk Abdul Samad Al Qurashi / عبدالصمد القرشي Eau de Parfum",
+        "brand": "Abdul Samad Al Qurashi / عبدالصمد القرشي",
+        "redundancyType": "brand_middle"
+      },
+      {
+        "id": "cmcuy0wgl0gyc14eri4yhg84h",
+        "name": "Dreamy Musk Abdul Samad Al Qurashi / عبدالصمد القرشي Perfume Oil",
+        "brand": "Abdul Samad Al Qurashi / عبدالصمد القرشي",
+        "redundancyType": "brand_middle"
+      },
+      {
+        "id": "cmcuy0wnc0inc14erwsn7m0wc",
+        "name": "Exquisite Musk Abdul Samad Al Qurashi / عبدالصمد القرشي Eau de Parfum",
+        "brand": "Abdul Samad Al Qurashi / عبدالصمد القرشي",
+        "redundancyType": "brand_middle"
+      },
+      {
+        "id": "cmcuy0wnc0ine14er0xgrzirj",
+        "name": "Exquisite Musk Abdul Samad Al Qurashi / عبدالصمد القرشي Perfume Oil",
+        "brand": "Abdul Samad Al Qurashi / عبدالصمد القرشي",
+        "redundancyType": "brand_middle"
+      },
+      {
+        "id": "cmcuy0y590p5d14erxc02v8lf",
+        "name": "Incense Musk Abdul Samad Al Qurashi / عبدالصمد القرشي Eau de Parfum",
+        "brand": "Abdul Samad Al Qurashi / عبدالصمد القرشي",
+        "redundancyType": "brand_middle"
+      },
+      {
+        "id": "cmcuy0y590p5e14erdwceb6w9",
+        "name": "Incense Musk Abdul Samad Al Qurashi / عبدالصمد القرشي Perfume Oil",
+        "brand": "Abdul Samad Al Qurashi / عبدالصمد القرشي",
+        "redundancyType": "brand_middle"
+      },
+      {
+        "id": "cmcuy0z550upj14erxp66ibj8",
+        "name": "Magnetic Musk Abdul Samad Al Qurashi / عبدالصمد القرشي Eau de Parfum",
+        "brand": "Abdul Samad Al Qurashi / عبدالصمد القرشي",
+        "redundancyType": "brand_middle"
+      },
+      {
+        "id": "cmcuy0z550upk14erwo7g29na",
+        "name": "Magnetic Musk Abdul Samad Al Qurashi / عبدالصمد القرشي Perfume Oil",
+        "brand": "Abdul Samad Al Qurashi / عبدالصمد القرشي",
+        "redundancyType": "brand_middle"
+      },
+      {
+        "id": "cmcuy0z7x0uvh14ero8me0hzv",
+        "name": "Makan Blend Makkah Blend Abdul Samad Al Qurashi / عبدالصمد القرشي Eau de Parfum",
+        "brand": "Abdul Samad Al Qurashi / عبدالصمد القرشي",
+        "redundancyType": "brand_middle"
+      },
+      {
+        "id": "cmcuy0z7x0uvi14ert5cov3za",
+        "name": "Makan Blend Makkah Blend Abdul Samad Al Qurashi / عبدالصمد القرشي Perfume Oil",
+        "brand": "Abdul Samad Al Qurashi / عبدالصمد القرشي",
+        "redundancyType": "brand_middle"
+      },
+      {
+        "id": "cmcuy0z8h0v0814er25ndbpfb",
+        "name": "Mandarin Musk Abdul Samad Al Qurashi / عبدالصمد القرشي 2018 Eau de Parfum",
+        "brand": "Abdul Samad Al Qurashi / عبدالصمد القرشي",
+        "redundancyType": "brand_middle"
+      },
+      {
+        "id": "cmcuy0z8i0v0914erbdwv01fh",
+        "name": "Mandarin Musk Abdul Samad Al Qurashi / عبدالصمد القرشي Perfume Oil",
+        "brand": "Abdul Samad Al Qurashi / عبدالصمد القرشي",
+        "redundancyType": "brand_middle"
+      },
+      {
+        "id": "cmcuy10bt159a14eri3fqjixf",
+        "name": "Strawberry Musk Abdul Samad Al Qurashi / عبدالصمد القرشي 2018 Eau de Parfum",
+        "brand": "Abdul Samad Al Qurashi / عبدالصمد القرشي",
+        "redundancyType": "brand_middle"
+      },
+      {
+        "id": "cmcuy10bt159c14er9uzsiz5l",
+        "name": "Strawberry Musk Abdul Samad Al Qurashi / عبدالصمد القرشي Perfume Oil",
+        "brand": "Abdul Samad Al Qurashi / عبدالصمد القرشي",
+        "redundancyType": "brand_middle"
+      },
+      {
+        "id": "cmcuy0wob0ja314eriusynlqu",
+        "name": "Fierce Abercrombie & Fitch 2002 Cologne",
+        "brand": "Abercrombie & Fitch",
+        "redundancyType": "brand_middle"
+      },
+      {
+        "id": "cmcuy0wob0ja614ercys36i87",
+        "name": "Fierce Abercrombie & Fitch Body Spray",
+        "brand": "Abercrombie & Fitch",
+        "redundancyType": "brand_middle"
+      },
+      {
+        "id": "cmcuy0wps0kdv14erd69gbl5q",
+        "name": "First Instinct Man Abercrombie & Fitch 2016 Eau de Toilette",
+        "brand": "Abercrombie & Fitch",
+        "redundancyType": "brand_middle"
+      },
+      {
+        "id": "cmcuy0uwi01b914ergyr4m8j6",
+        "name": "Ablxs × Sui Yumeshima - Dionysos 2002",
+        "brand": "Ablxs",
+        "redundancyType": "brand_prefix"
+      },
+      {
+        "id": "cmcuy0uwi01bj14erpop85unu",
+        "name": "Ablxs × Sui Yumeshima - Narkissos 2007",
+        "brand": "Ablxs",
+        "redundancyType": "brand_prefix"
+      },
+      {
+        "id": "cmcuy0wm10i0414erxv88usg0",
+        "name": "eimiess × Ablxs - Murder in the Movie 2009",
+        "brand": "Ablxs",
+        "redundancyType": "brand_middle"
+      },
+      {
+        "id": "cmcuy0wm10i0514erdv91lzcw",
+        "name": "eimiess × Ablxs - Pygmalion 1975",
+        "brand": "Ablxs",
+        "redundancyType": "brand_middle"
+      },
+      {
+        "id": "cmcuy0v0403ly14erhrc4qv4j",
+        "name": "Amal Abou Jamil Perfumery 1998 Huile de Parfum",
+        "brand": "Abou Jamil Perfumery",
+        "redundancyType": "brand_middle"
+      },
+      {
+        "id": "cmcuy0v0403lz14erl6zgnsto",
+        "name": "Amal Abou Jamil Perfumery Perfume Oil",
+        "brand": "Abou Jamil Perfumery",
+        "redundancyType": "brand_middle"
+      },
+      {
+        "id": "cmcuy0v3304cq14erwznps0fh",
+        "name": "Amira Abou Jamil Perfumery 2002 Huile de Parfum",
+        "brand": "Abou Jamil Perfumery",
+        "redundancyType": "brand_middle"
+      },
+      {
+        "id": "cmcuy0uvr00p414eranyt2546",
+        "name": "1869 Acca Kappa 2005 Eau de Cologne",
+        "brand": "Acca Kappa",
+        "redundancyType": "brand_middle"
+      },
+      {
+        "id": "cmcuy0uvr00p714er4um7o61s",
+        "name": "1869 Acca Kappa Eau de Parfum",
+        "brand": "Acca Kappa",
+        "redundancyType": "brand_middle"
+      },
+      {
+        "id": "cmcuy0wy40mia14er8gvorio0",
+        "name": "Glicine Acca Kappa 2004 Eau de Cologne",
+        "brand": "Acca Kappa",
+        "redundancyType": "brand_middle"
+      },
+      {
+        "id": "cmcuy0wy40mib14eriqyvc2d3",
+        "name": "Glicine Acca Kappa 2004 Eau de Parfum",
+        "brand": "Acca Kappa",
+        "redundancyType": "brand_middle"
+      },
+      {
+        "id": "cmcuy0x0t0ncw14er41fc7uzj",
+        "name": "Green Mandarin Acca Kappa 2013 Acqua di Colonia",
+        "brand": "Acca Kappa",
+        "redundancyType": "brand_middle"
+      },
+      {
+        "id": "cmcuy0yxi0tmv14eregyj2f0y",
+        "name": "LiboCedro Acca Kappa 2011 Eau de Cologne",
+        "brand": "Acca Kappa",
+        "redundancyType": "brand_middle"
+      },
+      {
+        "id": "cmcuy0z8h0uzz14erckuwxn2s",
+        "name": "Mandarin & Green Tea Acca Kappa 2019 Eau de Parfum",
+        "brand": "Acca Kappa",
+        "redundancyType": "brand_middle"
+      },
+      {
+        "id": "cmcuy0zeh0wty14er1ce9fv4k",
+        "name": "Muschio Bianco Acca Kappa 1997 Eau de Cologne",
+        "brand": "Acca Kappa",
+        "redundancyType": "brand_middle"
+      },
+      {
+        "id": "cmcuy0zeh0wtz14er6eq9ll9q",
+        "name": "Muschio Bianco Acca Kappa 2012 Eau de Parfum",
+        "brand": "Acca Kappa",
+        "redundancyType": "brand_middle"
+      }
+    ]
+  },
+  "dataCompleteness": {
+    "concentration": {
+      "count": 10413,
+      "percentage": 34.037198051841926
+    },
+    "year": {
+      "count": 22262,
+      "percentage": 72.76828032556467
+    },
+    "rating": {
+      "count": 19689,
+      "percentage": 64.35785964109438
+    },
+    "topNotes": {
+      "count": 28822,
+      "percentage": 94.21109404112052
+    },
+    "baseNotes": {
+      "count": 28839,
+      "percentage": 94.2666623083712
+    },
+    "middleNotes": {
+      "count": 28839,
+      "percentage": 94.2666623083712
+    }
+  },
+  "brandDistribution": [
+    {
+      "brand": "Guerlain",
+      "count": 545,
+      "percentage": 1.7814532736246853
+    },
+    {
+      "brand": "Avon",
+      "count": 400,
+      "percentage": 1.3074886411924296
+    },
+    {
+      "brand": "Bath & Body Works",
+      "count": 335,
+      "percentage": 1.09502173699866
+    },
+    {
+      "brand": "Dior",
+      "count": 292,
+      "percentage": 0.9544667080704736
+    },
+    {
+      "brand": "Al Haramain / الحرمين",
+      "count": 290,
+      "percentage": 0.9479292648645116
+    },
+    {
+      "brand": "O Boticário",
+      "count": 286,
+      "percentage": 0.9348543784525872
+    },
+    {
+      "brand": "Yves Saint Laurent",
+      "count": 273,
+      "percentage": 0.8923609976138333
+    },
+    {
+      "brand": "Givenchy",
+      "count": 265,
+      "percentage": 0.8662112247899846
+    },
+    {
+      "brand": "Swiss Arabian",
+      "count": 244,
+      "percentage": 0.797568071127382
+    },
+    {
+      "brand": "Giorgio Armani",
+      "count": 239,
+      "percentage": 0.7812244631124767
+    },
+    {
+      "brand": "Armaf",
+      "count": 236,
+      "percentage": 0.7714182983035335
+    },
+    {
+      "brand": "Oriflame",
+      "count": 233,
+      "percentage": 0.7616121334945902
+    },
+    {
+      "brand": "Calvin Klein",
+      "count": 197,
+      "percentage": 0.6439381557872716
+    },
+    {
+      "brand": "Amouage",
+      "count": 189,
+      "percentage": 0.617788382963423
+    },
+    {
+      "brand": "Nabeel",
+      "count": 188,
+      "percentage": 0.6145196613604419
+    },
+    {
+      "brand": "Rasasi",
+      "count": 187,
+      "percentage": 0.6112509397574609
+    },
+    {
+      "brand": "Cartier",
+      "count": 176,
+      "percentage": 0.5752950021246691
+    },
+    {
+      "brand": "Fueguia 1833",
+      "count": 175,
+      "percentage": 0.5720262805216879
+    },
+    {
+      "brand": "Zara",
+      "count": 171,
+      "percentage": 0.5589513941097637
+    },
+    {
+      "brand": "Kenzo",
+      "count": 167,
+      "percentage": 0.5458765076978395
+    }
+  ],
+  "concentrationDistribution": [
+    {
+      "concentration": "Eau de Parfum",
+      "count": 5051,
+      "percentage": 16.510312816657404
+    },
+    {
+      "concentration": "Eau de Toilette",
+      "count": 1978,
+      "percentage": 6.465531330696564
+    },
+    {
+      "concentration": "Parfum",
+      "count": 826,
+      "percentage": 2.699964044062367
+    },
+    {
+      "concentration": "Fragrance Mist",
+      "count": 383,
+      "percentage": 1.2519203739417515
+    },
+    {
+      "concentration": "Solid Perfume",
+      "count": 297,
+      "percentage": 0.9708103160853789
+    },
+    {
+      "concentration": "Eau de Cologne",
+      "count": 296,
+      "percentage": 0.967541594482398
+    },
+    {
+      "concentration": "Perfume Oil",
+      "count": 286,
+      "percentage": 0.9348543784525872
+    },
+    {
+      "concentration": "Extrait de Parfum",
+      "count": 262,
+      "percentage": 0.8564050599810415
+    },
+    {
+      "concentration": "Body Spray",
+      "count": 257,
+      "percentage": 0.840061451966136
+    },
+    {
+      "concentration": "Hair Mist",
+      "count": 227,
+      "percentage": 0.7419998038767038
+    },
+    {
+      "concentration": "After Shave Lotion",
+      "count": 214,
+      "percentage": 0.6995064230379499
+    },
+    {
+      "concentration": "Pura Esencia",
+      "count": 69,
+      "percentage": 0.22554179060569413
+    },
+    {
+      "concentration": "Lotion Après-Rasage",
+      "count": 55,
+      "percentage": 0.17977968816395906
+    },
+    {
+      "concentration": "Après Rasage",
+      "count": 26,
+      "percentage": 0.08498676167750793
+    },
+    {
+      "concentration": "After-Shave",
+      "count": 19,
+      "percentage": 0.06210571045664041
+    }
+  ],
+  "qualityScore": 90,
+  "recommendations": [
+    "🟢 HIGH QUALITY: Light cleanup + selective API seeding (~500 API calls)",
+    "✅ Keep existing data, focus on enriching incomplete records"
+  ]
+}
