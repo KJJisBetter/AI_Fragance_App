@@ -179,6 +179,197 @@ export function hasNameRedundancy(name: string, brand: string): boolean {
 }
 
 /**
+ * Convert a string to proper title case for fragrance names
+ */
+export function toTitleCase(str: string): string {
+  if (!str) return '';
+
+  return str
+    .toLowerCase()
+    .split(/[\s-_]+/) // Split on spaces, hyphens, and underscores
+    .map(word => {
+      if (word.length === 0) return word;
+
+      // Handle special cases
+      const specialWords: Record<string, string> = {
+        'edt': 'EDT',
+        'edp': 'EDP',
+        'eau': 'Eau',
+        'de': 'de',
+        'la': 'la',
+        'le': 'le',
+        'du': 'du',
+        'des': 'des',
+        'and': 'and',
+        'of': 'of',
+        'for': 'for',
+        'by': 'by',
+        'vs': 'VS',
+        'v.s.': 'V.S.',
+        'man': 'Man',
+        'men': 'Men',
+        'woman': 'Woman',
+        'women': 'Women',
+        'homme': 'Homme',
+        'femme': 'Femme',
+        'uomo': 'Uomo',
+        'donna': 'Donna'
+      };
+
+      const lowerWord = word.toLowerCase();
+      if (specialWords[lowerWord]) {
+        return specialWords[lowerWord];
+      }
+
+      // Standard title case
+      return word.charAt(0).toUpperCase() + word.slice(1);
+    })
+    .join(' ');
+}
+
+/**
+ * Format fragrance name for display with proper casing
+ */
+export function formatDisplayName(name: string): string {
+  if (!name) return '';
+
+  // First clean up any URL-like formatting
+  let cleaned = name
+    .replace(/[-_]+/g, ' ') // Replace hyphens and underscores with spaces
+    .replace(/\s+/g, ' ')   // Normalize multiple spaces
+    .trim();
+
+  // Apply title case
+  return toTitleCase(cleaned);
+}
+
+/**
+ * Sort brands by popularity (count) then alphabetically
+ */
+export function sortBrandsByPopularity(brands: Array<{ name: string; count: number }>): Array<{ name: string; count: number }> {
+  return [...brands].sort((a, b) => {
+    // First sort by count (descending)
+    if (b.count !== a.count) {
+      return b.count - a.count;
+    }
+
+    // Then sort alphabetically by formatted name
+    const nameA = formatDisplayName(a.name);
+    const nameB = formatDisplayName(b.name);
+    return nameA.localeCompare(nameB);
+  });
+}
+
+/**
+ * Sort brands alphabetically by formatted name
+ */
+export function sortBrandsAlphabetically(brands: Array<{ name: string; count: number }>): Array<{ name: string; count: number }> {
+  return [...brands].sort((a, b) => {
+    const nameA = formatDisplayName(a.name);
+    const nameB = formatDisplayName(b.name);
+    return nameA.localeCompare(nameB);
+  });
+}
+
+/**
+ * Format concentration values with proper names and abbreviations
+ */
+export function formatConcentration(concentration: string | null | undefined): string {
+  if (!concentration) return '';
+
+  // Handle the "Concentration" issue in the database
+  if (concentration === 'Concentration') return '';
+
+    const concentrationMap: Record<string, string> = {
+    // API standardized values (only the 4 main types)
+    'edt': 'Eau de Toilette (EDT)',
+    'edp': 'Eau de Parfum (EDP)',
+    'parfum': 'Parfum',
+    'cologne': 'Cologne',
+
+    // Legacy uppercase versions
+    'EDT': 'Eau de Toilette (EDT)',
+    'EDP': 'Eau de Parfum (EDP)',
+    'EDC': 'Cologne',
+    'PARFUM': 'Parfum',
+    'COLOGNE': 'Cologne',
+
+    // Full names
+    'Eau de Toilette': 'Eau de Toilette (EDT)',
+    'Eau de Parfum': 'Eau de Parfum (EDP)',
+    'Eau de Cologne': 'Cologne',
+    'Parfum': 'Parfum',
+    'Extrait de Parfum': 'Parfum',
+    'Extrait': 'Parfum',
+    'Cologne': 'Cologne',
+    'Perfume': 'Parfum',
+
+    // Lowercase full names
+    'eau de toilette': 'Eau de Toilette (EDT)',
+    'eau de parfum': 'Eau de Parfum (EDP)',
+    'eau de cologne': 'Cologne',
+    'extrait de parfum': 'Parfum',
+    'perfume': 'Parfum',
+    'cologne': 'Cologne'
+  };
+
+  const normalized = concentration.trim();
+  return concentrationMap[normalized] || concentrationMap[normalized.toLowerCase()] || toTitleCase(normalized);
+}
+
+/**
+ * Get short concentration abbreviation for display in cards
+ */
+export function getConcentrationAbbreviation(concentration: string | null | undefined): string {
+  if (!concentration) return '';
+
+  // Handle the "Concentration" issue in the database
+  if (concentration === 'Concentration') return '';
+
+  const abbreviationMap: Record<string, string> = {
+    'EDT': 'EDT',
+    'EDP': 'EDP',
+    'Parfum': 'Parfum',
+    'EDC': 'Cologne',
+    'Cologne': 'Cologne',
+    'Extrait': 'Extrait',
+    'Aftershave': 'Aftershave',
+    'Splash': 'Splash',
+    'Mist': 'Mist',
+    'Spray': 'Spray',
+
+    // Handle full names
+    'Eau de Toilette': 'EDT',
+    'Eau de Parfum': 'EDP',
+    'Eau de Cologne': 'Cologne',
+    'Extrait de Parfum': 'Extrait',
+    'Body Mist': 'Mist',
+
+    // Handle variations
+    'eau de toilette': 'EDT',
+    'eau de parfum': 'EDP',
+    'eau de cologne': 'Cologne',
+    'extrait de parfum': 'Extrait',
+    'body mist': 'Mist',
+
+    // Handle lowercase
+    'edt': 'EDT',
+    'edp': 'EDP',
+    'edc': 'Cologne',
+    'parfum': 'Parfum',
+    'cologne': 'Cologne',
+    'extrait': 'Extrait',
+    'aftershave': 'Aftershave',
+    'splash': 'Splash',
+    'mist': 'Mist',
+    'spray': 'Spray'
+  };
+
+  const normalized = concentration.trim();
+  return abbreviationMap[normalized] || abbreviationMap[normalized.toLowerCase()] || toTitleCase(normalized);
+}
+
+/**
  * Format fragrance name for different display contexts
  */
 export function formatFragranceName(
@@ -189,30 +380,33 @@ export function formatFragranceName(
     ? fragrance
     : getDisplayFragrance(fragrance);
 
+  // Always apply proper formatting to the display name
+  const formattedName = formatDisplayName(displayFragrance.displayName);
+
   switch (context) {
     case 'card':
       // For cards, use clean name truncated appropriately
-      return displayFragrance.displayName;
+      return formattedName;
 
     case 'list':
       // For lists, might want to include brand prefix if very short
-      if (displayFragrance.displayName.length < 15 && displayFragrance.hasRedundancy) {
-        return `${fragrance.brand} ${displayFragrance.displayName}`;
+      if (formattedName.length < 15 && displayFragrance.hasRedundancy) {
+        return `${fragrance.brand} ${formattedName}`;
       }
-      return displayFragrance.displayName;
+      return formattedName;
 
     case 'detail':
       // For detail pages, show full context
       return displayFragrance.hasRedundancy
-        ? `${displayFragrance.displayName} (${fragrance.brand})`
-        : displayFragrance.displayName;
+        ? `${formattedName} (${fragrance.brand})`
+        : formattedName;
 
     case 'search':
       // For search results, include brand context
-      return `${displayFragrance.displayName} by ${fragrance.brand}`;
+      return `${formattedName} by ${fragrance.brand}`;
 
     default:
-      return displayFragrance.displayName;
+      return formattedName;
   }
 }
 

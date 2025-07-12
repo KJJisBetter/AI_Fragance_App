@@ -5,6 +5,7 @@ import { cva, type VariantProps } from 'class-variance-authority'
 import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 import { useCleanFragrance } from '@/hooks/useCleanFragrance'
+import { formatDisplayName, getConcentrationAbbreviation } from '@/utils/fragrance'
 import type { Fragrance } from '@fragrance-battle/types'
 
 // Premium CVA variants with sophisticated styling and fixed heights
@@ -87,8 +88,9 @@ export const FragranceCard: React.FC<FragranceCardProps> = ({
     enableTooltip: true
   })
 
-  // Extract clean data with fallback
-  const displayName = cleanResult?.displayFragrance.displayName || fragrance.name
+  // Extract clean data with fallback and proper formatting
+  const rawDisplayName = cleanResult?.displayFragrance.displayName || fragrance.name
+  const displayName = formatDisplayName(rawDisplayName) // Apply proper title case formatting
   const tooltip = cleanResult?.tooltip || ''
   const hasRedundancy = cleanResult?.hasRedundancy || false
   const isNameTruncated = displayName.length > 40 // Approximate threshold for 2 lines
@@ -271,7 +273,7 @@ export const FragranceCard: React.FC<FragranceCardProps> = ({
               'text-xs font-semibold uppercase tracking-wider truncate pr-2',
               getBrandColor(fragrance.brand)
             )}>
-              {fragrance.brand}
+              {formatDisplayName(fragrance.brand)}
             </div>
 
             {displayRating > 0 && (
@@ -332,7 +334,7 @@ export const FragranceCard: React.FC<FragranceCardProps> = ({
                   displayConcentration === 'EDP' && 'border-blue-200 text-blue-700 hover:bg-blue-50'
                 )}
               >
-                {displayConcentration}
+                {getConcentrationAbbreviation(displayConcentration)}
               </Badge>
             )}
             {fragrance.verified && (

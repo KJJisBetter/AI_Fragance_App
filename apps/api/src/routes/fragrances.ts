@@ -22,20 +22,28 @@ export default async function fragrancesRoutes(app: FastifyInstance) {
     preHandler: [rateLimiters.search, optionalAuth, validateBody(fragranceSchemas.search)]
   },
     async (request: FastifyRequest, reply: FastifyReply) => {
+      console.log('🔍 Raw request body:', request.body);
       const { query, filters, page, limit, sortBy, sortOrder } = request.body as any;
       const userId = (request as any).userId;
 
       try {
-        // Use organic population service for market-intelligent search
+        // Calculate pagination
+        const offset = (page - 1) * limit;
+
+        console.log('🔍 Search API - Pagination params:', { page, limit, offset });
+
+        // Use organic population service for market-intelligent search with pagination
         const results = await organicPopulationService.searchWithOrganicPopulation(
           query || '',
-          filters
+          filters,
+          { limit, offset }
         );
 
-        // Apply pagination
-        const startIndex = (page - 1) * limit;
-        const endIndex = startIndex + limit;
-        const paginatedResults = results.slice(startIndex, endIndex);
+        console.log('🔍 Search API - Results:', { resultsCount: results.length, limit, offset });
+
+        // Get total count for pagination (we need to do a separate count query)
+        const totalCount = await organicPopulationService.getSearchCount(query || '', filters);
+        const totalPages = Math.ceil(totalCount / limit);
 
         // Track search for analytics
         if (userId) {
@@ -44,12 +52,16 @@ export default async function fragrancesRoutes(app: FastifyInstance) {
 
         return reply.send({
           success: true,
-          results: paginatedResults,
+          fragrances: results,
           pagination: {
             page,
             limit,
-            total: results.length,
-            hasMore: endIndex < results.length
+            total: totalCount,
+            totalCount: totalCount,
+            totalPages: totalPages,
+            hasMore: page < totalPages,
+            hasNextPage: page < totalPages,
+            hasPrevPage: page > 1
           },
           source: results.length > 0 ? 'hybrid' : 'not_found',
           populatedFromAPI: results.some(r => r.isApiOnly),
@@ -77,13 +89,48 @@ export default async function fragrancesRoutes(app: FastifyInstance) {
       page = 1,
       limit = 20,
       sortBy = 'name',
-      sortOrder = 'asc'
+      sortOrder = 'asc',
+      // Filter parameters
+      brand,
+      concentration,
+      verified,
+      yearFrom,
+      yearTo,
+      season,
+      occasion,
+      mood
     } = request.query;
 
     // Convert strings to integers
     const pageNum = parseInt(page as string, 10) || 1;
     const limitNum = parseInt(limit as string, 10) || 20;
     const offset = (pageNum - 1) * limitNum;
+
+    // Build where conditions from filters
+    const whereConditions: any = {};
+
+    if (brand) {
+      whereConditions.brand = { contains: brand, mode: 'insensitive' };
+    }
+
+    if (concentration) {
+      whereConditions.concentration = { equals: concentration, mode: 'insensitive' };
+    }
+
+    if (verified !== undefined) {
+      whereConditions.verified = verified === 'true';
+    }
+
+    if (yearFrom) {
+      whereConditions.year = { ...whereConditions.year, gte: parseInt(yearFrom as string, 10) };
+    }
+
+    if (yearTo) {
+      whereConditions.year = { ...whereConditions.year, lte: parseInt(yearTo as string, 10) };
+    }
+
+    // Note: season, occasion, mood would need to be added to the database schema
+    // For now, we'll ignore them but they're here for future implementation
 
     const orderBy: any = {};
     if (sortBy === 'rating') {
@@ -96,11 +143,14 @@ export default async function fragrancesRoutes(app: FastifyInstance) {
 
     const [fragrances, totalCount] = await Promise.all([
       prisma.fragrance.findMany({
+        where: whereConditions,
         orderBy,
         skip: offset,
         take: limitNum
       }),
-      prisma.fragrance.count()
+      prisma.fragrance.count({
+        where: whereConditions
+      })
     ]);
 
     const totalPages = Math.ceil(totalCount / limitNum);

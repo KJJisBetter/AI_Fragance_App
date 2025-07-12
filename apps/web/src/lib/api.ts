@@ -108,7 +108,8 @@ export const authApi = {
 export const fragrancesApi = {
   search: async (params: FragranceSearchRequest) => {
     const response = await api.post('/fragrances/search', params)
-    return handleApiResponse(response)
+    // Search API returns data directly, not wrapped in data property
+    return response.data
   },
 
   getAll: async (params?: Record<string, any>) => {

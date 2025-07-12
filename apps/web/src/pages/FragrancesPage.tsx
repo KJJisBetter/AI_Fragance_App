@@ -14,6 +14,7 @@ import { SortSelect } from '../components/SortSelect'
 import { VirtualizedList } from '../components/VirtualizedList'
 import { fragrancesApi } from '../lib/api'
 import { searchAnalytics } from '../lib/searchAnalytics'
+import { formatDisplayName, getConcentrationAbbreviation } from '../utils/fragrance'
 import './FragrancesPage.css'
 import { Helmet } from 'react-helmet-async'
 import { FragranceCard } from '../components/FragranceCard'
@@ -148,17 +149,17 @@ export const FragrancesPage = () => {
         <div className="fragrance-card-content">
           <div className="fragrance-card-header">
             <h3 className="fragrance-card-name">
-              <SearchHighlight text={fragrance.name} searchTerm={urlSearchQuery} />
+              <SearchHighlight text={formatDisplayName(fragrance.name)} searchTerm={urlSearchQuery} />
             </h3>
             <p className="fragrance-card-brand">
-              <SearchHighlight text={fragrance.brand} searchTerm={urlSearchQuery} />
+              <SearchHighlight text={formatDisplayName(fragrance.brand)} searchTerm={urlSearchQuery} />
             </p>
           </div>
 
           <div className="fragrance-card-details">
             {fragrance.year && <div className="fragrance-card-year">📅 {fragrance.year}</div>}
             {fragrance.concentration && (
-              <div className="fragrance-card-concentration">💧 {fragrance.concentration}</div>
+              <div className="fragrance-card-concentration">💧 {getConcentrationAbbreviation(fragrance.concentration)}</div>
             )}
           </div>
 

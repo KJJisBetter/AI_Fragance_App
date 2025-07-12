@@ -22,13 +22,13 @@ export const fragranceSchemas = {
       season: z.enum(['spring', 'summer', 'fall', 'winter']).optional(),
       occasion: z.enum(['casual', 'formal', 'date', 'work', 'party']).optional(),
       mood: z.enum(['fresh', 'warm', 'mysterious', 'elegant', 'bold']).optional(),
-      concentration: z.enum(['parfum', 'edp', 'edt', 'edc', 'cologne']).optional(),
+      concentration: z.enum(['parfum', 'edp', 'edt', 'cologne']).optional(),
       verified: z.boolean().optional(),
       yearFrom: z.number().int().min(1900).max(2030).optional(),
       yearTo: z.number().int().min(1900).max(2030).optional()
     }).optional(),
     page: z.number().int().min(1).max(1000).default(1),
-    limit: z.number().int().min(1).max(50).default(20),
+    limit: z.number().int().min(1).max(100).default(20),
     sortBy: z.enum(['name', 'brand', 'year', 'rating', 'popularity', 'relevance']).default('relevance'),
     sortOrder: z.enum(['asc', 'desc']).default('desc')
   }),
@@ -43,7 +43,7 @@ export const fragranceSchemas = {
     name: z.string().min(1).max(200),
     brand: z.string().min(1).max(100),
     year: z.number().int().min(1900).max(2030).optional(),
-    concentration: z.enum(['parfum', 'edp', 'edt', 'edc', 'cologne']).optional(),
+    concentration: z.enum(['parfum', 'edp', 'edt', 'cologne']).optional(),
     description: z.string().max(2000).optional(),
     notes: z.object({
       top: z.array(z.string().max(50)).max(10).optional(),
@@ -58,7 +58,7 @@ export const fragranceSchemas = {
     name: z.string().min(1).max(200).optional(),
     brand: z.string().min(1).max(100).optional(),
     year: z.number().int().min(1900).max(2030).optional(),
-    concentration: z.enum(['parfum', 'edp', 'edt', 'edc', 'cologne']).optional(),
+    concentration: z.enum(['parfum', 'edp', 'edt', 'cologne']).optional(),
     description: z.string().max(2000).optional(),
     notes: z.object({
       top: z.array(z.string().max(50)).max(10).optional(),
@@ -173,7 +173,7 @@ export const querySchemas = {
     season: z.enum(['spring', 'summer', 'fall', 'winter']).optional(),
     occasion: z.enum(['casual', 'formal', 'date', 'work', 'party']).optional(),
     mood: z.enum(['fresh', 'warm', 'mysterious', 'elegant', 'bold']).optional(),
-    concentration: z.enum(['parfum', 'edp', 'edt', 'edc', 'cologne']).optional(),
+    concentration: z.enum(['parfum', 'edp', 'edt', 'cologne']).optional(),
     verified: z.boolean().optional(),
     yearFrom: z.number().int().min(1900).max(2030).optional(),
     yearTo: z.number().int().min(1900).max(2030).optional(),
@@ -192,7 +192,7 @@ export const aiSchemas = {
     middleNotes: z.array(z.string().max(50)).max(20).optional(),
     baseNotes: z.array(z.string().max(50)).max(20).optional(),
     year: z.number().int().min(1900).max(2030).optional(),
-    concentration: z.enum(['parfum', 'edp', 'edt', 'edc', 'cologne']).optional(),
+    concentration: z.enum(['parfum', 'edp', 'edt', 'cologne']).optional(),
     description: z.string().max(1000).optional()
   }),
 

@@ -34,6 +34,12 @@ export const FragrancesPageRedesigned = () => {
   const [error, setError] = useState<string | null>(null)
   const [showMobileFilters, setShowMobileFilters] = useState(false)
 
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
+  const [isLoadingMore, setIsLoadingMore] = useState(false)
+  const itemsPerPage = 24
+
   // Filter state
   const [filters, setFilters] = useState<FilterState>({
     brands: [],
@@ -64,15 +70,24 @@ export const FragrancesPageRedesigned = () => {
   })
 
   // Fetch data
-  const fetchData = useCallback(async () => {
-    setIsLoading(true)
-    setError(null)
+  const fetchData = useCallback(async (page: number = 1, append: boolean = false) => {
+    if (append) {
+      setIsLoadingMore(true)
+    } else {
+      setIsLoading(true)
+      setError(null)
+    }
 
     try {
-      const limit = 24 // Increased for better grid layout
-
       let result
       if (urlSearchQuery.trim()) {
+        console.log('🔍 Search API call with params (itemsPerPage=' + itemsPerPage + '):', {
+          query: urlSearchQuery,
+          page,
+          limit: itemsPerPage,
+          sortBy: currentSort.sortBy,
+          sortOrder: currentSort.sortOrder,
+        })
         result = await fragrancesApi.search({
           query: urlSearchQuery,
           filters: {
@@ -86,15 +101,21 @@ export const FragrancesPageRedesigned = () => {
             ratingMin: filters.ratingRange[0],
             verified: filters.verified || undefined,
           },
-          page: 1,
-          limit,
+          page,
+          limit: itemsPerPage,
           sortBy: currentSort.sortBy,
           sortOrder: currentSort.sortOrder,
         })
       } else {
+        console.log('🔍 GetAll API call with params:', {
+          page,
+          limit: itemsPerPage,
+          sortBy: currentSort.sortBy,
+          sortOrder: currentSort.sortOrder,
+        })
         result = await fragrancesApi.getAll({
-          page: 1,
-          limit,
+          page,
+          limit: itemsPerPage,
           sortBy: currentSort.sortBy,
           sortOrder: currentSort.sortOrder,
           brands: filters.brands,
@@ -106,9 +127,17 @@ export const FragrancesPageRedesigned = () => {
       const responseData = (result as any).data || (result as any)
       const fetchedFragrances = responseData.fragrances || []
       const totalCount = responseData.pagination?.totalCount || responseData.total || 0
+      const totalPagesCount = Math.ceil(totalCount / itemsPerPage)
 
-      setFragrances(fetchedFragrances)
+      if (append) {
+        setFragrances(prev => [...prev, ...fetchedFragrances])
+      } else {
+        setFragrances(fetchedFragrances)
+      }
+
       setTotalFragrances(totalCount)
+      setTotalPages(totalPagesCount)
+      setCurrentPage(page)
 
       if (urlSearchQuery.trim()) {
         searchAnalytics.trackSearch(urlSearchQuery, fetchedFragrances.length, 'redesigned-page')
@@ -119,8 +148,30 @@ export const FragrancesPageRedesigned = () => {
       console.error('❌ Error fetching fragrances:', err)
     } finally {
       setIsLoading(false)
+      setIsLoadingMore(false)
     }
+  }, [urlSearchQuery, filters, currentSort, itemsPerPage])
+
+  // Reset to page 1 when search/filters change
+  useEffect(() => {
+    setCurrentPage(1)
+    fetchData(1, false)
   }, [urlSearchQuery, filters, currentSort])
+
+  // Load more function
+  const loadMore = () => {
+    if (currentPage < totalPages && !isLoadingMore) {
+      fetchData(currentPage + 1, true)
+    }
+  }
+
+  // Load specific page
+  const loadPage = (page: number) => {
+    if (page >= 1 && page <= totalPages && page !== currentPage && !isLoading) {
+      fetchData(page, false)
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
+  }
 
   // Fetch available filter options
   const fetchFilterOptions = useCallback(async () => {
@@ -134,10 +185,6 @@ export const FragrancesPageRedesigned = () => {
       console.error('Failed to load filter options:', err)
     }
   }, [])
-
-  useEffect(() => {
-    fetchData()
-  }, [fetchData])
 
   useEffect(() => {
     fetchFilterOptions()
@@ -165,6 +212,10 @@ export const FragrancesPageRedesigned = () => {
     ? `Explore ${totalFragrances.toLocaleString()} fragrances matching "${urlSearchQuery}". Find your perfect scent with detailed notes, ratings, and expert reviews.`
     : `Discover your perfect fragrance from our collection of ${totalFragrances.toLocaleString()} premium scents. Compare notes, ratings, and find your signature scent.`
 
+  const headerSubtitle = urlSearchQuery
+    ? `Showing results for "${urlSearchQuery}"${totalPages > 1 ? ` (Page ${currentPage} of ${totalPages})` : ''}`
+    : `Explore our curated collection of premium fragrances${totalPages > 1 ? ` (Page ${currentPage} of ${totalPages})` : ''}`
+
   return (
     <>
       <Helmet>
@@ -185,10 +236,7 @@ export const FragrancesPageRedesigned = () => {
                     {urlSearchQuery ? `Search Results` : 'Discover Fragrances'}
                   </h1>
                   <p className="mt-2 text-slate-600">
-                    {urlSearchQuery
-                      ? `Showing results for "${urlSearchQuery}"`
-                      : 'Explore our curated collection of premium fragrances'
-                    }
+                    {headerSubtitle}
                   </p>
                 </div>
 
@@ -246,6 +294,11 @@ export const FragrancesPageRedesigned = () => {
                   onSort={handleSort}
                   onToggleFilters={toggleMobileFilters}
                   currentSort={currentSort}
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  isLoadingMore={isLoadingMore}
+                  onLoadMore={loadMore}
+                  onLoadPage={loadPage}
                   className="bg-white rounded-xl border border-slate-200 shadow-sm p-6"
                 />
               )}

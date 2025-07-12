@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useToast } from '@/hooks/use-toast'
 import { useAppStore } from '../stores/appStore'
+import { authApi } from '../lib/api'
 
 export const RegisterPage = () => {
   const [username, setUsername] = useState('')
@@ -26,28 +27,38 @@ export const RegisterPage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
-    // setError(""); // This line was removed as per the new_code
-    // setSuccess(""); // This line was removed as per the new_code
+
+    // Validation
+    if (password !== confirmPassword) {
+      toast({
+        title: 'Passwords do not match',
+        variant: 'destructive',
+      })
+      setIsLoading(false)
+      return
+    }
 
     try {
       // Call the backend API to register the user
-      // const response = await authApi.register({ // This line was removed as per the new_code
-      //   username, // This line was removed as per the new_code
-      //   email, // This line was removed as per the new_code
-      //   password // This line was removed as per the new_code
-      // }); // This line was removed as per the new_code
+      const response = await authApi.register({
+        username,
+        email,
+        password
+      })
 
       // Use Zustand store to handle login
-      // login(response.user, response.token); // This line was removed as per the new_code
+      login(response.user, response.token)
 
-      // setSuccess(`Welcome ${response.user.username}! Registration successful!`); // This line was removed as per the new_code
+      toast({
+        title: `Welcome ${response.user.username}! Registration successful!`,
+        variant: 'default',
+      })
 
       // Redirect to home page after 2 seconds
       setTimeout(() => {
         navigate('/')
       }, 2000)
     } catch (err: any) {
-      // setError(err.message || 'Registration failed. Please try again.'); // This line was removed as per the new_code
       toast({
         title: err.message || 'Registration failed. Please try again.',
         variant: 'destructive',
@@ -127,6 +138,19 @@ export const RegisterPage = () => {
                 required
                 disabled={isLoading}
                 placeholder="Create a strong password"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="confirmPassword">Confirm Password</Label>
+              <Input
+                id="confirmPassword"
+                type="password"
+                value={confirmPassword}
+                onChange={e => setConfirmPassword(e.target.value)}
+                required
+                disabled={isLoading}
+                placeholder="Confirm your password"
               />
             </div>
 

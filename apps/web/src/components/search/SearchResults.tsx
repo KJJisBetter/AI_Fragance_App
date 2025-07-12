@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { FragranceCard } from '@/components/fragrance/FragranceCard'
+import { formatDisplayName, getConcentrationAbbreviation } from '@/utils/fragrance'
 import type { Fragrance } from '@fragrance-battle/types'
 
 interface SearchResultsProps {
@@ -15,6 +16,12 @@ interface SearchResultsProps {
   onToggleFilters?: () => void
   currentSort?: { sortBy: string; sortOrder: 'asc' | 'desc' }
   className?: string
+  // Pagination props
+  currentPage?: number
+  totalPages?: number
+  isLoadingMore?: boolean
+  onLoadMore?: () => void
+  onLoadPage?: (page: number) => void
 }
 
 type ViewMode = 'grid' | 'list'
@@ -29,6 +36,12 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
   onToggleFilters,
   currentSort = { sortBy: 'relevance', sortOrder: 'desc' },
   className,
+  // Pagination props
+  currentPage = 1,
+  totalPages = 1,
+  isLoadingMore = false,
+  onLoadMore,
+  onLoadPage,
 }) => {
   const [viewMode, setViewMode] = useState<ViewMode>('grid')
   const [cardVariant, setCardVariant] = useState<CardVariant>('default')
@@ -210,7 +223,7 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
                 className="bg-purple-100 text-purple-800 hover:bg-purple-200 cursor-pointer"
                 onClick={() => handleRemoveFromBattle(fragrance.id)}
               >
-                {fragrance.brand} {fragrance.name}
+                {formatDisplayName(fragrance.brand)} {formatDisplayName(fragrance.name)}
                 <span className="ml-1">×</span>
               </Badge>
             ))}
@@ -243,6 +256,111 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
               className={viewMode === 'list' ? 'flex' : ''}
             />
           ))}
+        </div>
+      )}
+
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-slate-200">
+          {/* Page Info */}
+          <div className="text-sm text-slate-600">
+            Showing {((currentPage - 1) * 24) + 1} to {Math.min(currentPage * 24, totalCount)} of {totalCount.toLocaleString()} fragrances
+          </div>
+
+          {/* Pagination Buttons */}
+          <div className="flex items-center gap-2">
+            {/* Previous Page */}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onLoadPage?.(currentPage - 1)}
+              disabled={currentPage === 1 || isLoading}
+            >
+              Previous
+            </Button>
+
+            {/* Page Numbers */}
+            <div className="flex items-center gap-1">
+              {/* First page */}
+              {currentPage > 3 && (
+                <>
+                  <Button
+                    variant={1 === currentPage ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => onLoadPage?.(1)}
+                    disabled={isLoading}
+                  >
+                    1
+                  </Button>
+                  {currentPage > 4 && <span className="text-slate-400 px-2">...</span>}
+                </>
+              )}
+
+              {/* Current page and neighbors */}
+              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                const page = Math.max(1, Math.min(totalPages - 4, currentPage - 2)) + i
+                if (page > totalPages) return null
+
+                return (
+                  <Button
+                    key={page}
+                    variant={page === currentPage ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => onLoadPage?.(page)}
+                    disabled={isLoading}
+                    className={page === currentPage ? 'bg-slate-900 text-white' : ''}
+                  >
+                    {page}
+                  </Button>
+                )
+              })}
+
+              {/* Last page */}
+              {currentPage < totalPages - 2 && (
+                <>
+                  {currentPage < totalPages - 3 && <span className="text-slate-400 px-2">...</span>}
+                  <Button
+                    variant={totalPages === currentPage ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => onLoadPage?.(totalPages)}
+                    disabled={isLoading}
+                  >
+                    {totalPages}
+                  </Button>
+                </>
+              )}
+            </div>
+
+            {/* Next Page */}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onLoadPage?.(currentPage + 1)}
+              disabled={currentPage === totalPages || isLoading}
+            >
+              Next
+            </Button>
+          </div>
+
+          {/* Load More Button (Alternative) */}
+          {currentPage < totalPages && onLoadMore && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onLoadMore}
+              disabled={isLoadingMore}
+              className="sm:hidden"
+            >
+              {isLoadingMore ? 'Loading...' : 'Load More'}
+            </Button>
+          )}
+        </div>
+      )}
+
+      {/* Load More Loading State */}
+      {isLoadingMore && (
+        <div className="flex justify-center py-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-900"></div>
         </div>
       )}
 

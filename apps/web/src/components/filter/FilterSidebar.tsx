@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Slider } from '@/components/ui/slider'
 import { Checkbox } from '@/components/ui/checkbox'
+import { formatDisplayName, formatConcentration, sortBrandsByPopularity, sortBrandsAlphabetically } from '@/utils/fragrance'
 
 interface FilterState {
   brands: string[]
@@ -99,6 +100,8 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
     ranges: false,
     features: false,
   })
+
+  const [brandSortBy, setBrandSortBy] = useState<'popularity' | 'alphabetical'>('popularity')
 
   const toggleSection = (section: string) => {
     setOpenSections(prev => ({
@@ -197,7 +200,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
                 className="cursor-pointer hover:bg-slate-200"
                 onClick={() => handleBrandToggle(brand)}
               >
-                {brand} <X className="w-3 h-3 ml-1" />
+                {formatDisplayName(brand)} <X className="w-3 h-3 ml-1" />
               </Badge>
             ))}
             {filters.concentrations.map(conc => (
@@ -207,7 +210,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
                 className="cursor-pointer hover:bg-slate-200"
                 onClick={() => handleMultiSelect('concentrations', conc)}
               >
-                {conc} <X className="w-3 h-3 ml-1" />
+                {formatConcentration(conc)} <X className="w-3 h-3 ml-1" />
               </Badge>
             ))}
           </div>
@@ -223,22 +226,53 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
           onToggle={() => toggleSection('brands')}
           count={filters.brands.length}
         >
-          <div className="space-y-2 max-h-64 overflow-y-auto">
-            {availableOptions.brands.slice(0, 20).map((brand) => (
-              <label
-                key={brand.name}
-                className="flex items-center justify-between cursor-pointer hover:bg-slate-50 rounded px-2 py-1"
+          <div className="space-y-3">
+            {/* Brand sorting toggle */}
+            <div className="flex items-center gap-2 text-xs">
+              <span className="text-slate-500">Sort by:</span>
+              <button
+                onClick={() => setBrandSortBy('popularity')}
+                className={`px-2 py-1 rounded text-xs ${
+                  brandSortBy === 'popularity'
+                    ? 'bg-blue-100 text-blue-800'
+                    : 'text-slate-600 hover:text-slate-800'
+                }`}
               >
-                <div className="flex items-center gap-2">
-                  <Checkbox
-                    checked={filters.brands.includes(brand.name)}
-                    onCheckedChange={() => handleBrandToggle(brand.name)}
-                  />
-                  <span className="text-sm text-slate-700">{brand.name}</span>
-                </div>
-                <span className="text-xs text-slate-500">{brand.count}</span>
-              </label>
-            ))}
+                Popular
+              </button>
+              <button
+                onClick={() => setBrandSortBy('alphabetical')}
+                className={`px-2 py-1 rounded text-xs ${
+                  brandSortBy === 'alphabetical'
+                    ? 'bg-blue-100 text-blue-800'
+                    : 'text-slate-600 hover:text-slate-800'
+                }`}
+              >
+                A-Z
+              </button>
+            </div>
+
+            {/* Brand list */}
+            <div className="space-y-2 max-h-64 overflow-y-auto">
+              {(brandSortBy === 'popularity'
+                ? sortBrandsByPopularity(availableOptions.brands)
+                : sortBrandsAlphabetically(availableOptions.brands)
+              ).slice(0, 20).map((brand) => (
+                <label
+                  key={brand.name}
+                  className="flex items-center justify-between cursor-pointer hover:bg-slate-50 rounded px-2 py-1"
+                >
+                  <div className="flex items-center gap-2">
+                    <Checkbox
+                      checked={filters.brands.includes(brand.name)}
+                      onCheckedChange={() => handleBrandToggle(brand.name)}
+                    />
+                    <span className="text-sm text-slate-700">{formatDisplayName(brand.name)}</span>
+                  </div>
+                  <span className="text-xs text-slate-500">{brand.count}</span>
+                </label>
+              ))}
+            </div>
           </div>
         </FilterSection>
 
@@ -259,7 +293,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
                   checked={filters.concentrations.includes(concentration)}
                   onCheckedChange={() => handleMultiSelect('concentrations', concentration)}
                 />
-                <span className="text-sm text-slate-700">{concentration}</span>
+                <span className="text-sm text-slate-700">{formatConcentration(concentration)}</span>
               </label>
             ))}
           </div>

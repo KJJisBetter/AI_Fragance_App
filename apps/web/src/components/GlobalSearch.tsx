@@ -18,6 +18,7 @@ import { useNavigate } from 'react-router-dom'
 import { useVoiceSearch } from '../hooks/useVoiceSearch'
 import { fragrancesApi } from '../lib/api'
 import { type SearchSuggestion, searchAnalytics } from '../lib/searchAnalytics'
+import { formatDisplayName, getConcentrationAbbreviation } from '../utils/fragrance'
 import { useSearchStore } from '../stores/searchStore'
 import { SearchHighlight } from './SearchHighlight'
 
@@ -203,8 +204,8 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({ isOpen, onClose }) =
         fragrances.forEach((fragrance: Fragrance) => {
           searchResults.push({
             id: `fragrance-${fragrance.id}`,
-            title: fragrance.name,
-            subtitle: fragrance.brand,
+                      title: formatDisplayName(fragrance.name),
+          subtitle: formatDisplayName(fragrance.brand),
             type: 'fragrance',
             action: () => {
               trackSearchClick(searchTerm)

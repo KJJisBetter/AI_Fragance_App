@@ -2,6 +2,7 @@ import type { Collection, Fragrance } from '@fragrance-battle/types'
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { collectionsApi, fragrancesApi } from '../lib/api'
+import { formatDisplayName, formatConcentration } from '../utils/fragrance'
 import './FragranceDetailPage.css'
 
 export const FragranceDetailPage = () => {
@@ -238,9 +239,9 @@ export const FragranceDetailPage = () => {
           Fragrances
         </Link>
         <span>→</span>
-        <span>{fragrance.brand}</span>
+        <span>{formatDisplayName(fragrance.brand)}</span>
         <span>→</span>
-        <span style={{ color: '#1e293b', fontWeight: '500' }}>{fragrance.name}</span>
+        <span style={{ color: '#1e293b', fontWeight: '500' }}>{formatDisplayName(fragrance.name)}</span>
       </nav>
 
       {/* FragranceHeader */}
@@ -282,7 +283,7 @@ export const FragranceDetailPage = () => {
                   lineHeight: '1.2',
                 }}
               >
-                {fragrance.name}
+                {formatDisplayName(fragrance.name)}
               </h1>
               {fragrance.verified && (
                 <span
@@ -308,7 +309,7 @@ export const FragranceDetailPage = () => {
                 fontWeight: '500',
               }}
             >
-              by {fragrance.brand}
+                                by {formatDisplayName(fragrance.brand)}
             </h2>
 
             <div
@@ -378,7 +379,7 @@ export const FragranceDetailPage = () => {
                       fontWeight: '600',
                     }}
                   >
-                    {fragrance.concentration}
+                    {formatConcentration(fragrance.concentration)}
                   </span>
                 </div>
               )}
@@ -416,7 +417,7 @@ export const FragranceDetailPage = () => {
               onClick={() => {
                 if (navigator.share) {
                   navigator.share({
-                    title: `${fragrance.name} by ${fragrance.brand}`,
+                                          title: `${formatDisplayName(fragrance.name)} by ${formatDisplayName(fragrance.brand)}`,
                     url: window.location.href,
                   })
                 } else {

@@ -2,6 +2,7 @@ import type { FragranceSearchFilters } from '@fragrance-battle/types'
 import * as Collapsible from '@radix-ui/react-collapsible'
 import { ChevronDownIcon, ChevronRightIcon } from '@radix-ui/react-icons'
 import React from 'react'
+import { formatDisplayName, formatConcentration, sortBrandsByPopularity } from '@/utils/fragrance'
 
 interface FilterSidebarProps {
   filters: FragranceSearchFilters
@@ -63,7 +64,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
         checked={filters[key] === label}
         onChange={() => toggleCheckbox(key, label)}
       />
-      <span>{label}</span>
+      <span>{formatDisplayName(label)}</span>
     </label>
   )
 

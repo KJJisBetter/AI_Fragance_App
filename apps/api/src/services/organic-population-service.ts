@@ -76,12 +76,13 @@ export class OrganicPopulationService {
 
   async searchWithOrganicPopulation(
     query: string,
-    filters: any = {}
+    filters: any = {},
+    options: { limit?: number; offset?: number } = {}
   ): Promise<FragranceSearchResult[]> {
     log.info(`🔍 Searching for: "${query}"`);
 
     // 1. Try local database first (super fast) - should have popular stuff
-    const localResults = await this.searchLocal(query, filters);
+    const localResults = await this.searchLocal(query, filters, options);
 
     if (localResults.length > 0) {
       log.info(`💾 Found ${localResults.length} local results (hot cache hit)`);
@@ -136,33 +137,46 @@ export class OrganicPopulationService {
     return [];
   }
 
-  private async searchLocal(query: string, filters: any): Promise<FragranceSearchResult[]> {
-    const fragrances = await prisma.fragrance.findMany({
-      where: {
-        AND: [
+  private async searchLocal(query: string, filters: any, options: { limit?: number; offset?: number } = {}): Promise<FragranceSearchResult[]> {
+    log.info(`🔍 searchLocal called with options:`, { limit: options.limit, offset: options.offset });
+
+    const searchConditions = [];
+
+    // Add text search conditions
+    if (query) {
+      searchConditions.push({
+        OR: [
+          { name: { contains: query, mode: 'insensitive' } },
+          { brand: { contains: query, mode: 'insensitive' } },
           {
             OR: [
-              { name: { contains: query, mode: 'insensitive' } },
-              { brand: { contains: query, mode: 'insensitive' } },
-              {
-                OR: [
-                  { topNotes: { hasSome: [query] } },
-                  { middleNotes: { hasSome: [query] } },
-                  { baseNotes: { hasSome: [query] } }
-                ]
-              }
+              { topNotes: { hasSome: [query] } },
+              { middleNotes: { hasSome: [query] } },
+              { baseNotes: { hasSome: [query] } }
             ]
-          },
-          filters
+          }
         ]
-      },
+      });
+    }
+
+    // Add filter conditions
+    const filterConditions = this.buildFilters(filters);
+    if (filterConditions.length > 0) {
+      searchConditions.push(...filterConditions);
+    }
+
+    const fragrances = await prisma.fragrance.findMany({
+      where: searchConditions.length > 0 ? { AND: searchConditions } : {},
       orderBy: [
         { marketPriority: 'desc' },
         { communityRating: 'desc' },
         { relevanceScore: 'desc' }
       ],
-      take: 20
+      skip: options.offset || 0,
+      take: options.limit || 100 // Increased default limit, but still reasonable
     });
+
+    log.info(`🔍 searchLocal returning ${fragrances.length} results with limit ${options.limit}, offset ${options.offset}`);
 
     return fragrances.map(f => ({
       id: f.id,
@@ -182,6 +196,105 @@ export class OrganicPopulationService {
       dataSource: f.dataSource || 'database',
       isApiOnly: false
     }));
+  }
+
+  async getSearchCount(query: string, filters: any = {}): Promise<number> {
+    const searchConditions = [];
+
+    // Add text search conditions
+    if (query) {
+      searchConditions.push({
+        OR: [
+          { name: { contains: query, mode: 'insensitive' } },
+          { brand: { contains: query, mode: 'insensitive' } },
+          {
+            OR: [
+              { topNotes: { hasSome: [query] } },
+              { middleNotes: { hasSome: [query] } },
+              { baseNotes: { hasSome: [query] } }
+            ]
+          }
+        ]
+      });
+    }
+
+    // Add filter conditions
+    const filterConditions = this.buildFilters(filters);
+    if (filterConditions.length > 0) {
+      searchConditions.push(...filterConditions);
+    }
+
+    const count = await prisma.fragrance.count({
+      where: searchConditions.length > 0 ? { AND: searchConditions } : {}
+    });
+
+    return count;
+  }
+
+  /**
+   * Build Prisma where conditions from filter object
+   */
+  private buildFilters(filters: any): any[] {
+    if (!filters) return [];
+
+    const conditions = [];
+
+    // Brand filter
+    if (filters.brand) {
+      conditions.push({
+        brand: { contains: filters.brand, mode: 'insensitive' }
+      });
+    }
+
+    // Concentration filter
+    if (filters.concentration) {
+      conditions.push({
+        concentration: { equals: filters.concentration, mode: 'insensitive' }
+      });
+    }
+
+    // Year range filters
+    if (filters.yearFrom) {
+      conditions.push({
+        year: { gte: filters.yearFrom }
+      });
+    }
+
+    if (filters.yearTo) {
+      conditions.push({
+        year: { lte: filters.yearTo }
+      });
+    }
+
+    // Verified filter
+    if (filters.verified !== undefined) {
+      conditions.push({
+        verified: filters.verified
+      });
+    }
+
+    // Season filter (if we add this field later)
+    if (filters.season) {
+      conditions.push({
+        season: { equals: filters.season, mode: 'insensitive' }
+      });
+    }
+
+    // Occasion filter (if we add this field later)
+    if (filters.occasion) {
+      conditions.push({
+        occasion: { equals: filters.occasion, mode: 'insensitive' }
+      });
+    }
+
+    // Mood filter (if we add this field later)
+    if (filters.mood) {
+      conditions.push({
+        mood: { equals: filters.mood, mode: 'insensitive' }
+      });
+    }
+
+    return conditions;
   }
 
   private isPopularSearchTerm(query: string): boolean {

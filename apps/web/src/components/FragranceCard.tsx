@@ -3,6 +3,7 @@ import type React from 'react'
 import { Link } from 'react-router-dom'
 import { Badge } from './UI/Badge'
 import { Rating } from './UI/Rating'
+import { formatDisplayName, getConcentrationAbbreviation } from '@/utils/fragrance'
 
 interface FragranceCardProps {
   fragrance: Fragrance
@@ -28,12 +29,12 @@ export const FragranceCard: React.FC<FragranceCardProps> = ({ fragrance }) => {
       <div className="p-4 flex flex-col flex-grow">
         {/* Fragrance Name - given a fixed height to allow for 2 lines and keep cards aligned */}
         <h3 className="font-bold text-slate-900 text-lg leading-tight mb-1 overflow-hidden h-14 line-clamp-2">
-          {fragrance.name || 'Untitled Fragrance'}
+          {formatDisplayName(fragrance.name) || 'Untitled Fragrance'}
         </h3>
 
         {/* Brand and Rating */}
         <div className="flex justify-between items-center mb-3">
-          <p className="text-xs text-slate-600">by {fragrance.brand || '—'}</p>
+          <p className="text-xs text-slate-600">by {formatDisplayName(fragrance.brand) || '—'}</p>
           {fragrance.communityRating && (
             <Rating value={fragrance.communityRating} className="text-slate-800" />
           )}
@@ -46,7 +47,7 @@ export const FragranceCard: React.FC<FragranceCardProps> = ({ fragrance }) => {
             <Badge className="bg-slate-200 text-slate-600">{fragrance.year}</Badge>
           )}
           {fragrance.concentration && (
-            <Badge className="bg-purple-100 text-purple-800">{fragrance.concentration}</Badge>
+            <Badge className="bg-purple-100 text-purple-800">{getConcentrationAbbreviation(fragrance.concentration)}</Badge>
           )}
         </div>
       </div>

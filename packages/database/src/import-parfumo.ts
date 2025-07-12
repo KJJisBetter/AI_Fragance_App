@@ -136,8 +136,10 @@ export const importParfumoFromCSV = async (
   console.log(`📋 Strategy: ${mergeStrategy}`);
 
   return new Promise((resolve, reject) => {
-    fs.createReadStream(filePath)
-      .pipe(csv({ separator: ',' }))
+    const stream = fs.createReadStream(filePath)
+      .pipe(csv({ separator: ',' }));
+
+    stream
       .on('data', (row: ParfumoCSVRow) => {
         try {
           // Skip if essential data is missing or corrupted
@@ -182,7 +184,10 @@ export const importParfumoFromCSV = async (
 
           // Process in batches
           if (fragrances.length >= batchSize) {
-            processBatch();
+            stream.pause();
+            processBatch()
+              .then(() => stream.resume())
+              .catch((error) => stream.emit('error', error));
           }
         } catch (error) {
           errors.push(`Error processing row for ${row.Name}: ${error}`);
