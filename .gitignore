@@ -115,6 +115,26 @@ testing-checklist.md
 data-integration-strategy.md
 ai_api_recommendations.md
 
+# Implementation and strategy docs
+IMPLEMENTATION_GUIDE.md
+STRATEGIC_PURGE_GUIDE.md
+**/BASIC_PLAN_STRATEGY.md
+**/API_SETUP.md
+**/frontend-migration-guide.md
+**/FRAGRANCE_CLEANUP_GUIDE.md
+**/*-strategy.md
+**/*-guide.md
+**/*-implementation.md
+**/*analysis*.md
+**/*analyzer*.md
+
+# Component documentation (keep only essential README files)
+**/components/README.md
+**/docs/
+!README.md
+!packages/*/README.md
+!apps/*/README.md
+
 # Scripts and utilities
 scripts/ai-classify-genders*.js
 scripts/classify-genders.js
