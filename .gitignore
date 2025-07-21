@@ -1,9 +1,15 @@
+# Dependencies
 node_modules/
+packages/*/node_modules/
+apps/*/node_modules/
+
+# Environment files
 .env
 .env.local
 .env.*
-.DS_Store
-*.log
+!.env.example
+
+# Build outputs
 dist/
 build/
 .next/
@@ -13,13 +19,11 @@ build/
 .fusebox/
 .dynamodb/
 .tern-port
+
+# Development tools
 .vscode/
 .idea/
-*.swp
-*.swo
-*~
-packages/*/node_modules/
-apps/*/node_modules/
+*.sublime-*
 
 # Turbo
 .turbo/
@@ -27,34 +31,90 @@ apps/*/node_modules/
 # Vite
 .vite/
 
-# Test files
+# Test files and coverage
 test-*.js
 test-*.ts
 *.test.local.*
 coverage/
 .nyc_output/
+monitor-*.js
+*.performance.js
+*.benchmark.js
 
-# Database
+# Database files
 *.db
 *.sqlite
 *.sqlite3
 prisma/migrations/dev.db*
+*.backup
+*.dump
+backup_*.sql
+staging_backup_*.sql
+
+# Data files
+*.csv
+backup_*.csv
+*.xlsx
+*.xls
 
 # OS Files
-Thumbs.db
+.DS_Store
 .DS_Store?
 ._*
 .Spotlight-V100
 .Trashes
 ehthumbs.db
+Thumbs.db
 
-# IDE
-.vscode/settings.json
-.idea/
-*.sublime-*
+# Editor files
+*.swp
+*.swo
+*~
 
 # Temporary files
 *.tmp
 *.temp
 .cache/
 .parcel-cache/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Research and analysis markdown files
+anthropic_fragrance_analyzer.md
+openai_fragrance_analyzer.md
+fragrance_intelligence_analyzer.md
+popularity_research.md
+fragrance-battle-ai-explanation.md
+FRAGRANCE_INTELLIGENCE_ANALYZER_GUIDE.md
+FRAGRANCE_CARD_IMPLEMENTATION.md
+testing-checklist.md
+data-integration-strategy.md
+ai_api_recommendations.md
+
+# Scripts and utilities
+scripts/ai-classify-genders*.js
+scripts/classify-genders.js
+scripts/quick-start-intelligence.sh
+scripts/run-intelligence-analysis.ts
+scripts/simple-intelligence-test.ts
+scripts/test-classification.js
+
+# Generated files
+packages/*/dist/
+apps/*/dist/
+*.d.ts.map
+
+# Local development
+.local/
+local/
