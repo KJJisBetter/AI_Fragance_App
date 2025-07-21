@@ -51,6 +51,19 @@ prisma/migrations/dev.db*
 backup_*.sql
 staging_backup_*.sql
 
+# Database-specific directories and files
+**/reports/
+**/backups/
+**/logs/
+packages/database/reports/
+packages/database/backups/
+packages/database/logs/
+packages/database/backup*.sql
+packages/database/staging*.sql
+**/database-quality*.json
+**/bad-data-examples*.json
+**/seeding-report*.json
+
 # Data files
 *.csv
 backup_*.csv
